@@ -1,6 +1,6 @@
 ﻿namespace RunLoader
 {
-    partial class Form1
+    partial class FileAccessForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,25 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.listView1 = new System.Windows.Forms.ListView();
             this.btn_ConnectDB = new System.Windows.Forms.Button();
             this.btn_BrowseAccess = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.txt_FileLocation = new System.Windows.Forms.TextBox();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
-            // 
-            // listView1
-            // 
-            this.listView1.Location = new System.Drawing.Point(12, 148);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(752, 157);
-            this.listView1.TabIndex = 0;
-            this.listView1.UseCompatibleStateImageBehavior = false;
             // 
             // btn_ConnectDB
             // 
-            this.btn_ConnectDB.Location = new System.Drawing.Point(370, 11);
+            this.btn_ConnectDB.Location = new System.Drawing.Point(355, 10);
             this.btn_ConnectDB.Name = "btn_ConnectDB";
             this.btn_ConnectDB.Size = new System.Drawing.Size(75, 23);
             this.btn_ConnectDB.TabIndex = 1;
@@ -56,7 +49,7 @@
             // 
             // btn_BrowseAccess
             // 
-            this.btn_BrowseAccess.Location = new System.Drawing.Point(333, 11);
+            this.btn_BrowseAccess.Location = new System.Drawing.Point(318, 10);
             this.btn_BrowseAccess.Name = "btn_BrowseAccess";
             this.btn_BrowseAccess.Size = new System.Drawing.Size(31, 23);
             this.btn_BrowseAccess.TabIndex = 1;
@@ -84,37 +77,45 @@
             // 
             // txt_FileLocation
             // 
-            this.txt_FileLocation.Location = new System.Drawing.Point(12, 12);
+            this.txt_FileLocation.Location = new System.Drawing.Point(12, 11);
             this.txt_FileLocation.Name = "txt_FileLocation";
             this.txt_FileLocation.Size = new System.Drawing.Size(300, 20);
             this.txt_FileLocation.TabIndex = 2;
+            // 
+            // dataGridView1
+            // 
+            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Location = new System.Drawing.Point(12, 38);
+            this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.Size = new System.Drawing.Size(719, 271);
+            this.dataGridView1.TabIndex = 4;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(776, 564);
+            this.ClientSize = new System.Drawing.Size(750, 423);
+            this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.txt_FileLocation);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.btn_BrowseAccess);
             this.Controls.Add(this.btn_ConnectDB);
-            this.Controls.Add(this.listView1);
             this.Name = "Form1";
             this.Text = "Form1";
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.Button btn_ConnectDB;
         private System.Windows.Forms.Button btn_BrowseAccess;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.TextBox txt_FileLocation;
+        private System.Windows.Forms.DataGridView dataGridView1;
     }
 }
 

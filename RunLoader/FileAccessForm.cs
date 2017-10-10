@@ -4,12 +4,15 @@ using System.Windows.Forms;
 using System.Configuration;
 using System.Data.Common;
 using DAL;
+using Entity;
+using BusinessLayer;
+using System.Collections.Generic;
 
 namespace RunLoader
 {
-    public partial class Form1 : Form
+    public partial class FileAccessForm : Form
     {
-        public Form1()
+        public FileAccessForm()
         {
             InitializeComponent();
         }
@@ -47,47 +50,23 @@ namespace RunLoader
 
         private void btn_Connect_Click(object sender, EventArgs e)
         {
+            //Test connection and store in datafactory
             conn = DataFactory.CreateConnection(this.txt_FileLocation.Text);
+
+            //
+            Files obj = new Files();
+            DataTable oFilesdt = obj.getFileDataTable();
+            List<FilesEntity> oFiles = obj.getFilesList();
+            dataGridView1.DataSource = oFilesdt;
+            //conn = DataFactory.CreateConnection(DatabaseType.Oracle,"192.168.1.252:1521/ORCL");
+            //FileData fd = new FileData();
+            //using (conn)
+            //{
+            //    DataTable dt = fd.GetFileData();
+            //    dataGridView1.DataSource = dt;
+            //}
+
+
         }
     }
 }
-
-//namespace DAL
-//{
-//    public class CustomersData
-//    {
-//        public DataTable GetCustomers()
-//        {
-//            string ConnectionString =
-//               ConfigurationSettings.AppSettings
-//               ["ConnectionString"];
-//            DatabaseType dbtype =
-//               (DatabaseType)Enum.Parse
-//               (typeof(DatabaseType),
-//               ConfigurationSettings.AppSettings
-//               ["DatabaseType"]);
-
-//            IDbConnection cnn =
-//               DataFactory.CreateConnection
-//               (ConnectionString, dbtype);
-
-//            string cmdString = "SELECT CustomerID" +
-//               ",CompanyName,ContactName FROM Customers";
-
-//            IDbCommand cmd =
-//               DataFactory.CreateCommand(
-//               cmdString, dbtype, cnn);
-
-//            DbDataAdapter da =
-//               DataFactory.CreateAdapter(cmd, dbtype);
-
-//            DataTable dt = new DataTable("Customers");
-
-//            da.Fill(dt);
-
-//            return dt;
-//        }
-        
-//    }
-//}
-
