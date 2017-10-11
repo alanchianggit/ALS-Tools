@@ -13,7 +13,7 @@ namespace BusinessLayer
         public List<FilesEntity> getFilesList()
         {
             FileDataDAL obj = new FileDataDAL();
-            return obj.getFilesData();
+            return obj.GetList();
         }
 
         public DataTable getFileDataTable()

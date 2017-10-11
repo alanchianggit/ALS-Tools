@@ -48,25 +48,48 @@ namespace RunLoader
             //PopulateListView();
         }
 
+        private void UpdateStatusConsole(string message)
+        {
+            this.BeginInvoke
+                        (new Action(() =>
+                        {
+                            //add message to status console
+                            this.txt_status.AppendText(DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt") + " - " + message);
+                            //add new line to status console
+                            this.txt_status.AppendText(Environment.NewLine);
+                        }
+                        ));
+
+        }
+
+
         private void btn_Connect_Click(object sender, EventArgs e)
         {
             //Test connection and store in datafactory
             conn = DataFactory.CreateConnection(this.txt_FileLocation.Text);
+            if (conn.State == ConnectionState.Open)
+            {
+                UpdateStatusConsole(string.Format("Connection opened with {0}", this.txt_FileLocation.Text));
+            }
 
             //
+            
+            //conn = DataFactory.CreateConnection(DatabaseType.Oracle,"192.168.1.252:1521/ORCL");
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
             Files obj = new Files();
             DataTable oFilesdt = obj.getFileDataTable();
             List<FilesEntity> oFiles = obj.getFilesList();
-            dataGridView1.DataSource = oFilesdt;
-            //conn = DataFactory.CreateConnection(DatabaseType.Oracle,"192.168.1.252:1521/ORCL");
-            //FileData fd = new FileData();
-            //using (conn)
-            //{
-            //    DataTable dt = fd.GetFileData();
-            //    dataGridView1.DataSource = dt;
-            //}
+            DataTable dt = oFilesdt;
+            dt.Columns.Remove("FileContent");
+            dataGridView1.DataSource = dt;
+            DataGridViewCheckBoxColumn dgc = new DataGridViewCheckBoxColumn();
+            dgc.Name = "CheckColumn";
+            dgc.ReadOnly = false;
 
-
+            dataGridView1.Columns.Add(dgc);
         }
     }
 }

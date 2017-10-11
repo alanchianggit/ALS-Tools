@@ -11,8 +11,6 @@ using System.Data.SQLite;
 using System.Configuration;
 using Entity;
 
-//using System.Data.OracleClient;
-
 
 namespace DAL
 {
@@ -215,8 +213,18 @@ namespace DAL
         public FileDataDAL()
         {
             string strSQL = "SELECT * FROM tbl_Files";
+            IDbConnection conn;
+            if (DataFactory.ActiveConn.State == ConnectionState.Open)
+            {
+                conn = DataFactory.ActiveConn;
+            }
+            else
+            {
+                Console.WriteLine("Connection is no longer active");
+                throw new Exception();
+            }
+            
 
-            IDbConnection conn = DataFactory.ActiveConn;
             IDbCommand cmd = DataFactory.CreateCommand(strSQL, DataFactory.dbtype, conn);
             DbDataAdapter da = DataFactory.CreateAdapter(cmd, DataFactory.dbtype);
             DataTable dt = new DataTable("FileData");
@@ -224,12 +232,13 @@ namespace DAL
             this.Datatable = dt;
         }
 
-        public List<FilesEntity> getFilesData()
+        public List<FilesEntity> GetList()
         {
             List<FilesEntity> listFE = new List<FilesEntity>();
             
             foreach (DataRow dr in this.Datatable.Rows)
             {
+                //Need to handle nulls and 0s 
                 FilesEntity obj = new FilesEntity();
                 obj.FileName = dr["Filename"].ToString();
                 obj.FileSize = (Int32)dr["Size"];
@@ -239,8 +248,6 @@ namespace DAL
                 obj.FileContent = (byte[])dr["FileContent"];
                 listFE.Add(obj);
             }
-
-
             return listFE;
         }
     }
