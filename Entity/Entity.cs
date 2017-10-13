@@ -10,7 +10,7 @@ namespace Entity
     {
         protected string _FileName = string.Empty;
         protected string _ID = string.Empty;
-        protected long _FileSize = 0;
+        protected int _FileSize = 0;
         protected string _Type = string.Empty;
         protected DateTime _DateUploaded = DateTime.Today;
         protected byte[] _FileBinary;
@@ -26,7 +26,7 @@ namespace Entity
             set { _ID = value; }
         }
 
-        public long FileSize
+        public int FileSize
         {
             get { return _FileSize; }
             set { _FileSize = value; }

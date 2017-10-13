@@ -10,7 +10,7 @@ using System.Net;
 using System.Data.SQLite;
 using System.Configuration;
 using Entity;
-
+using System.Data.SqlTypes;
 
 namespace DAL
 {
@@ -210,27 +210,29 @@ namespace DAL
     public class FileDataDAL
     {
         public DataTable Datatable { get; set; }
+
+
+
         public FileDataDAL()
         {
             string strSQL = "SELECT * FROM tbl_Files";
             IDbConnection conn;
-            if (DataFactory.ActiveConn.State == ConnectionState.Open)
+            if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State == ConnectionState.Open)
             {
                 conn = DataFactory.ActiveConn;
+                IDbCommand cmd = DataFactory.CreateCommand(strSQL, DataFactory.dbtype, conn);
+                DbDataAdapter da = DataFactory.CreateAdapter(cmd, DataFactory.dbtype);
+                DataTable dt = new DataTable("FileData");
+                da.Fill(dt);
+                this.Datatable = dt;
             }
             else
             {
                 Console.WriteLine("Connection is no longer active");
-                throw new Exception();
-            }
-            
-
-            IDbCommand cmd = DataFactory.CreateCommand(strSQL, DataFactory.dbtype, conn);
-            DbDataAdapter da = DataFactory.CreateAdapter(cmd, DataFactory.dbtype);
-            DataTable dt = new DataTable("FileData");
-            da.Fill(dt);
-            this.Datatable = dt;
+            }           
         }
+
+
 
         public List<FilesEntity> GetList()
         {
@@ -238,10 +240,11 @@ namespace DAL
             
             foreach (DataRow dr in this.Datatable.Rows)
             {
+                
                 //Need to handle nulls and 0s 
                 FilesEntity obj = new FilesEntity();
                 obj.FileName = dr["Filename"].ToString();
-                obj.FileSize = (Int32)dr["Size"];
+                obj.FileSize = dr["Size"].Equals(DBNull.Value) ? (int)dr["Size"] : 0 ;
                 obj.DateUploaded = DateTime.Parse(dr["Date Uploaded"].ToString());
                 obj.Type = dr["Type"].ToString();
 
