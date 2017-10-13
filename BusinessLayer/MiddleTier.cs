@@ -23,5 +23,10 @@ namespace BusinessLayer
             return obj.Datatable;
         }
 
+        public void Add()
+        {
+            FileDataDAL obj = new FileDataDAL();
+            obj.Add(this);
+        }
     }
 }

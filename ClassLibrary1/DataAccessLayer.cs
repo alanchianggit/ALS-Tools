@@ -253,6 +253,18 @@ namespace DAL
             }
             return listFE;
         }
+
+        public void Add(FilesEntity obj)
+        {
+            if (DataFactory.ActiveConn.State == ConnectionState.Open)
+            {
+                
+            }
+            else
+            {
+                DataFactory.CreateCommand()
+            }
+        }
     }
 
 
