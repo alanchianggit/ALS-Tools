@@ -140,7 +140,9 @@ namespace RunLoader
                 {
                     //DirectoryInfo rootDirectoryInfo = new DirectoryInfo(path);
                     TreeNode fileNode = new TreeNode(path);
+                    fileNode.Name = path;
                     treeView.Nodes.Add(fileNode);
+
                     fileNode.Checked = true;
                     CheckedNodes.Add(fileNode.Name.ToString());
                 }
@@ -155,13 +157,14 @@ namespace RunLoader
                 BinaryReader reader = new System.IO.BinaryReader(fileStream);
                 byte[] data = reader.ReadBytes((int)fileStream.Length);
 
-                FilesEntity FE = new FilesEntity();
-                FE.FileName = tv_InputFiles.Nodes[checkednode].Name;
+                Files FE = new Files();
+                FE.FileName = tv_InputFiles.Nodes[checkednode].Text;
                 FE.FileContent = data;
                 FE.DateUploaded = DateTime.Today;
-                FileInfo fi = new FileInfo(tv_InputFiles.Nodes[checkednode].Name);
+                FileInfo fi = new FileInfo(tv_InputFiles.Nodes[checkednode].Text);
                 FE.FileSize = data.Length;
 
+                FE.Add();
             }
         }
 

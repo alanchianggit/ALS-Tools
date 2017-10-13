@@ -258,11 +258,13 @@ namespace DAL
         {
             if (DataFactory.ActiveConn.State == ConnectionState.Open)
             {
-                
+                var cmd = DataFactory.CreateCommand(string.Empty, DataFactory.dbtype, DataFactory.ActiveConn);
+                var param = cmd.CreateParameter();
+                param.
             }
             else
             {
-                DataFactory.CreateCommand()
+                
             }
         }
     }
