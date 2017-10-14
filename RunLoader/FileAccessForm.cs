@@ -87,7 +87,7 @@ namespace RunLoader
                 this.txt_Output.Text = fbd.SelectedPath;
             }
         }
-        private List<FilesEntity> ListofFileEntity;
+        private List<FilesEntity> ListofFileEntity = new List<FilesEntity>();
         private void btn_LoadFileTable_Click(object sender, EventArgs e)
         {
             Files obj = new Files();
@@ -99,19 +99,29 @@ namespace RunLoader
         }
         private void PopulateTreeView()
         {
-            var topNode = new TreeNode("Select all");
-            tv_OutputFiles.Nodes.Add(topNode);
-            foreach (FilesEntity obj in ListofFileEntity)
+            if (tv_OutputFiles.Nodes.ContainsKey("Select All") != true)
             {
-                topNode.Nodes.Add(obj.FileName);
+                
+                tv_OutputFiles.Nodes.Add(new TreeNode("Select All") { Name = "Select All" });
+                TreeNode topNode = tv_OutputFiles.Nodes["Select All"];
+                foreach (FilesEntity obj in ListofFileEntity)
+                {
+                    topNode.Nodes.Add(obj.FileName);
+                }
             }
+            
 
         }
 
         private void btn_Download_Click(object sender, EventArgs e)
         {
-            byte[] bindata = ListofFileEntity[1].FileContent;
-            File.WriteAllBytes(string.Format(@"{0}\{1}.zip",this.txt_Output.Text,ListofFileEntity[1].FileName), bindata);
+            foreach (string filetodownload in tv_OutputFiles.Nodes)
+            {
+                //Need to find list of checked output files
+                byte[] bindata = ListofFileEntity[0].FileContent;
+                File.WriteAllBytes(string.Format(@"{0}\{1}.zip", this.txt_Output.Text, ListofFileEntity[0].FileName), bindata);
+            }
+            
         }
 
         private void btn_SelectInputFiles_Click(object sender, EventArgs e)
@@ -144,7 +154,7 @@ namespace RunLoader
                     treeView.Nodes.Add(fileNode);
 
                     fileNode.Checked = true;
-                    CheckedNodes.Add(fileNode.Name.ToString());
+                    //CheckedNodes.Add(fileNode.Name.ToString());
                 }
             }
         }
@@ -158,11 +168,14 @@ namespace RunLoader
                 byte[] data = reader.ReadBytes((int)fileStream.Length);
 
                 Files FE = new Files();
-                FE.FileName = tv_InputFiles.Nodes[checkednode].Text;
+                FileInfo fi = new FileInfo(tv_InputFiles.Nodes[checkednode].Text);
+
+                FE.FileName = fi.Name;
                 FE.FileContent = data;
                 FE.DateUploaded = DateTime.Today;
-                FileInfo fi = new FileInfo(tv_InputFiles.Nodes[checkednode].Text);
-                FE.FileSize = data.Length;
+                
+                FE.Type = fi.Extension;
+                FE.Size = data.Length;
 
                 FE.Add();
             }

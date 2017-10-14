@@ -11,6 +11,8 @@ using System.Data.SQLite;
 using System.Configuration;
 using Entity;
 using System.Data.SqlTypes;
+using System.Reflection;
+using System.Collections;
 
 namespace DAL
 {
@@ -41,13 +43,16 @@ namespace DAL
     public static class DataFactory
     {
         public static IDbConnection ActiveConn { get; set; }
-        public static string BuiltConnectionString { get; set; }
+        public static string ActiveConnectionString { get; set; }
 
         public static DatabaseType dbtype { get; set; }
 
         private static Dictionary<object, IDbConnection> conns = new Dictionary<object, IDbConnection>();
 
-        //private static DataFactory() { }
+        //private static DataFactory()  {
+
+
+        //}
 
         public static IDbConnection CreateConnection(string DBDataSource)
         {
@@ -64,7 +69,7 @@ namespace DAL
         public static IDbConnection CreateConnection(DatabaseType dbtype, string DBDataSource)
         {
             //Set connection string
-            BuiltConnectionString = BuildString(DBDataSource, dbtype);
+            ActiveConnectionString = BuildString(DBDataSource, dbtype);
             //Lazy load connection type
             conns.Add(DatabaseType.AccessACCDB, new OleDbConnection());
             conns.Add(DatabaseType.AccessMDB, new OleDbConnection());
@@ -76,7 +81,7 @@ namespace DAL
             //Close connection
             if (Conn.State != ConnectionState.Closed) { Conn.Close(); };
             //update connection string
-            Conn.ConnectionString = BuiltConnectionString;
+            Conn.ConnectionString = ActiveConnectionString;
             Conn.Open();
             return ActiveConn = Conn;
         }
@@ -92,7 +97,7 @@ namespace DAL
                         bs.DataSource = Path.GetFullPath(DBDataSource).ToString();
                         bs.Provider = "Microsoft.ACE.OLEDB.12.0";
                         bs.OleDbServices = -1;
-                        BuiltConnectionString = bs.ConnectionString;
+                        ActiveConnectionString = bs.ConnectionString;
                     }
                     break;
                 case DatabaseType.AccessMDB:
@@ -101,7 +106,7 @@ namespace DAL
                         bs.DataSource = Path.GetFullPath(DBDataSource).ToString();
                         bs.Provider = "Microsoft.Jet.OLEDB.4.0";
                         bs.OleDbServices = -1;
-                        BuiltConnectionString = bs.ConnectionString;
+                        ActiveConnectionString = bs.ConnectionString;
                     }
                     break;
                 case DatabaseType.Oracle:
@@ -114,7 +119,7 @@ namespace DAL
                         bs.SelfTuning = true;
                         bs.Pooling = true;
                         bs.ConnectionTimeout = 60;
-                        BuiltConnectionString = bs.ConnectionString;
+                        ActiveConnectionString = bs.ConnectionString;
                     }
                     break;
                 case DatabaseType.SQLite:
@@ -123,7 +128,7 @@ namespace DAL
                         bs.DataSource = DBDataSource;
                         bs.Password = "sql";
                         bs.Pooling = true;
-                        BuiltConnectionString = bs.ConnectionString;
+                        ActiveConnectionString = bs.ConnectionString;
                     }
                     break;
                 case DatabaseType.SQLServer:
@@ -132,7 +137,7 @@ namespace DAL
                         bs.DataSource = IPAddress.Parse(DBDataSource).ToString();
                         bs.Pooling = true;
                         //bs.UserID = "admin";
-                        BuiltConnectionString = bs.ConnectionString;
+                        ActiveConnectionString = bs.ConnectionString;
                     }
                     break;
                 default:
@@ -141,18 +146,18 @@ namespace DAL
                         bs.DataSource = DBDataSource;
                         bs.OleDbServices = -1;
 
-                        BuiltConnectionString = bs.ConnectionString;
+                        ActiveConnectionString = bs.ConnectionString;
                     }
                     break;
             }
 
-            return BuiltConnectionString;
+            return ActiveConnectionString;
         }
 
         public static IDbCommand CreateCommand(string CommandText, DatabaseType dbtype, IDbConnection cnn)
         {
             IDbCommand cmd;
-            switch (dbtype)
+            switch (DataFactory.dbtype)
             {
                 case DatabaseType.AccessACCDB:
                 case DatabaseType.AccessMDB:
@@ -178,10 +183,11 @@ namespace DAL
         }
 
 
-        public static DbDataAdapter CreateAdapter(IDbCommand cmd, DatabaseType dbtype)
+        public static DbDataAdapter CreateAdapter(IDbCommand cmd)
         {
             DbDataAdapter da;
-            switch (dbtype)
+
+            switch (DataFactory.dbtype)
             {
                 case DatabaseType.AccessACCDB:
                 case DatabaseType.AccessMDB:
@@ -211,7 +217,7 @@ namespace DAL
     {
         public DataTable Datatable { get; set; }
 
-
+        List<FilesEntity> listFE = new List<FilesEntity>();
 
         public FileDataDAL()
         {
@@ -221,7 +227,7 @@ namespace DAL
             {
                 conn = DataFactory.ActiveConn;
                 IDbCommand cmd = DataFactory.CreateCommand(strSQL, DataFactory.dbtype, conn);
-                DbDataAdapter da = DataFactory.CreateAdapter(cmd, DataFactory.dbtype);
+                DbDataAdapter da = DataFactory.CreateAdapter(cmd);
                 DataTable dt = new DataTable("FileData");
                 da.Fill(dt);
                 this.Datatable = dt;
@@ -236,31 +242,55 @@ namespace DAL
 
         public List<FilesEntity> GetList()
         {
-            List<FilesEntity> listFE = new List<FilesEntity>();
+            
             
             foreach (DataRow dr in this.Datatable.Rows)
             {
-                
-                //Need to handle nulls and 0s 
                 FilesEntity obj = new FilesEntity();
-                obj.FileName = dr["Filename"].ToString();
-                obj.FileSize = dr["Size"].Equals(DBNull.Value) ? (int)dr["Size"] : 0 ;
-                obj.DateUploaded = DateTime.Parse(dr["Date Uploaded"].ToString());
-                obj.Type = dr["Type"].ToString();
+                //Reflection method
+                foreach (PropertyInfo pi in typeof(FilesEntity).GetProperties())
+                {
+                    pi.SetValue(obj, dr[pi.Name]);   
+                }
+                //Hardcoded method
+                //obj.FileName = dr["Filename"].ToString();
+                //obj.Size = dr["Size"].Equals(DBNull.Value) ? (int)dr["Size"] : 0 ;
+                //obj.DateUploaded = DateTime.Parse(dr["Date Uploaded"].ToString());
+                //obj.Type = dr["Type"].ToString();
 
-                obj.FileContent = (byte[])dr["FileContent"];
+                //obj.FileContent = (byte[])dr["FileContent"];
                 listFE.Add(obj);
             }
             return listFE;
         }
-
         public void Add(FilesEntity obj)
         {
             if (DataFactory.ActiveConn.State == ConnectionState.Open)
             {
+                // get properties from entity class
+                PropertyInfo[] PIs = typeof(FilesEntity).GetProperties();
+                //Create table of data according to properties so it can be adapted to connection
                 var cmd = DataFactory.CreateCommand(string.Empty, DataFactory.dbtype, DataFactory.ActiveConn);
-                var param = cmd.CreateParameter();
-                param.
+                List<string> columnNames = new List<string>();
+                List<string> columnValues = new List<string>();
+                foreach (PropertyInfo pi in PIs)
+                {
+                    IDbDataParameter pm = cmd.CreateParameter();
+                    pm.ParameterName = string.Format("@{0}",pi.Name.ToString());
+                    pm.Value = pi.GetValue(obj);
+                    cmd.Parameters.Add(pm);
+                    
+
+                    columnValues.Add(pm.ParameterName);
+                    columnNames.Add("[" + pi.Name.ToString() + "]");
+                }
+
+                cmd.CommandText = string.Format("INSERT INTO [tbl_Files] ({0}) VALUES ({1});",string.Join(",",columnNames.ToArray()),string.Join(",",columnValues.ToArray()));
+                Console.WriteLine(cmd.CommandText);
+
+                cmd.ExecuteNonQuery();
+                
+                
             }
             else
             {

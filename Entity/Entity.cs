@@ -9,7 +9,7 @@ namespace Entity
     public class FilesEntity
     {
         protected string _FileName = string.Empty;
-        protected string _ID = string.Empty;
+        //protected Int32 _ID = int.MinValue;
         protected int _FileSize = 0;
         protected string _Type = string.Empty;
         protected DateTime _DateUploaded = DateTime.Today;
@@ -20,13 +20,13 @@ namespace Entity
             set { _FileName = value; }
         }
 
-        public string ID
-        {
-            get { return _ID; }
-            set { _ID = value; }
-        }
+        //public Int32 ID
+        //{
+        //    get { return _ID; }
+        //    set { _ID = value; }
+        //}
 
-        public int FileSize
+        public int Size
         {
             get { return _FileSize; }
             set { _FileSize = value; }
@@ -46,7 +46,6 @@ namespace Entity
         {
             get
             {
-                //Return as file?
                 return _FileBinary;
             }
             set { _FileBinary = value; }
