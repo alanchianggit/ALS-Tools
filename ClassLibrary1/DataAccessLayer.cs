@@ -269,18 +269,26 @@ namespace DAL
             {
                 // get properties from entity class
                 PropertyInfo[] PIs = typeof(FilesEntity).GetProperties();
+                //PropertyInfo[] PIs = typeof(obj.GetType()).GetProperties();
+
+
                 //Create table of data according to properties so it can be adapted to connection
                 var cmd = DataFactory.CreateCommand(string.Empty, DataFactory.dbtype, DataFactory.ActiveConn);
+                //create new Lists for colum names and parameters
                 List<string> columnNames = new List<string>();
                 List<string> columnValues = new List<string>();
+                //Iterate through each prorperty to coerce a parameter
                 foreach (PropertyInfo pi in PIs)
                 {
+                    //Create new parameter object
                     IDbDataParameter pm = cmd.CreateParameter();
+                    //Set Parameter name from property name
                     pm.ParameterName = string.Format("@{0}",pi.Name.ToString());
+                    //Set value from property of object
                     pm.Value = pi.GetValue(obj);
+                    //Add parameter to command
                     cmd.Parameters.Add(pm);
-                    
-
+                    //Add to list for generating string
                     columnValues.Add(pm.ParameterName);
                     columnNames.Add("[" + pi.Name.ToString() + "]");
                 }
@@ -289,8 +297,6 @@ namespace DAL
                 Console.WriteLine(cmd.CommandText);
 
                 cmd.ExecuteNonQuery();
-                
-                
             }
             else
             {

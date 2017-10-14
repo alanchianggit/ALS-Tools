@@ -28,25 +28,31 @@ namespace RunLoader
         }
 
         public IDbConnection conn { get; private set; }
+        private List<FilesEntity> ListofFileEntity = new List<FilesEntity>();
 
         private const string FileDialogFilter = "Microsoft Access (*.accdb , *.mdb)|*.accdb;*.mdb|SQLite (*.db)|*.db|All Files (*.*)|*.*";
         private const string DATA_FILE_FILTER = "All Files (*.*)|*.*";
 
         private void btn_BrowseAccess_Click(object sender, EventArgs e)
         {
+            //Instantiate dialog
             OpenFileDialog dlg = new OpenFileDialog();
+            //Enable upgrade for new Vista framework
             dlg.AutoUpgradeEnabled = true;
+            //Initial directory is personal documents
             dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            //Filter using database extensions
             dlg.Filter = FileDialogFilter;
-            if (txt_FileLocation.Text.Length > 0)
+            //If textbox is empty, then fil
+            if (txt_FileLocation.Text.Length == 0)
             {
-                dlg.FileName = txt_FileLocation.Text;
+                txt_FileLocation.Text = dlg.FileName;
             }
             if (dlg.ShowDialog() == DialogResult.Cancel)
             {
                 return;
             }
-            txt_FileLocation.Text = dlg.FileName;
+            
             //PopulateListView();
         }
 
@@ -80,21 +86,38 @@ namespace RunLoader
 
         private void btn_SelectOutput_Click(object sender, EventArgs e)
         {
+            //Instantiate folder browser
             FolderBrowserDialog fbd = new FolderBrowserDialog();
+            //Show dialog
             fbd.ShowDialog();
-            if (fbd.SelectedPath != "")
+            //If selectedpath is not 0
+            if (fbd.SelectedPath.Length > 0 )
             {
                 this.txt_Output.Text = fbd.SelectedPath;
             }
         }
-        private List<FilesEntity> ListofFileEntity = new List<FilesEntity>();
+        
         private void btn_LoadFileTable_Click(object sender, EventArgs e)
         {
-            Files obj = new Files();
-            DataTable oFilesdt = obj.getFileDataTable();
-            ListofFileEntity = obj.getFilesList();
-            PopulateTreeView();
-
+            if (DataFactory.ActiveConn.State == ConnectionState.Open)
+            {
+                //Clear list of working File Entitiy
+                ListofFileEntity = new List<FilesEntity>();
+                //Create new Files Entity through mid-tier
+                Files obj = new Files();
+                //get datatable from DB through middle tier
+                DataTable oFilesdt = obj.getFileDataTable();
+                //Clear list of File Entity
+                ListofFileEntity.Clear();
+                //Get new list through DB
+                ListofFileEntity = obj.getFilesList();
+                PopulateTreeView();
+            }
+            else
+            {
+                UpdateStatusConsole("Connection is not open.")
+            }
+            
 
         }
         private void PopulateTreeView()
@@ -115,8 +138,9 @@ namespace RunLoader
 
         private void btn_Download_Click(object sender, EventArgs e)
         {
-            foreach (string filetodownload in tv_OutputFiles.Nodes)
+            foreach (TreeNode node in tv_OutputFiles.Nodes)
             {
+                node
                 //Need to find list of checked output files
                 byte[] bindata = ListofFileEntity[0].FileContent;
                 File.WriteAllBytes(string.Format(@"{0}\{1}.zip", this.txt_Output.Text, ListofFileEntity[0].FileName), bindata);
@@ -131,8 +155,11 @@ namespace RunLoader
 
         private string[] SelectFiles()
         {
+            //Instantiate file dialog
             OpenFileDialog opd = new OpenFileDialog();
+            //
             opd.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
+            //Allow multiple files
             opd.Multiselect = true;
             opd.ShowDialog();
             return opd.FileNames;
@@ -148,13 +175,12 @@ namespace RunLoader
             {
                 foreach (string path in paths)
                 {
-                    //DirectoryInfo rootDirectoryInfo = new DirectoryInfo(path);
                     TreeNode fileNode = new TreeNode(path);
+                    
                     fileNode.Name = path;
                     treeView.Nodes.Add(fileNode);
 
                     fileNode.Checked = true;
-                    //CheckedNodes.Add(fileNode.Name.ToString());
                 }
             }
         }
