@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Windows.Forms;
-using System.Configuration;
-using System.Data.Common;
 using DAL;
 using Entity;
 using BusinessLayer;

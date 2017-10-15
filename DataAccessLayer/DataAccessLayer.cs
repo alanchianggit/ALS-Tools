@@ -8,11 +8,8 @@ using System.IO;
 using System;
 using System.Net;
 using System.Data.SQLite;
-using System.Configuration;
 using Entity;
-using System.Data.SqlTypes;
 using System.Reflection;
-using System.Collections;
 
 namespace DAL
 {
