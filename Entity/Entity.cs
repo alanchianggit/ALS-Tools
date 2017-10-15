@@ -12,7 +12,7 @@ namespace Entity
         //protected Int32 _ID = int.MinValue;
         protected int _FileSize = 0;
         protected string _Type = string.Empty;
-        protected DateTime _DateUploaded = DateTime.Today;
+        protected DateTime _DateUploaded = DateTime.Now;
         protected byte[] _FileBinary;
         public string FileName
         {
@@ -50,6 +50,8 @@ namespace Entity
             }
             set { _FileBinary = value; }
         }
+
+
     }
 
 }

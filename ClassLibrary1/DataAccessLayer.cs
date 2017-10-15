@@ -56,14 +56,15 @@ namespace DAL
 
         public static IDbConnection CreateConnection(string DBDataSource)
         {
-            //Find extension from file path
-            string extension = Path.GetExtension(DBDataSource).Replace(".", string.Empty);
-            //Find database file type based on extension
-            DatabaseFileType dbfiletype = (DatabaseFileType)Enum.Parse(typeof(DatabaseFileType), extension, true);
-            //find database type based on file type
-            dbtype = (DatabaseType)dbfiletype;
-            //create connection using database type
-            return DataFactory.CreateConnection(dbtype, DBDataSource);
+                //Find extension from file path
+                string extension = Path.GetExtension(DBDataSource).Replace(".", string.Empty);
+                //Find database file type based on extension
+                DatabaseFileType dbfiletype = (DatabaseFileType)Enum.Parse(typeof(DatabaseFileType), extension, true);
+                //find database type based on file type
+                dbtype = (DatabaseType)dbfiletype;
+                //create connection using database type
+                return DataFactory.CreateConnection(dbtype, DBDataSource);
+
         }
 
         public static IDbConnection CreateConnection(DatabaseType dbtype, string DBDataSource)
@@ -154,28 +155,28 @@ namespace DAL
             return ActiveConnectionString;
         }
 
-        public static IDbCommand CreateCommand(string CommandText, DatabaseType dbtype, IDbConnection cnn)
+        public static IDbCommand CreateCommand(string CommandText)
         {
             IDbCommand cmd;
             switch (DataFactory.dbtype)
             {
                 case DatabaseType.AccessACCDB:
                 case DatabaseType.AccessMDB:
-                    cmd = new OleDbCommand(CommandText, (OleDbConnection)cnn);
+                    cmd = new OleDbCommand(CommandText, (OleDbConnection)DataFactory.ActiveConn);
                     break;
 
                 case DatabaseType.SQLServer:
-                    cmd = new SqlCommand(CommandText, (SqlConnection)cnn);
+                    cmd = new SqlCommand(CommandText, (SqlConnection)DataFactory.ActiveConn);
                     break;
 
                 case DatabaseType.Oracle:
-                    cmd = new OracleCommand(CommandText, (OracleConnection)cnn);
+                    cmd = new OracleCommand(CommandText, (OracleConnection)DataFactory.ActiveConn);
                     break;
                 case DatabaseType.SQLite:
-                    cmd = new SQLiteCommand(CommandText, (SQLiteConnection)cnn);
+                    cmd = new SQLiteCommand(CommandText, (SQLiteConnection)DataFactory.ActiveConn);
                     break;
                 default:
-                    cmd = new OleDbCommand(CommandText, (OleDbConnection)cnn);
+                    cmd = new OleDbCommand(CommandText, (OleDbConnection)DataFactory.ActiveConn);
                     break;
             }
 
@@ -217,16 +218,16 @@ namespace DAL
     {
         public DataTable Datatable { get; set; }
 
+        Dictionary<string, FilesEntity> dictFE = new Dictionary<string, FilesEntity>();
         List<FilesEntity> listFE = new List<FilesEntity>();
 
         public FileDataDAL()
         {
             string strSQL = "SELECT * FROM tbl_Files";
-            IDbConnection conn;
             if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State == ConnectionState.Open)
             {
-                conn = DataFactory.ActiveConn;
-                IDbCommand cmd = DataFactory.CreateCommand(strSQL, DataFactory.dbtype, conn);
+                //conn = DataFactory.ActiveConn;
+                IDbCommand cmd = DataFactory.CreateCommand(strSQL);
                 DbDataAdapter da = DataFactory.CreateAdapter(cmd);
                 DataTable dt = new DataTable("FileData");
                 da.Fill(dt);
@@ -240,10 +241,9 @@ namespace DAL
 
 
 
-        public List<FilesEntity> GetList()
+        public Dictionary<string,FilesEntity> GetList()
         {
-            
-            
+            dictFE = new Dictionary<string, FilesEntity>();
             foreach (DataRow dr in this.Datatable.Rows)
             {
                 FilesEntity obj = new FilesEntity();
@@ -252,51 +252,56 @@ namespace DAL
                 {
                     pi.SetValue(obj, dr[pi.Name]);   
                 }
-                //Hardcoded method
-                //obj.FileName = dr["Filename"].ToString();
-                //obj.Size = dr["Size"].Equals(DBNull.Value) ? (int)dr["Size"] : 0 ;
-                //obj.DateUploaded = DateTime.Parse(dr["Date Uploaded"].ToString());
-                //obj.Type = dr["Type"].ToString();
-
-                //obj.FileContent = (byte[])dr["FileContent"];
-                listFE.Add(obj);
+                dictFE.Add(obj.FileName, obj);
             }
-            return listFE;
+            return dictFE;
         }
         public void Add(FilesEntity obj)
         {
             if (DataFactory.ActiveConn.State == ConnectionState.Open)
-            {
+            {           
                 // get properties from entity class
                 PropertyInfo[] PIs = typeof(FilesEntity).GetProperties();
-                //PropertyInfo[] PIs = typeof(obj.GetType()).GetProperties();
-
 
                 //Create table of data according to properties so it can be adapted to connection
-                var cmd = DataFactory.CreateCommand(string.Empty, DataFactory.dbtype, DataFactory.ActiveConn);
+                var cmdInsert = DataFactory.CreateCommand(string.Empty);
+                var cmdcheck = DataFactory.CreateCommand(string.Empty);
                 //create new Lists for colum names and parameters
-                List<string> columnNames = new List<string>();
-                List<string> columnValues = new List<string>();
+                List<string> InsertColumnNames = new List<string>();
+                List<string> InsertColumnValues = new List<string>();
                 //Iterate through each prorperty to coerce a parameter
                 foreach (PropertyInfo pi in PIs)
                 {
                     //Create new parameter object
-                    IDbDataParameter pm = cmd.CreateParameter();
+                    IDbDataParameter pm = cmdInsert.CreateParameter();
                     //Set Parameter name from property name
                     pm.ParameterName = string.Format("@{0}",pi.Name.ToString());
                     //Set value from property of object
                     pm.Value = pi.GetValue(obj);
                     //Add parameter to command
-                    cmd.Parameters.Add(pm);
+                    cmdInsert.Parameters.Add(pm);
                     //Add to list for generating string
-                    columnValues.Add(pm.ParameterName);
-                    columnNames.Add("[" + pi.Name.ToString() + "]");
+                    InsertColumnValues.Add(pm.ParameterName);
+                    InsertColumnNames.Add("[" + pi.Name.ToString() + "]");
                 }
+                IDbDataParameter pmchk = cmdcheck.CreateParameter();
+                pmchk.ParameterName = "@FileName";
+                pmchk.Value = obj.FileName;
+                cmdcheck.Parameters.Add(pmchk);
 
-                cmd.CommandText = string.Format("INSERT INTO [tbl_Files] ({0}) VALUES ({1});",string.Join(",",columnNames.ToArray()),string.Join(",",columnValues.ToArray()));
-                Console.WriteLine(cmd.CommandText);
+                string strInsert = string.Format("INSERT INTO [tbl_Files] ({0}) VALUES ({1});", string.Join(",", InsertColumnNames.ToArray()), string.Join(",", InsertColumnValues.ToArray()));
+                string strCheckExist = string.Format("SELECT * FROM [tbl_Files] WHERE [FileName] = {0}", "@FileName");
 
-                cmd.ExecuteNonQuery();
+                cmdInsert.CommandText = strInsert;
+                cmdcheck.CommandText = strCheckExist;
+
+                var result = cmdcheck.ExecuteScalar();
+
+                if (result == null)
+                {
+                    cmdInsert.ExecuteNonQuery();
+                }
+                
             }
             else
             {

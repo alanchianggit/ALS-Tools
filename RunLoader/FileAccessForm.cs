@@ -13,7 +13,7 @@ namespace RunLoader
 {
     public partial class FileAccessForm : Form
     {
-        private List<string> CheckedNodes = new List<string>();
+        private List<string> OutputCheckedNodes = new List<string>();
         public FileAccessForm()
         {
             InitializeComponent();
@@ -28,7 +28,7 @@ namespace RunLoader
         }
 
         public IDbConnection conn { get; private set; }
-        private List<FilesEntity> ListofFileEntity = new List<FilesEntity>();
+        private Dictionary<string, FilesEntity> ListofFileEntity = new Dictionary<string, FilesEntity>();
 
         private const string FileDialogFilter = "Microsoft Access (*.accdb , *.mdb)|*.accdb;*.mdb|SQLite (*.db)|*.db|All Files (*.*)|*.*";
         private const string DATA_FILE_FILTER = "All Files (*.*)|*.*";
@@ -43,12 +43,13 @@ namespace RunLoader
             dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
             //Filter using database extensions
             dlg.Filter = FileDialogFilter;
+            //dlg.ShowDialog();
             //If textbox is empty, then fil
-            if (txt_FileLocation.Text.Length == 0)
+            if (dlg.ShowDialog() == DialogResult.OK && txt_FileLocation.Text.Length == 0)
             {
                 txt_FileLocation.Text = dlg.FileName;
             }
-            if (dlg.ShowDialog() == DialogResult.Cancel)
+            else 
             {
                 return;
             }
@@ -73,6 +74,10 @@ namespace RunLoader
 
         private void btn_Connect_Click(object sender, EventArgs e)
         {
+            try
+            {
+
+            
             //Test connection and store in datafactory
             conn = DataFactory.CreateConnection(this.txt_FileLocation.Text);
             if (conn.State == ConnectionState.Open)
@@ -80,6 +85,11 @@ namespace RunLoader
                 UpdateStatusConsole(string.Format("Connection opened with {0}", this.txt_FileLocation.Text));
             }
 
+            }
+            catch (Exception ex)
+            {
+                UpdateStatusConsole(string.Format("Connection Failed due to error '{0}'",ex.Message));
+            }
             //conn = DataFactory.CreateConnection(DatabaseType.Oracle,"192.168.1.252:1521/ORCL");
         }
 
@@ -99,27 +109,55 @@ namespace RunLoader
         
         private void btn_LoadFileTable_Click(object sender, EventArgs e)
         {
-            if (DataFactory.ActiveConn.State == ConnectionState.Open)
+            if (conn != null && DataFactory.ActiveConn != null && DataFactory.ActiveConn.State == ConnectionState.Open)
+            {
+              
+            }
+            else
+            {
+                UpdateStatusConsole("Connection is not open.");
+                UpdateStatusConsole("Attempting to re-open Connection now.");
+                btn_ConnectDB.PerformClick();
+            }
+
+            try
             {
                 //Clear list of working File Entitiy
-                ListofFileEntity = new List<FilesEntity>();
+                ListofFileEntity.Clear();
                 //Create new Files Entity through mid-tier
                 Files obj = new Files();
                 //get datatable from DB through middle tier
                 DataTable oFilesdt = obj.getFileDataTable();
-                //Clear list of File Entity
-                ListofFileEntity.Clear();
                 //Get new list through DB
                 ListofFileEntity = obj.getFilesList();
                 PopulateTreeView();
             }
-            else
+            catch (Exception ex)
             {
-                UpdateStatusConsole("Connection is not open.")
+                UpdateStatusConsole(string.Format("Load table failed due to {0}.", ex.Message));
             }
             
 
         }
+        private void ListFiles(TreeView treeView, object[] objectIDs)
+        {
+            if (objectIDs.Length == 0)
+            {
+                UpdateStatusConsole(string.Format("No Files selected"));
+            }
+            else
+            {
+                foreach (string id in objectIDs)
+                {
+                    TreeNode fileNode = new TreeNode(id);
+
+                    fileNode.Name = id;
+                    treeView.Nodes.Add(fileNode);
+                    fileNode.Checked = true;
+                }
+            }
+        }
+
         private void PopulateTreeView()
         {
             if (tv_OutputFiles.Nodes.ContainsKey("Select All") != true)
@@ -127,23 +165,35 @@ namespace RunLoader
                 
                 tv_OutputFiles.Nodes.Add(new TreeNode("Select All") { Name = "Select All" });
                 TreeNode topNode = tv_OutputFiles.Nodes["Select All"];
-                foreach (FilesEntity obj in ListofFileEntity)
+                foreach (FilesEntity obj in ListofFileEntity.Values)
                 {
                     topNode.Nodes.Add(obj.FileName);
                 }
             }
-            
-
         }
 
         private void btn_Download_Click(object sender, EventArgs e)
         {
-            foreach (TreeNode node in tv_OutputFiles.Nodes)
+
+            try
             {
-                node
-                //Need to find list of checked output files
-                byte[] bindata = ListofFileEntity[0].FileContent;
-                File.WriteAllBytes(string.Format(@"{0}\{1}.zip", this.txt_Output.Text, ListofFileEntity[0].FileName), bindata);
+                foreach (TreeNode node in tv_OutputFiles.Nodes["Select All"].Nodes)
+                {
+                    if (node.Checked == true)
+                    {
+                        Files fs = new Files();
+                        
+                        //Need to find list of checked output files
+                        byte[] bindata = fs[node.Text].FileContent;
+                        //byte[] bindata = ListofFileEntity[node.Name].FileContent;
+                        File.WriteAllBytes(string.Format(@"{0}\{1}", this.txt_Output.Text, fs[node.Text].FileName), bindata);
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatusConsole(ex.Message);
             }
             
         }
@@ -165,29 +215,11 @@ namespace RunLoader
             return opd.FileNames;
         }
 
-        private void ListFiles(TreeView treeView, string[] paths)
-        {
-            if (paths.Length == 0)
-            {
-                UpdateStatusConsole(string.Format("No Files selected"));
-            }
-            else
-            {
-                foreach (string path in paths)
-                {
-                    TreeNode fileNode = new TreeNode(path);
-                    
-                    fileNode.Name = path;
-                    treeView.Nodes.Add(fileNode);
 
-                    fileNode.Checked = true;
-                }
-            }
-        }
 
         private void btn_Upload_Click(object sender, EventArgs e)
         {
-            foreach (string checkednode in CheckedNodes)
+            foreach (string checkednode in OutputCheckedNodes)
             {
                 FileStream fileStream = new System.IO.FileStream(checkednode, System.IO.FileMode.Open, System.IO.FileAccess.Read);
                 BinaryReader reader = new System.IO.BinaryReader(fileStream);
@@ -198,13 +230,19 @@ namespace RunLoader
 
                 FE.FileName = fi.Name;
                 FE.FileContent = data;
-                FE.DateUploaded = DateTime.Today;
-                
+                //FE.DateUploaded = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") ;
+                FE.DateUploaded = GetDateWithoutMilliseconds(DateTime.Now) ;
+
                 FE.Type = fi.Extension;
                 FE.Size = data.Length;
 
                 FE.Add();
             }
+        }
+
+        private DateTime GetDateWithoutMilliseconds(DateTime d)
+        {
+            return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
         }
 
         private void tv_InputFiles_AfterCheck(object sender, TreeViewEventArgs e)
@@ -222,15 +260,27 @@ namespace RunLoader
             {
                 if (e.Node.Checked == true)
                 {
-                    CheckedNodes.Add(e.Node.Text);
+                    OutputCheckedNodes.Add(e.Node.Text);
 
                 }
                 else if (e.Node.Checked == false)
                 {
-                    CheckedNodes.Remove(e.Node.Text);
+                    OutputCheckedNodes.Remove(e.Node.Text);
 
                 }
 
+            }
+        }
+
+        private void txt_FileLocation_TextChanged(object sender, EventArgs e)
+        {
+            if (this.txt_FileLocation.Text.Length > 0)
+            {
+                this.btn_ConnectDB.Enabled = true;
+            }
+            else
+            {
+                this.btn_ConnectDB.Enabled = true;
             }
         }
 

@@ -46,6 +46,7 @@
             // 
             // btn_ConnectDB
             // 
+            this.btn_ConnectDB.Enabled = false;
             this.btn_ConnectDB.Location = new System.Drawing.Point(365, 29);
             this.btn_ConnectDB.Name = "btn_ConnectDB";
             this.btn_ConnectDB.Size = new System.Drawing.Size(75, 20);
@@ -90,6 +91,7 @@
             this.txt_FileLocation.Name = "txt_FileLocation";
             this.txt_FileLocation.Size = new System.Drawing.Size(300, 20);
             this.txt_FileLocation.TabIndex = 2;
+            this.txt_FileLocation.TextChanged += new System.EventHandler(this.txt_FileLocation_TextChanged);
             // 
             // txt_Output
             // 

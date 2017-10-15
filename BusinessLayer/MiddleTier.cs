@@ -10,10 +10,29 @@ namespace BusinessLayer
 {
     public class Files : FilesEntity
     {
-        public List<FilesEntity> getFilesList()
+        private Dictionary<string, FilesEntity> _FilesList = new Dictionary<string, FilesEntity>();
+
+        public Files()
         {
             FileDataDAL obj = new FileDataDAL();
-            return obj.GetList();
+            _FilesList = obj.GetList();
+        }
+
+
+        public FilesEntity this[string key]
+        {
+            // returns value if exists
+            get { return _FilesList[key]; }
+
+            // updates if exists, adds if doesn't exist
+            set { _FilesList[key] = value; }
+        }
+
+
+        public Dictionary<string,FilesEntity> getFilesList()
+        {
+            FileDataDAL obj = new FileDataDAL();
+            return _FilesList = obj.GetList();
         }
 
         public DataTable getFileDataTable()
