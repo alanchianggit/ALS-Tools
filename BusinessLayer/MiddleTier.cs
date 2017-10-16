@@ -5,9 +5,9 @@ using DAL;
 
 namespace BusinessLayer
 {
-    public class Files : FilesEntity
+    public class Files : FileEntity
     {
-        private Dictionary<string, FilesEntity> _FilesList = new Dictionary<string, FilesEntity>();
+        private Dictionary<string, FileEntity> _FilesList = new Dictionary<string, FileEntity>();
 
         public Files()
         {
@@ -15,8 +15,7 @@ namespace BusinessLayer
             _FilesList = obj.GetList();
         }
 
-
-        public FilesEntity this[string key]
+        public FileEntity this[string key]
         {
             // returns value if exists
             get { return _FilesList[key]; }
@@ -26,7 +25,7 @@ namespace BusinessLayer
         }
 
 
-        public Dictionary<string,FilesEntity> getFilesList()
+        public Dictionary<string,FileEntity> getFilesList()
         {
             FileDataDAL obj = new FileDataDAL();
             return _FilesList = obj.GetList();

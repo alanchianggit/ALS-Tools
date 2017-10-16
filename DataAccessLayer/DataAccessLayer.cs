@@ -215,8 +215,8 @@ namespace DAL
     {
         public DataTable Datatable { get; set; }
 
-        Dictionary<string, FilesEntity> dictFE = new Dictionary<string, FilesEntity>();
-        List<FilesEntity> listFE = new List<FilesEntity>();
+        Dictionary<string, FileEntity> dictFE = new Dictionary<string, FileEntity>();
+        List<FileEntity> listFE = new List<FileEntity>();
 
         public FileDataDAL()
         {
@@ -238,14 +238,14 @@ namespace DAL
 
 
 
-        public Dictionary<string,FilesEntity> GetList()
+        public Dictionary<string,FileEntity> GetList()
         {
-            dictFE = new Dictionary<string, FilesEntity>();
+            dictFE = new Dictionary<string, FileEntity>();
             foreach (DataRow dr in this.Datatable.Rows)
             {
-                FilesEntity obj = new FilesEntity();
+                FileEntity obj = new FileEntity();
                 //Reflection method
-                foreach (PropertyInfo pi in typeof(FilesEntity).GetProperties())
+                foreach (PropertyInfo pi in typeof(FileEntity).GetProperties())
                 {
                     pi.SetValue(obj, dr[pi.Name]);   
                 }
@@ -253,12 +253,15 @@ namespace DAL
             }
             return dictFE;
         }
-        public void Add(FilesEntity obj)
+
+
+
+        public void Add(FileEntity obj)
         {
             if (DataFactory.ActiveConn.State == ConnectionState.Open)
             {           
                 // get properties from entity class
-                PropertyInfo[] PIs = typeof(FilesEntity).GetProperties();
+                PropertyInfo[] PIs = typeof(FileEntity).GetProperties();
 
                 //Create table of data according to properties so it can be adapted to connection
                 var cmdInsert = DataFactory.CreateCommand(string.Empty);

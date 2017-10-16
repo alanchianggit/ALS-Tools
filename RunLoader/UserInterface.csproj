@@ -73,16 +73,34 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analysis Management.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Analysis Management.Designer.cs">
+      <DependentUpon>Analysis Management.cs</DependentUpon>
+    </Compile>
     <Compile Include="FileAccessForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FileAccessForm.Designer.cs">
       <DependentUpon>FileAccessForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Main Menu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Main Menu.Designer.cs">
+      <DependentUpon>Main Menu.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Analysis Management.resx">
+      <DependentUpon>Analysis Management.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FileAccessForm.resx">
       <DependentUpon>FileAccessForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Main Menu.resx">
+      <DependentUpon>Main Menu.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

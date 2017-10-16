@@ -11,7 +11,12 @@ namespace RunLoader
 {
     public partial class FileAccessForm : Form
     {
+        private List<string> InputCheckedNodes = new List<string>();
         private List<string> OutputCheckedNodes = new List<string>();
+
+        private IDbConnection conn { get; set; }
+        private Dictionary<string, FileEntity> ListofFileEntity = new Dictionary<string, FileEntity>();
+
         public FileAccessForm()
         {
             InitializeComponent();
@@ -25,8 +30,7 @@ namespace RunLoader
             DateUploaded = 4
         }
 
-        public IDbConnection conn { get; private set; }
-        private Dictionary<string, FilesEntity> ListofFileEntity = new Dictionary<string, FilesEntity>();
+
 
         private const string FileDialogFilter = "Microsoft Access (*.accdb , *.mdb)|*.accdb;*.mdb|SQLite (*.db)|*.db|All Files (*.*)|*.*";
         private const string DATA_FILE_FILTER = "All Files (*.*)|*.*";
@@ -47,11 +51,11 @@ namespace RunLoader
             {
                 txt_FileLocation.Text = dlg.FileName;
             }
-            else 
+            else
             {
                 return;
             }
-            
+
             //PopulateListView();
         }
 
@@ -73,20 +77,17 @@ namespace RunLoader
         private void btn_Connect_Click(object sender, EventArgs e)
         {
             try
-            {
-
-            
-            //Test connection and store in datafactory
-            conn = DataFactory.CreateConnection(this.txt_FileLocation.Text);
-            if (conn.State == ConnectionState.Open)
-            {
-                UpdateStatusConsole(string.Format("Connection opened with {0}", this.txt_FileLocation.Text));
-            }
-
+            { 
+                //Test connection and store in datafactory
+                conn = DataFactory.CreateConnection(this.txt_FileLocation.Text);
+                if (conn.State == ConnectionState.Open)
+                {
+                    UpdateStatusConsole(string.Format("Connection opened with {0}", this.txt_FileLocation.Text));
+                }
             }
             catch (Exception ex)
             {
-                UpdateStatusConsole(string.Format("Connection Failed due to error '{0}'",ex.Message));
+                UpdateStatusConsole(string.Format("Connection Failed due to error '{0}'", ex.Message));
             }
             //conn = DataFactory.CreateConnection(DatabaseType.Oracle,"192.168.1.252:1521/ORCL");
         }
@@ -99,23 +100,23 @@ namespace RunLoader
             //Show dialog
             fbd.ShowDialog();
             //If selectedpath is not 0
-            if (fbd.SelectedPath.Length > 0 )
+            if (fbd.SelectedPath.Length > 0)
             {
                 this.txt_Output.Text = fbd.SelectedPath;
             }
         }
-        
+
         private void btn_LoadFileTable_Click(object sender, EventArgs e)
         {
             if (conn != null && DataFactory.ActiveConn != null && DataFactory.ActiveConn.State == ConnectionState.Open)
             {
-              
+
             }
             else
             {
                 UpdateStatusConsole("Connection is not open.");
                 UpdateStatusConsole("Attempting to re-open Connection now.");
-                btn_ConnectDB.PerformClick();
+                btn_Connect_Click(sender, e);
             }
 
             try
@@ -130,11 +131,11 @@ namespace RunLoader
                 ListofFileEntity = obj.getFilesList();
                 PopulateTreeView();
             }
-            catch (Exception ex)
+            catch (NullReferenceException ex)
             {
-                UpdateStatusConsole(string.Format("Load table failed due to {0}.", ex.Message));
+                UpdateStatusConsole(string.Format("Load table failed due to '{0}'.", ex.Message));
             }
-            
+
 
         }
         private void ListFiles(TreeView treeView, object[] objectIDs)
@@ -158,15 +159,22 @@ namespace RunLoader
 
         private void PopulateTreeView()
         {
+            //Create top node if doesn't exist
             if (tv_OutputFiles.Nodes.ContainsKey("Select All") != true)
+            { tv_OutputFiles.Nodes.Add(new TreeNode("Select All") { Name = "Select All" }); }
+
+            //Populate child nodes
+            try
             {
-                
-                tv_OutputFiles.Nodes.Add(new TreeNode("Select All") { Name = "Select All" });
                 TreeNode topNode = tv_OutputFiles.Nodes["Select All"];
-                foreach (FilesEntity obj in ListofFileEntity.Values)
+                foreach (FileEntity obj in ListofFileEntity.Values)
                 {
                     topNode.Nodes.Add(obj.FileName);
                 }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatusConsole(string.Format("Update table error - {0}.",ex.Message));
             }
         }
 
@@ -180,7 +188,7 @@ namespace RunLoader
                     if (node.Checked == true)
                     {
                         Files fs = new Files();
-                        
+
                         //Need to find list of checked output files
                         byte[] bindata = fs[node.Text].FileContent;
                         //byte[] bindata = ListofFileEntity[node.Name].FileContent;
@@ -193,7 +201,7 @@ namespace RunLoader
             {
                 UpdateStatusConsole(ex.Message);
             }
-            
+
         }
 
         private void btn_SelectInputFiles_Click(object sender, EventArgs e)
@@ -217,7 +225,7 @@ namespace RunLoader
 
         private void btn_Upload_Click(object sender, EventArgs e)
         {
-            foreach (string checkednode in OutputCheckedNodes)
+            foreach (string checkednode in InputCheckedNodes)
             {
                 FileStream fileStream = new System.IO.FileStream(checkednode, System.IO.FileMode.Open, System.IO.FileAccess.Read);
                 BinaryReader reader = new System.IO.BinaryReader(fileStream);
@@ -229,7 +237,7 @@ namespace RunLoader
                 FE.FileName = fi.Name;
                 FE.FileContent = data;
                 //FE.DateUploaded = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") ;
-                FE.DateUploaded = GetDateWithoutMilliseconds(DateTime.Now) ;
+                FE.DateUploaded = GetDateWithoutMilliseconds(DateTime.Now);
 
                 FE.Type = fi.Extension;
                 FE.Size = data.Length;
@@ -242,6 +250,34 @@ namespace RunLoader
         {
             return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
         }
+
+        // Updates all child tree nodes recursively.
+        private void CheckAllChildNodes(TreeNode treeNode, bool nodeChecked)
+        {
+            foreach (TreeNode node in treeNode.Nodes)
+            {
+                node.Checked = nodeChecked;
+                if (node.Nodes.Count > 0)
+                {
+                    // If the current node has child nodes, call the CheckAllChildsNodes method recursively.
+                    this.CheckAllChildNodes(node, nodeChecked);
+                }
+                if (node.Nodes.Count == 0)
+                {
+                    if (node.Checked == true)
+                    {
+                        //CheckedNodes.Add(node.Text);
+
+                    }
+                    else if (node.Checked == false)
+                    {
+                        //CheckedNodes.Remove(node.Text);
+
+                    }
+                }
+            }
+        }
+
 
         private void tv_InputFiles_AfterCheck(object sender, TreeViewEventArgs e)
         {
@@ -258,13 +294,11 @@ namespace RunLoader
             {
                 if (e.Node.Checked == true)
                 {
-                    OutputCheckedNodes.Add(e.Node.Text);
-
+                    InputCheckedNodes.Add(e.Node.Text);
                 }
                 else if (e.Node.Checked == false)
                 {
-                    OutputCheckedNodes.Remove(e.Node.Text);
-
+                    InputCheckedNodes.Remove(e.Node.Text);
                 }
 
             }
@@ -272,15 +306,53 @@ namespace RunLoader
 
         private void txt_FileLocation_TextChanged(object sender, EventArgs e)
         {
-            if (this.txt_FileLocation.Text.Length > 0)
+            if (this.txt_FileLocation.TextLength > 0) { this.btn_ConnectDB.Enabled = true; }
+            else { this.btn_ConnectDB.Enabled = false; }
+        }
+
+        private void txt_Output_TextChanged(object sender, EventArgs e)
+        {
+            if (txt_Output.TextLength > 0 && OutputCheckedNodes.Count > 0)
             {
-                this.btn_ConnectDB.Enabled = true;
+                this.btn_Download.Enabled = true;
             }
             else
             {
-                this.btn_ConnectDB.Enabled = true;
+                this.btn_Download.Enabled = false;
             }
         }
+
+        private void tv_OutputFiles_AfterCheck(object sender, TreeViewEventArgs e)
+        {
+            // The code only executes if the user caused the checked state to change.
+            if (e.Node.Nodes.Count > 0)
+            {
+                /* Calls the CheckAllChildNodes method, passing in the current 
+                Checked value of the TreeNode whose checked state changed. */
+                this.CheckAllChildNodes(e.Node, e.Node.Checked);
+            }
+            else if (e.Node.Nodes.Count == 0)
+            {
+                if (e.Node.Checked == true)
+                {
+                    OutputCheckedNodes.Add(e.Node.Text);
+                    this.txt_Output_TextChanged(sender, e);
+                }
+                else if (e.Node.Checked == false)
+                {
+                    OutputCheckedNodes.Remove(e.Node.Text);
+                    this.txt_Output_TextChanged(sender, e);
+                }
+
+            }
+        }
+
+        private void tv_OutputFiles_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            TreeNode selectedNode = tv_OutputFiles.SelectedNode;
+
+        }
+
 
         //private TreeNode CreateDirectoryNode(DirectoryInfo directoryInfo)
         //{

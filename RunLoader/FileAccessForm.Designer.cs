@@ -42,12 +42,14 @@
             this.btn_SelectInputFiles = new System.Windows.Forms.Button();
             this.btn_Download = new System.Windows.Forms.Button();
             this.btn_Upload = new System.Windows.Forms.Button();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btn_ConnectDB
             // 
             this.btn_ConnectDB.Enabled = false;
-            this.btn_ConnectDB.Location = new System.Drawing.Point(365, 29);
+            this.btn_ConnectDB.Location = new System.Drawing.Point(352, 42);
             this.btn_ConnectDB.Name = "btn_ConnectDB";
             this.btn_ConnectDB.Size = new System.Drawing.Size(75, 20);
             this.btn_ConnectDB.TabIndex = 1;
@@ -57,7 +59,7 @@
             // 
             // btn_BrowseAccess
             // 
-            this.btn_BrowseAccess.Location = new System.Drawing.Point(325, 29);
+            this.btn_BrowseAccess.Location = new System.Drawing.Point(312, 42);
             this.btn_BrowseAccess.Name = "btn_BrowseAccess";
             this.btn_BrowseAccess.Size = new System.Drawing.Size(31, 20);
             this.btn_BrowseAccess.TabIndex = 1;
@@ -67,7 +69,7 @@
             // 
             // btn_SelectOutput
             // 
-            this.btn_SelectOutput.Location = new System.Drawing.Point(325, 376);
+            this.btn_SelectOutput.Location = new System.Drawing.Point(312, 389);
             this.btn_SelectOutput.Name = "btn_SelectOutput";
             this.btn_SelectOutput.Size = new System.Drawing.Size(31, 20);
             this.btn_SelectOutput.TabIndex = 1;
@@ -77,7 +79,7 @@
             // 
             // btn_LoadFileTable
             // 
-            this.btn_LoadFileTable.Location = new System.Drawing.Point(19, 332);
+            this.btn_LoadFileTable.Location = new System.Drawing.Point(6, 345);
             this.btn_LoadFileTable.Name = "btn_LoadFileTable";
             this.btn_LoadFileTable.Size = new System.Drawing.Size(106, 23);
             this.btn_LoadFileTable.TabIndex = 1;
@@ -87,7 +89,7 @@
             // 
             // txt_FileLocation
             // 
-            this.txt_FileLocation.Location = new System.Drawing.Point(19, 29);
+            this.txt_FileLocation.Location = new System.Drawing.Point(6, 42);
             this.txt_FileLocation.Name = "txt_FileLocation";
             this.txt_FileLocation.Size = new System.Drawing.Size(300, 20);
             this.txt_FileLocation.TabIndex = 2;
@@ -96,15 +98,16 @@
             // txt_Output
             // 
             this.txt_Output.Enabled = false;
-            this.txt_Output.Location = new System.Drawing.Point(19, 376);
+            this.txt_Output.Location = new System.Drawing.Point(6, 389);
             this.txt_Output.Name = "txt_Output";
             this.txt_Output.Size = new System.Drawing.Size(300, 20);
             this.txt_Output.TabIndex = 5;
+            this.txt_Output.TextChanged += new System.EventHandler(this.txt_Output_TextChanged);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(19, 13);
+            this.label1.Location = new System.Drawing.Point(6, 26);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(201, 13);
             this.label1.TabIndex = 6;
@@ -113,7 +116,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(19, 360);
+            this.label2.Location = new System.Drawing.Point(6, 373);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(90, 13);
             this.label2.TabIndex = 6;
@@ -121,32 +124,33 @@
             // 
             // txt_status
             // 
-            this.txt_status.Location = new System.Drawing.Point(19, 412);
+            this.txt_status.Location = new System.Drawing.Point(6, 425);
             this.txt_status.Multiline = true;
             this.txt_status.Name = "txt_status";
-            this.txt_status.Size = new System.Drawing.Size(719, 91);
+            this.txt_status.Size = new System.Drawing.Size(754, 91);
             this.txt_status.TabIndex = 7;
             // 
             // tv_OutputFiles
             // 
             this.tv_OutputFiles.CheckBoxes = true;
-            this.tv_OutputFiles.Location = new System.Drawing.Point(19, 55);
+            this.tv_OutputFiles.Location = new System.Drawing.Point(6, 68);
             this.tv_OutputFiles.Name = "tv_OutputFiles";
             this.tv_OutputFiles.Size = new System.Drawing.Size(374, 271);
             this.tv_OutputFiles.TabIndex = 8;
+            this.tv_OutputFiles.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.tv_OutputFiles_AfterCheck);
             // 
             // tv_InputFiles
             // 
             this.tv_InputFiles.CheckBoxes = true;
-            this.tv_InputFiles.Location = new System.Drawing.Point(399, 55);
+            this.tv_InputFiles.Location = new System.Drawing.Point(386, 68);
             this.tv_InputFiles.Name = "tv_InputFiles";
-            this.tv_InputFiles.Size = new System.Drawing.Size(339, 271);
+            this.tv_InputFiles.Size = new System.Drawing.Size(374, 271);
             this.tv_InputFiles.TabIndex = 8;
             this.tv_InputFiles.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.tv_InputFiles_AfterCheck);
             // 
             // btn_SelectInputFiles
             // 
-            this.btn_SelectInputFiles.Location = new System.Drawing.Point(399, 332);
+            this.btn_SelectInputFiles.Location = new System.Drawing.Point(386, 345);
             this.btn_SelectInputFiles.Name = "btn_SelectInputFiles";
             this.btn_SelectInputFiles.Size = new System.Drawing.Size(110, 23);
             this.btn_SelectInputFiles.TabIndex = 1;
@@ -156,7 +160,8 @@
             // 
             // btn_Download
             // 
-            this.btn_Download.Location = new System.Drawing.Point(318, 332);
+            this.btn_Download.Enabled = false;
+            this.btn_Download.Location = new System.Drawing.Point(305, 345);
             this.btn_Download.Name = "btn_Download";
             this.btn_Download.Size = new System.Drawing.Size(75, 23);
             this.btn_Download.TabIndex = 9;
@@ -166,7 +171,7 @@
             // 
             // btn_Upload
             // 
-            this.btn_Upload.Location = new System.Drawing.Point(663, 332);
+            this.btn_Upload.Location = new System.Drawing.Point(685, 345);
             this.btn_Upload.Name = "btn_Upload";
             this.btn_Upload.Size = new System.Drawing.Size(75, 23);
             this.btn_Upload.TabIndex = 10;
@@ -174,29 +179,41 @@
             this.btn_Upload.UseVisualStyleBackColor = true;
             this.btn_Upload.Click += new System.EventHandler(this.btn_Upload_Click);
             // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Controls.Add(this.btn_LoadFileTable);
+            this.groupBox1.Controls.Add(this.btn_Upload);
+            this.groupBox1.Controls.Add(this.tv_OutputFiles);
+            this.groupBox1.Controls.Add(this.btn_ConnectDB);
+            this.groupBox1.Controls.Add(this.txt_status);
+            this.groupBox1.Controls.Add(this.txt_Output);
+            this.groupBox1.Controls.Add(this.btn_SelectOutput);
+            this.groupBox1.Controls.Add(this.btn_Download);
+            this.groupBox1.Controls.Add(this.btn_SelectInputFiles);
+            this.groupBox1.Controls.Add(this.txt_FileLocation);
+            this.groupBox1.Controls.Add(this.tv_InputFiles);
+            this.groupBox1.Controls.Add(this.btn_BrowseAccess);
+            this.groupBox1.Controls.Add(this.label2);
+            this.groupBox1.Location = new System.Drawing.Point(0, 0);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(772, 533);
+            this.groupBox1.TabIndex = 11;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "File Management";
+            // 
             // FileAccessForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(748, 528);
-            this.Controls.Add(this.btn_Upload);
-            this.Controls.Add(this.btn_Download);
-            this.Controls.Add(this.tv_InputFiles);
-            this.Controls.Add(this.tv_OutputFiles);
-            this.Controls.Add(this.txt_status);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.txt_Output);
-            this.Controls.Add(this.txt_FileLocation);
-            this.Controls.Add(this.btn_SelectInputFiles);
-            this.Controls.Add(this.btn_LoadFileTable);
-            this.Controls.Add(this.btn_SelectOutput);
-            this.Controls.Add(this.btn_BrowseAccess);
-            this.Controls.Add(this.btn_ConnectDB);
+            this.ClientSize = new System.Drawing.Size(774, 536);
+            this.Controls.Add(this.groupBox1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "FileAccessForm";
-            this.Text = "Form1";
+            this.Text = "File Management";
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -215,6 +232,7 @@
         private System.Windows.Forms.Button btn_SelectInputFiles;
         private System.Windows.Forms.Button btn_Download;
         private System.Windows.Forms.Button btn_Upload;
+        private System.Windows.Forms.GroupBox groupBox1;
     }
 }
 

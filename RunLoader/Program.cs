@@ -16,7 +16,8 @@ namespace RunLoader
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FileAccessForm());
+            //Application.Run(new FileAccessForm());
+            Application.Run(new frm_MainMenu());
         }
     }
 }

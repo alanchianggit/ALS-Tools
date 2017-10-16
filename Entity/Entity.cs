@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Entity
 {
-    public class FilesEntity
+    public class FileEntity
     {
         protected string _FileName = string.Empty;
         //protected Int32 _ID = int.MinValue;
