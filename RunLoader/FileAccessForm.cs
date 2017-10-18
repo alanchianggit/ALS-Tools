@@ -13,9 +13,9 @@ namespace RunLoader
     {
         private List<string> InputCheckedNodes = new List<string>();
         private List<string> OutputCheckedNodes = new List<string>();
+        private bool FirstConnect = true;
 
-        private IDbConnection conn { get; set; }
-        private Dictionary<string, FileEntity> ListofFileEntity = new Dictionary<string, FileEntity>();
+        private Dictionary<string, string> ListofFileNames = new Dictionary<string, string>();
 
         public FileAccessForm()
         {
@@ -77,12 +77,29 @@ namespace RunLoader
         private void btn_Connect_Click(object sender, EventArgs e)
         {
             try
-            { 
-                //Test connection and store in datafactory
-                conn = DataFactory.CreateConnection(this.txt_FileLocation.Text);
-                if (conn.State == ConnectionState.Open)
+            {
+                if (FirstConnect)
                 {
-                    UpdateStatusConsole(string.Format("Connection opened with {0}", this.txt_FileLocation.Text));
+                    try
+                    {
+                        //Test connection and store in datafactory
+                        IDbConnection conn = DataFactory.CreateConnection(this.txt_FileLocation.Text);
+                        UpdateStatusConsole(string.Format("Connection established with {0}", this.txt_FileLocation.Text));
+                            FirstConnect = false;
+                            
+                    }
+                    catch (Exception ex)
+                    {
+                        UpdateStatusConsole(ex.Message);
+                    }
+                    
+                }
+                
+                if (DataFactory.ActiveConn.State == ConnectionState.Open)
+                {
+                    
+                    this.btn_ConnectDB.Text = "Connected";
+                    this.btn_ConnectDB.Enabled = false;
                 }
             }
             catch (Exception ex)
@@ -108,32 +125,37 @@ namespace RunLoader
 
         private void btn_LoadFileTable_Click(object sender, EventArgs e)
         {
-            if (conn != null && DataFactory.ActiveConn != null && DataFactory.ActiveConn.State == ConnectionState.Open)
+            if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State == ConnectionState.Open)
             {
 
             }
             else
             {
-                UpdateStatusConsole("Connection is not open.");
-                UpdateStatusConsole("Attempting to re-open Connection now.");
+                //UpdateStatusConsole("Connection is not open. Attempting to re-open Connection now.");
                 btn_Connect_Click(sender, e);
             }
 
             try
             {
-                //Clear list of working File Entitiy
-                ListofFileEntity.Clear();
-                //Create new Files Entity through mid-tier
-                Files obj = new Files();
-                //get datatable from DB through middle tier
-                DataTable oFilesdt = obj.getFileDataTable();
-                //Get new list through DB
-                ListofFileEntity = obj.getFilesList();
-                PopulateTreeView();
+                this.btn_LoadFileTable.Enabled = false;
+                //create new files
+                using (Files obj = new Files())
+                {
+                    //Get list of file names
+                    ListofFileNames = obj.getFileNameList();
+                    //Populate list of file names
+                    PopulateTreeView();
+                    ListofFileNames = null;
+                    GC.Collect();
+                }                    
             }
             catch (NullReferenceException ex)
             {
                 UpdateStatusConsole(string.Format("Load table failed due to '{0}'.", ex.Message));
+            }
+            finally
+            {
+                this.btn_LoadFileTable.Enabled = true;
             }
 
 
@@ -167,14 +189,20 @@ namespace RunLoader
             try
             {
                 TreeNode topNode = tv_OutputFiles.Nodes["Select All"];
-                foreach (FileEntity obj in ListofFileEntity.Values)
+                TreeNodeCollection childnodes = topNode.Nodes;
+                foreach (string filename in ListofFileNames.Values)
                 {
-                    topNode.Nodes.Add(obj.FileName);
+                    if (childnodes.ContainsKey(filename)==false)
+                    {
+                        topNode.Nodes.Add(filename,filename);
+                    }
+                                 
                 }
+                
             }
             catch (Exception ex)
             {
-                UpdateStatusConsole(string.Format("Update table error - {0}.",ex.Message));
+                UpdateStatusConsole(string.Format("Update table error - {0}.", ex.Message));
             }
         }
 
@@ -227,22 +255,28 @@ namespace RunLoader
         {
             foreach (string checkednode in InputCheckedNodes)
             {
-                FileStream fileStream = new System.IO.FileStream(checkednode, System.IO.FileMode.Open, System.IO.FileAccess.Read);
-                BinaryReader reader = new System.IO.BinaryReader(fileStream);
-                byte[] data = reader.ReadBytes((int)fileStream.Length);
+                byte[] data;
+                using (FileStream fs = new System.IO.FileStream(checkednode, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+                {
+                    BinaryReader reader = new System.IO.BinaryReader(fs);
+                    data = reader.ReadBytes((int)fs.Length);
+                }
+                //Instantiate new file
+                using (Files FE = new Files())
+                {
+                    FileInfo fi = new FileInfo(tv_InputFiles.Nodes[checkednode].Text);
 
-                Files FE = new Files();
-                FileInfo fi = new FileInfo(tv_InputFiles.Nodes[checkednode].Text);
+                    //Populate object
+                    FE.FileName = fi.Name;
+                    FE.FileContent = data;
+                    FE.DateUploaded = GetDateWithoutMilliseconds(DateTime.Now);
+                    FE.Type = fi.Extension;
+                    FE.Size = data.Length;
+                    //Add to DB
+                    FE.Add();
+                }
 
-                FE.FileName = fi.Name;
-                FE.FileContent = data;
-                //FE.DateUploaded = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") ;
-                FE.DateUploaded = GetDateWithoutMilliseconds(DateTime.Now);
 
-                FE.Type = fi.Extension;
-                FE.Size = data.Length;
-
-                FE.Add();
             }
         }
 
@@ -300,14 +334,20 @@ namespace RunLoader
                 {
                     InputCheckedNodes.Remove(e.Node.Text);
                 }
-
             }
+
         }
 
         private void txt_FileLocation_TextChanged(object sender, EventArgs e)
         {
-            if (this.txt_FileLocation.TextLength > 0) { this.btn_ConnectDB.Enabled = true; }
-            else { this.btn_ConnectDB.Enabled = false; }
+            if (this.txt_FileLocation.TextLength > 0)
+            {
+                this.btn_ConnectDB.Enabled = true;
+            }
+            else
+            {
+                this.btn_ConnectDB.Enabled = false;
+            }
         }
 
         private void txt_Output_TextChanged(object sender, EventArgs e)
