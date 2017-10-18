@@ -144,12 +144,15 @@ namespace RunLoader
                     //Get list of file names
                     ListofFileNames = obj.getFileNameList();
                     //Populate list of file names
-                    PopulateTreeView();
-                    ListofFileNames = null;
+                    if (ListofFileNames.Count != 0)
+                    {
+                        PopulateTreeView();
+                        ListofFileNames = null;
+                    }
                     GC.Collect();
                 }                    
             }
-            catch (NullReferenceException ex)
+            catch (Exception ex)
             {
                 UpdateStatusConsole(string.Format("Load table failed due to '{0}'.", ex.Message));
             }
