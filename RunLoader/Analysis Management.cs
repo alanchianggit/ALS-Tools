@@ -25,11 +25,10 @@ namespace RunLoader
             {
                 string FullText = sr.ReadToEnd().ToString();
                 string[] textRows = FullText.Split('\n');
-
                 foreach (string row in textRows)
                     {
-                        string[] SampleArray = row.Split(",")
-                        
+                        string[] SampleArray = row.Split(',');
+                        // MessageBox.Show(SampleArray.Length.ToString());
                             Sample currSample = new Sample();
                             
                             currSample.Skip = SampleArray[0];
@@ -39,11 +38,9 @@ namespace RunLoader
                             currSample.SampleName = SampleArray[4];
                             currSample.Level = SampleArray[5];
                             currSample.Dilution = SampleArray[6];
-                        
-                        
                     }
                 
-                MessageBox.Show(textRows.Length.ToString());
+                
             }
         }
         
