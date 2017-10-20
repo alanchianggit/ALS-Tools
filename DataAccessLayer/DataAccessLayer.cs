@@ -37,21 +37,16 @@ namespace DAL
         // define a common parameter type set
     }
 
-    public static class DataFactory
+    public class DataFactory
     {
-        public static IDbConnection ActiveConn
-        { get; set; }
-        //{
-        //    get
-        //    {
-        //        return CreateConnection(ActiveConnectionString);
-        //    }
 
-        //    set
-        //    {
-        //        ActiveConn = value;
-        //    }
-        //}
+        public static DataFactory Instance = new DataFactory();
+        public void Reset()
+        {
+            Instance = new DataFactory();
+        }
+
+        public static IDbConnection ActiveConn { get; set; }
         public static string ActiveConnectionString { get; set; }
 
         public static DatabaseType dbtype { get; set; }
@@ -65,14 +60,14 @@ namespace DAL
         //Create Connection based on file extension type: e.g. *.db for SQLite, *.MDB or *.ACCDB for M$ Access
         public static IDbConnection CreateConnection(string DBDataSource)
         {
-                //Find extension from file path
-                string extension = Path.GetExtension(DBDataSource).Replace(".", string.Empty);
-                //Find database file type based on extension
-                DatabaseFileType dbfiletype = (DatabaseFileType)Enum.Parse(typeof(DatabaseFileType), extension, true);
-                //find database type based on file type
-                dbtype = (DatabaseType)dbfiletype;
-                //create connection using database type
-                return DataFactory.CreateConnection(dbtype, DBDataSource);
+            //Find extension from file path
+            string extension = Path.GetExtension(DBDataSource).Replace(".", string.Empty);
+            //Find database file type based on extension
+            DatabaseFileType dbfiletype = (DatabaseFileType)Enum.Parse(typeof(DatabaseFileType), extension, true);
+            //find database type based on file type
+            dbtype = (DatabaseType)dbfiletype;
+            //create connection using database type
+            return DataFactory.CreateConnection(dbtype, DBDataSource);
 
         }
 
@@ -89,7 +84,7 @@ namespace DAL
                 conns.Add(DatabaseType.SQLServer, new SqlConnection());
                 conns.Add(DatabaseType.SQLite, new SQLiteConnection());
             }
-            
+
             //Get type of connection provided datasource and database type 
             IDbConnection Conn = conns[dbtype];
             //Close connection
@@ -112,7 +107,7 @@ namespace DAL
                         bs.DataSource = Path.GetFullPath(DBDataSource).ToString();
                         bs.Provider = "Microsoft.ACE.OLEDB.12.0";
                         bs.OleDbServices = -13;
-                        
+
                         ActiveConnectionString = bs.ConnectionString;
                     }
                     break;
@@ -229,7 +224,7 @@ namespace DAL
         }
     }
 
-    public class FileDataDAL: IDisposable
+    public class FileDataDAL : IDisposable
     {
         public DataTable Datatable = new DataTable();
 
@@ -240,7 +235,7 @@ namespace DAL
         public FileDataDAL()
         {
             string strSQL = "SELECT * FROM tbl_Files";
-            if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State != ConnectionState.Open){ DataFactory.ActiveConn.Open(); }
+            if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
             try
             {
                 //conn = DataFactory.ActiveConn;
@@ -251,8 +246,8 @@ namespace DAL
                 //this.Datatable = dt;
                 da.Dispose();
                 cmd.Dispose();
-            }        
-            catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
@@ -266,13 +261,13 @@ namespace DAL
             {
                 FileEntity obj = new FileEntity();
                 //Reflection method
-                    obj.FileName = dr["FileName"].ToString();
+                obj.FileName = dr["FileName"].ToString();
                 dictFileName.Add(obj.FileName, obj.FileName);
             }
             return dictFileName;
         }
 
-        public Dictionary<string,FileEntity> GetList()
+        public Dictionary<string, FileEntity> GetList()
         {
             dictFE = new Dictionary<string, FileEntity>();
             foreach (DataRow dr in this.Datatable.Rows)
@@ -281,7 +276,7 @@ namespace DAL
                 //Reflection method
                 foreach (PropertyInfo pi in typeof(FileEntity).GetProperties())
                 {
-                    pi.SetValue(obj, dr[pi.Name]);   
+                    pi.SetValue(obj, dr[pi.Name]);
                 }
                 dictFE.Add(obj.FileName, obj);
             }
@@ -294,7 +289,7 @@ namespace DAL
         {
             if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
             try
-            {       
+            {
                 // get properties from entity class
                 PropertyInfo[] PIs = typeof(FileEntity).GetProperties();
 
@@ -310,7 +305,7 @@ namespace DAL
                     //Create new parameter object
                     IDbDataParameter pm = cmdInsert.CreateParameter();
                     //Set Parameter name from property name
-                    pm.ParameterName = string.Format("@{0}",pi.Name.ToString());
+                    pm.ParameterName = string.Format("@{0}", pi.Name.ToString());
                     //Set value from property of object
                     pm.Value = pi.GetValue(obj);
                     //Add parameter to command
@@ -349,9 +344,9 @@ namespace DAL
             }
             finally
             {
-                
+
             }
-            
+
         }
 
         #region IDisposable Support
@@ -363,9 +358,9 @@ namespace DAL
             {
                 if (disposing)
                 {
-                    dictFE= null;
-                    dictFileName= null;
-                    listFE=null;
+                    dictFE = null;
+                    dictFileName = null;
+                    listFE = null;
                     ((IDisposable)Datatable).Dispose();
                     DataFactory.ActiveConn.Close();
                     // TODO: dispose managed state (managed objects).

@@ -1,4 +1,6 @@
-﻿namespace RunLoader
+﻿using DAL;
+
+namespace RunLoader
 {
     partial class FileAccessForm
     {
@@ -20,6 +22,8 @@
             InputCheckedNodes = null;
             OutputCheckedNodes = null;
             ListofFileNames = null;
+            DataFactory.Instance.Reset();
+
             base.Dispose(disposing);
         }
 

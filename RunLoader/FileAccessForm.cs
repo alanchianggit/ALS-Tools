@@ -218,13 +218,14 @@ namespace RunLoader
                 {
                     if (node.Checked == true)
                     {
-                        Files fs = new Files();
-
-                        //Need to find list of checked output files
-                        byte[] bindata = fs[node.Text].FileContent;
-                        //byte[] bindata = ListofFileEntity[node.Name].FileContent;
-                        File.WriteAllBytes(string.Format(@"{0}\{1}", this.txt_Output.Text, fs[node.Text].FileName), bindata);
-                        UpdateStatusConsole(string.Format("{0} Downloaded.", fs[node.Text].FileName));
+                        using (Files fs = new Files())
+                        {
+                            //Need to find list of checked output files
+                            byte[] bindata = fs[node.Text].FileContent;
+                            //byte[] bindata = ListofFileEntity[node.Name].FileContent;
+                            File.WriteAllBytes(string.Format(@"{0}\{1}", this.txt_Output.Text, fs[node.Text].FileName), bindata);
+                            UpdateStatusConsole(string.Format("{0} Downloaded.", fs[node.Text].FileName));
+                        }
                     }
 
                 }
