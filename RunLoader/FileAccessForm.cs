@@ -38,25 +38,28 @@ namespace RunLoader
         private void btn_BrowseAccess_Click(object sender, EventArgs e)
         {
             //Instantiate dialog
-            OpenFileDialog dlg = new OpenFileDialog();
-            //Enable upgrade for new Vista framework
-            dlg.AutoUpgradeEnabled = true;
-            //Initial directory is personal documents
-            dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-            //Filter using database extensions
-            dlg.Filter = FileDialogFilter;
-            //dlg.ShowDialog();
-            //If textbox is empty, then fil
-            if (dlg.ShowDialog() == DialogResult.OK && txt_FileLocation.Text.Length == 0)
+            using (OpenFileDialog dlg = new OpenFileDialog())
             {
-                txt_FileLocation.Text = dlg.FileName;
-            }
-            else
-            {
-                return;
+                //Enable upgrade for new Vista framework
+                dlg.AutoUpgradeEnabled = true;
+                //Initial directory is personal documents
+                dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+                //Filter using database extensions
+                dlg.Filter = FileDialogFilter;
+                //dlg.ShowDialog();
+                //If textbox is empty, then fil
+                if (dlg.ShowDialog() == DialogResult.OK && txt_FileLocation.Text.Length == 0)
+                {
+                    txt_FileLocation.Text = dlg.FileName;
+                }
+                else
+                {
+                    return;
+                }
+
+                //PopulateListView();
             }
 
-            //PopulateListView();
         }
 
         private void UpdateStatusConsole(string message)
@@ -85,19 +88,19 @@ namespace RunLoader
                         //Test connection and store in datafactory
                         IDbConnection conn = DataFactory.CreateConnection(this.txt_FileLocation.Text);
                         UpdateStatusConsole(string.Format("Connection established with {0}", this.txt_FileLocation.Text));
-                            FirstConnect = false;
-                            
+                        FirstConnect = false;
+
                     }
                     catch (Exception ex)
                     {
                         UpdateStatusConsole(ex.Message);
                     }
-                    
+
                 }
-                
+
                 if (DataFactory.ActiveConn.State == ConnectionState.Open)
                 {
-                    
+
                     this.btn_ConnectDB.Text = "Connected";
                     this.btn_ConnectDB.Enabled = false;
                 }
@@ -113,23 +116,22 @@ namespace RunLoader
         private void btn_SelectOutput_Click(object sender, EventArgs e)
         {
             //Instantiate folder browser
-            FolderBrowserDialog fbd = new FolderBrowserDialog();
-            //Show dialog
-            fbd.ShowDialog();
-            //If selectedpath is not 0
-            if (fbd.SelectedPath.Length > 0)
+            using (FolderBrowserDialog fbd = new FolderBrowserDialog())
             {
-                this.txt_Output.Text = fbd.SelectedPath;
+                //Show dialog
+                fbd.ShowDialog();
+                //If selectedpath is not 0
+                if (fbd.SelectedPath.Length > 0)
+                {
+                    this.txt_Output.Text = fbd.SelectedPath;
+                }
             }
+
         }
 
         private void btn_LoadFileTable_Click(object sender, EventArgs e)
         {
-            if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State == ConnectionState.Open)
-            {
-
-            }
-            else
+            if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State != ConnectionState.Open)
             {
                 //UpdateStatusConsole("Connection is not open. Attempting to re-open Connection now.");
                 btn_Connect_Click(sender, e);
@@ -150,7 +152,7 @@ namespace RunLoader
                         ListofFileNames = null;
                     }
                     GC.Collect();
-                }                    
+                }
             }
             catch (Exception ex)
             {
@@ -195,13 +197,15 @@ namespace RunLoader
                 TreeNodeCollection childnodes = topNode.Nodes;
                 foreach (string filename in ListofFileNames.Values)
                 {
-                    if (childnodes.ContainsKey(filename)==false)
+                    if (childnodes.ContainsKey(filename) == false)
                     {
-                        topNode.Nodes.Add(filename,filename);
+                        topNode.Nodes.Add(filename, filename);
                     }
-                                 
+
                 }
-                
+                childnodes.Clear();
+                GC.Collect();
+
             }
             catch (Exception ex)
             {
@@ -226,9 +230,11 @@ namespace RunLoader
                             File.WriteAllBytes(string.Format(@"{0}\{1}", this.txt_Output.Text, fs[node.Text].FileName), bindata);
                             UpdateStatusConsole(string.Format("{0} Downloaded.", fs[node.Text].FileName));
                         }
+                        
                     }
 
                 }
+                GC.Collect();
             }
             catch (Exception ex)
             {
@@ -245,13 +251,16 @@ namespace RunLoader
         private string[] SelectFiles()
         {
             //Instantiate file dialog
-            OpenFileDialog opd = new OpenFileDialog();
-            //
-            opd.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
-            //Allow multiple files
-            opd.Multiselect = true;
-            opd.ShowDialog();
-            return opd.FileNames;
+            using (OpenFileDialog opd = new OpenFileDialog())
+            {
+
+
+                opd.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyComputer);
+                //Allow multiple files
+                opd.Multiselect = true;
+                opd.ShowDialog();
+                return opd.FileNames;
+            }
         }
 
 
@@ -280,7 +289,7 @@ namespace RunLoader
                     //Add to DB
                     FE.Add();
                 }
-
+                GC.Collect();
 
             }
         }
@@ -392,11 +401,6 @@ namespace RunLoader
             }
         }
 
-        private void tv_OutputFiles_AfterSelect(object sender, TreeViewEventArgs e)
-        {
-            TreeNode selectedNode = tv_OutputFiles.SelectedNode;
-
-        }
 
 
         //private TreeNode CreateDirectoryNode(DirectoryInfo directoryInfo)
