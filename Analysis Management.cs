@@ -30,12 +30,15 @@ namespace RunLoader
                 foreach (string row in textRows)
                     {
                         string[] SampleArray = row.Split(',');   
-                        
-                        Sample currSample = new Sample(SampleArray);
+                        if (SampleArray.Length > 0)
+                        {
+                            Sample currSample = new Sample(SampleArray);
                         // If (currSample.SampleName != "")
                         // {
                             listSamples.Add(currSample);
                         // }
+                        }
+                        
                     }
                 
                  MessageBox.Show(listSamples.Count.ToString());
@@ -79,13 +82,22 @@ namespace RunLoader
 
         public Sample (string[] arr)
         {
-            Skip = arr[0]==string.Empty ? string.Empty : arr[0];
-            Type = arr[1]==string.Empty ? string.Empty : arr[1];
-            Vial = arr[2]==string.Empty ? string.Empty : arr[2];
-            FileName = arr[3]==string.Empty ? string.Empty : arr[3];
-            SampleName = arr[4]==string.Empty ? string.Empty : arr[4];
-            Level = arr[5]==string.Empty ? string.Empty : arr[5];
-            Dilution = arr[6]==string.Empty ? string.Empty : arr[6];
+            try
+            {
+                Skip = arr[0]==string.Empty ? string.Empty : arr[0];
+                Type = arr[1]==string.Empty ? string.Empty : arr[1];
+                Vial = arr[2]==string.Empty ? string.Empty : arr[2];
+                FileName = arr[3]==string.Empty ? string.Empty : arr[3];
+                SampleName = arr[4]==string.Empty ? string.Empty : arr[4];
+                Level = arr[5]==string.Empty ? string.Empty : arr[5];
+                Dilution = arr[6]==string.Empty ? string.Empty : arr[6];                
+            }
+            catch (System.Exception)
+            {
+                
+                throw;
+            }
+            
         }
         public string Skip 
         {
