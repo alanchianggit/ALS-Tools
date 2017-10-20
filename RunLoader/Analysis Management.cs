@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Xml.Serialization;
 
 namespace RunLoader
 {
@@ -20,6 +21,7 @@ namespace RunLoader
 
         private void cmd_LoadRun_Click(object sender, EventArgs e)
         {
+            List<Sample> listSamples = new List<Sample>();
             string xxx = string.Format(@"{0}{1}",this.txt_Directory.Text,this.cmb_RunNum.Text);
             using (StreamReader sr = new StreamReader(xxx))
             {
@@ -27,25 +29,40 @@ namespace RunLoader
                 string[] textRows = FullText.Split('\n');
                 foreach (string row in textRows)
                     {
-                        string[] SampleArray = row.Split(',');
-                        // MessageBox.Show(SampleArray.Length.ToString());
-                            Sample currSample = new Sample();
-                            
-                            currSample.Skip = SampleArray[0];
-                            currSample.Type = SampleArray[1];
-                            currSample.Vial = SampleArray[2];
-                            currSample.FileName = SampleArray[3];
-                            currSample.SampleName = SampleArray[4];
-                            currSample.Level = SampleArray[5];
-                            currSample.Dilution = SampleArray[6];
+                        string[] SampleArray = row.Split(',');   
+                        Sample currSample = new Sample(SampleArray);
+                        // If (currSample.SampleName != "")
+                        // {
+                            listSamples.Add(currSample);
+                        // }
                     }
                 
-                
+                // MessageBox.Show(listSamples.Count.ToString());
             }
         }
         
+        private void SerializeDataSet(string filename)
+        {
+            XmlSerializer ser = new XmlSerializer(typeof(DataSet));  
+            // Creates a DataSet; adds a table, column, and ten rows. 
+            DataSet ds = new DataSet("myDataSet");  
+            DataTable t = new DataTable("table1");  
+            DataColumn c = new DataColumn("thing");  
+            t.Columns.Add(c);  
+            ds.Tables.Add(t);  
+            DataRow r;
+            for (int i = 0; i<10;i++) 
+            {
+                r = t.NewRow();
+                r[0] = "Thing " + i;
+                t.Rows.Add(r);  
+                TextWriter writer = new StreamWriter(filename);  
+                ser.Serialize(writer, ds);  
+                writer.Close();  
+            }
+                
+        }  
     }
-
 
     public class Sample 
     {
@@ -58,6 +75,17 @@ namespace RunLoader
         private string _Level;
         private string _Type;
 
+
+        public Sample (string[] arr)
+        {
+            _Skip = arr[0];
+            _Type = arr[1];
+            _Vial = arr[2];
+            _FileName = arr[3];
+            _SampleName = arr[4];
+            _Level = arr[5];
+            _Dilution = arr[6];
+        }
         public string Skip 
         {
             get
