@@ -19,9 +19,9 @@ namespace RunLoader
             {
                 components.Dispose();
             }
-            InputCheckedNodes = null;
-            OutputCheckedNodes = null;
-            ListofFileNames = null;
+            InputCheckedNodes.Clear();
+            OutputCheckedNodes.Clear();
+            ListofFileNames.Clear();
             DataFactory.Instance.Reset();
 
             base.Dispose(disposing);
