@@ -17,6 +17,9 @@
             {
                 components.Dispose();
             }
+            InputCheckedNodes = null;
+            OutputCheckedNodes = null;
+            ListofFileNames = null;
             base.Dispose(disposing);
         }
 

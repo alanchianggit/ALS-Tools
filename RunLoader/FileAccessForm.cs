@@ -224,6 +224,7 @@ namespace RunLoader
                         byte[] bindata = fs[node.Text].FileContent;
                         //byte[] bindata = ListofFileEntity[node.Name].FileContent;
                         File.WriteAllBytes(string.Format(@"{0}\{1}", this.txt_Output.Text, fs[node.Text].FileName), bindata);
+                        UpdateStatusConsole(string.Format("{0} Downloaded.", fs[node.Text].FileName));
                     }
 
                 }

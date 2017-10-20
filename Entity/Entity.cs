@@ -95,4 +95,114 @@ namespace Entity
 
     }
 
+
+    public class Sample
+    {
+        private string _Skip;
+        private string _SampleName;
+        private string _Comment;
+        private string _Vial;
+        private string _FileName;
+        private string _Dilution;
+        private string _Level;
+        private string _Type;
+
+        public Sample() { }
+
+        public Sample(string[] arr)
+        {
+            Skip = arr[0] == string.Empty ? string.Empty : arr[0];
+            Type = arr[1] == string.Empty ? string.Empty : arr[1];
+            Vial = arr[2] == string.Empty ? string.Empty : arr[2];
+            FileName = arr[3] == string.Empty ? string.Empty : arr[3];
+            SampleName = arr[4] == string.Empty ? string.Empty : arr[4];
+            Level = arr[5] == string.Empty ? string.Empty : arr[5];
+            Dilution = arr[6] == string.Empty ? string.Empty : arr[6];
+        }
+        public string Skip
+        {
+            get
+            {
+                return Skip = _Skip;
+            }
+            set
+            {
+                _Skip = value;
+            }
+        }
+
+        public string Type
+        {
+            get
+            {
+                return Type = _Type;
+            }
+
+            set
+            {
+                _Type = value;
+            }
+        }
+
+
+        public string SampleName
+        {
+            get
+            {
+                return SampleName = _SampleName;
+            }
+            set
+            {
+                _SampleName = value;
+            }
+        }
+
+        public string Vial
+        {
+            get
+            {
+                return Vial = _Vial;
+            }
+            set
+            {
+                _Vial = value;
+            }
+        }
+
+        public string FileName
+        {
+            get
+            {
+                return FileName = _FileName;
+            }
+            set
+            {
+                _FileName = value;
+            }
+        }
+
+        public string Dilution
+        {
+            get
+            {
+                return Dilution = _Dilution;
+            }
+            set
+            {
+                _Dilution = value;
+            }
+        }
+
+        public string Level
+        {
+            get
+            {
+                return Level = _Level;
+            }
+            set
+            {
+                _Level = value;
+            }
+        }
+    }
 }

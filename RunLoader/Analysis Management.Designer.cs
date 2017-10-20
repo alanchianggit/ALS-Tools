@@ -33,6 +33,8 @@
             this.Label_Directory = new System.Windows.Forms.Label();
             this.label_RunNumber = new System.Windows.Forms.Label();
             this.cmd_LoadRun = new System.Windows.Forms.Button();
+            this.btn_LoadDirectory = new System.Windows.Forms.Button();
+            this.btn_LoadRun = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cmb_RunNum
@@ -71,19 +73,38 @@
             // 
             // cmd_LoadRun
             // 
-            this.cmd_LoadRun.Location = new System.Drawing.Point(300, 97);
+            this.cmd_LoadRun.Location = new System.Drawing.Point(343, 96);
             this.cmd_LoadRun.Name = "cmd_LoadRun";
-            this.cmd_LoadRun.Text = "Load Run";
             this.cmd_LoadRun.Size = new System.Drawing.Size(70, 20);
             this.cmd_LoadRun.TabIndex = 0;
+            this.cmd_LoadRun.Text = "Load Run";
             this.cmd_LoadRun.Click += new System.EventHandler(this.cmd_LoadRun_Click);
-
+            // 
+            // btn_LoadDirectory
+            // 
+            this.btn_LoadDirectory.Location = new System.Drawing.Point(295, 47);
+            this.btn_LoadDirectory.Name = "btn_LoadDirectory";
+            this.btn_LoadDirectory.Size = new System.Drawing.Size(31, 20);
+            this.btn_LoadDirectory.TabIndex = 3;
+            this.btn_LoadDirectory.Text = "...";
+            this.btn_LoadDirectory.UseVisualStyleBackColor = true;
+            // 
+            // btn_LoadRun
+            // 
+            this.btn_LoadRun.Location = new System.Drawing.Point(295, 96);
+            this.btn_LoadRun.Name = "btn_LoadRun";
+            this.btn_LoadRun.Size = new System.Drawing.Size(31, 20);
+            this.btn_LoadRun.TabIndex = 3;
+            this.btn_LoadRun.Text = "...";
+            this.btn_LoadRun.UseVisualStyleBackColor = true;
             // 
             // Analysis_Management
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(466, 240);
+            this.Controls.Add(this.btn_LoadRun);
+            this.Controls.Add(this.btn_LoadDirectory);
             this.Controls.Add(this.label_RunNumber);
             this.Controls.Add(this.Label_Directory);
             this.Controls.Add(this.txt_Directory);
@@ -103,5 +124,7 @@
         private System.Windows.Forms.Label Label_Directory;
         private System.Windows.Forms.Label label_RunNumber;
         private System.Windows.Forms.Button cmd_LoadRun;
+        private System.Windows.Forms.Button btn_LoadDirectory;
+        private System.Windows.Forms.Button btn_LoadRun;
     }
 }
