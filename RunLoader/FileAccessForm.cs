@@ -56,6 +56,7 @@ namespace RunLoader
                 {
                     return;
                 }
+                dlg.Dispose();
 
                 //PopulateListView();
             }
@@ -136,6 +137,7 @@ namespace RunLoader
                 {
                     this.txt_Output.Text = fbd.SelectedPath;
                 }
+                fbd.Dispose();
             }
 
         }
@@ -268,7 +270,9 @@ namespace RunLoader
                 //Allow multiple files
                 opd.Multiselect = true;
                 opd.ShowDialog();
+                opd.Dispose();
                 return opd.FileNames;
+                
             }
         }
 
