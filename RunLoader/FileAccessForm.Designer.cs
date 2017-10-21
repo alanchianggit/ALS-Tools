@@ -1,4 +1,5 @@
-﻿using DAL;
+﻿using System;
+using DAL;
 
 namespace RunLoader
 {
@@ -23,6 +24,7 @@ namespace RunLoader
             OutputCheckedNodes.Clear();
             ListofFileNames.Clear();
             DataFactory.Instance.Reset();
+            GC.Collect();
 
             base.Dispose(disposing);
         }

@@ -97,6 +97,17 @@ namespace RunLoader
                     }
 
                 }
+                else
+                {
+                    try
+                    {
+                        DataFactory.ActiveConn.Open();
+                    }
+                    catch (Exception ex)
+                    {
+                        UpdateStatusConsole(ex.Message);
+                    }
+                }
 
                 if (DataFactory.ActiveConn.State == ConnectionState.Open)
                 {
@@ -149,9 +160,8 @@ namespace RunLoader
                     if (ListofFileNames.Count != 0)
                     {
                         PopulateTreeView();
-                        ListofFileNames = null;
                     }
-                    GC.Collect();
+                    
                 }
             }
             catch (Exception ex)
@@ -203,7 +213,6 @@ namespace RunLoader
                     }
 
                 }
-                childnodes.Clear();
                 GC.Collect();
 
             }
