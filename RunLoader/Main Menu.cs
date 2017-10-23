@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DAL;
 
 namespace RunLoader
 {
@@ -24,14 +25,12 @@ namespace RunLoader
 
         private void btn_FileManagement_Click(object sender, EventArgs e)
         {
-            Form newform = new FileAccessForm();
-            newform.Show();
+            FileAccessForm.GetForm.Show();
         }
 
         private void btn_AnalysisLoader_Click(object sender, EventArgs e)
         {
-            Form newform = new Analysis_Management();
-            newform.Show();
+            Analysis_Management.GetForm.Show();
         }
     }
 }

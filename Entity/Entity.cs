@@ -14,17 +14,12 @@ namespace Entity
         protected string _Type = string.Empty;
         protected DateTime _DateUploaded = DateTime.Now;
         protected byte[] _FileBinary;
+        protected DateTime _DateModified;
         public string FileName
         {
             get { return _FileName; }
             set { _FileName = value; }
         }
-
-        //public Int32 ID
-        //{
-        //    get { return _ID; }
-        //    set { _ID = value; }
-        //}
 
         public int Size
         {
@@ -44,13 +39,14 @@ namespace Entity
         }
         public byte[] FileContent
         {
-            get
-            {
-                return _FileBinary;
-            }
+            get { return _FileBinary; }
             set { _FileBinary = value; }
         }
-
+        public DateTime DateModified
+        {
+            get { return _DateModified; }
+            set { _DateModified = value; }
+        }
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
@@ -72,6 +68,7 @@ namespace Entity
                 // TODO: set large fields to null.
 
                 disposedValue = true;
+                GC.Collect();
             }
         }
 

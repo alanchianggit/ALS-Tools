@@ -37,7 +37,7 @@ namespace DAL
         // define a common parameter type set
     }
 
-    public class DataFactory
+    public class DataFactory : IDisposable
     {
 
         public static DataFactory Instance = new DataFactory();
@@ -46,7 +46,7 @@ namespace DAL
             Instance = new DataFactory();
         }
 
-        public static IDbConnection ActiveConn { get; set; }
+        public static IDbConnection ActiveConn;/*{ get; set; }*/
         public static string ActiveConnectionString { get; set; }
 
         public static DatabaseType dbtype { get; set; }
@@ -107,7 +107,6 @@ namespace DAL
                         bs.DataSource = Path.GetFullPath(DBDataSource).ToString();
                         bs.Provider = "Microsoft.ACE.OLEDB.12.0";
                         bs.OleDbServices = -13;
-
                         ActiveConnectionString = bs.ConnectionString;
                     }
                     break;
@@ -222,6 +221,17 @@ namespace DAL
 
             return da;
         }
+
+        public void Dispose()
+        {
+            if (ActiveConn != null)
+            {
+                ActiveConn.Dispose();
+                ActiveConn = null;
+                Instance.Reset();
+            }
+            //((IDisposable)Instance).Dispose();
+        }
     }
 
     public class FileDataDAL : IDisposable
@@ -234,51 +244,88 @@ namespace DAL
 
         public FileDataDAL()
         {
+            
+        }
+
+        private DataTable GetDatatable()
+        {
             string strSQL = "SELECT * FROM tbl_Files";
             if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
             try
             {
                 //conn = DataFactory.ActiveConn;
                 IDbCommand cmd = DataFactory.CreateCommand(strSQL);
-                DbDataAdapter da = DataFactory.CreateAdapter(cmd);
-                //DataTable dt = new DataTable("FileData");
-                da.Fill(this.Datatable);
-                //this.Datatable = dt;
-                da.Dispose();
+                using (DbDataAdapter da = DataFactory.CreateAdapter(cmd))
+                {
+                    //DataTable dt = new DataTable("FileData");
+                    da.Fill(this.Datatable);
+                    //this.Datatable = dt;
+                }
                 cmd.Dispose();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
+            return Datatable;
+
+        }
+
+        public string GetFileName(string method )
+        {
+            string fn = string.Empty;
+            string strSQL = "SELECT tbl_Files.FileName FROM tbl_Method INNER JOIN tbl_Files ON tbl_Method.FileName = tbl_Files.FileName WHERE(((tbl_Method.Method) = @Method));";
+            using (IDbCommand cmd = DataFactory.CreateCommand(strSQL))
+            {
+                IDbDataParameter pm = cmd.CreateParameter();
+                pm.ParameterName = "@Method";
+                pm.Value = method;
+                cmd.Parameters.Add(pm);
+                fn = cmd.ExecuteScalar().ToString();
+            }
+                
+
+            return fn;
         }
 
 
         public Dictionary<string, string> GetNameList()
         {
             dictFileName = new Dictionary<string, string>();
-            foreach (DataRow dr in this.Datatable.Rows)
+            using (this.Datatable = GetDatatable())
             {
-                FileEntity obj = new FileEntity();
-                //Reflection method
-                obj.FileName = dr["FileName"].ToString();
-                dictFileName.Add(obj.FileName, obj.FileName);
+                foreach (DataRow dr in this.Datatable.Rows)
+                {
+                    using (FileEntity obj = new FileEntity())
+                    {
+                        //Reflection method
+                        obj.FileName = dr["FileName"].ToString();
+                        dictFileName.Add(obj.FileName, obj.FileName);
+                    }
+                }
             }
+                
             return dictFileName;
         }
 
         public Dictionary<string, FileEntity> GetList()
         {
             dictFE = new Dictionary<string, FileEntity>();
-            foreach (DataRow dr in this.Datatable.Rows)
+            using (this.Datatable = GetDatatable())
             {
-                FileEntity obj = new FileEntity();
-                //Reflection method
-                foreach (PropertyInfo pi in typeof(FileEntity).GetProperties())
+                foreach (DataRow dr in this.Datatable.Rows)
                 {
-                    pi.SetValue(obj, dr[pi.Name]);
+                    FileEntity obj = new FileEntity();
+                    
+                        //Reflection method
+                        foreach (PropertyInfo pi in typeof(FileEntity).GetProperties())
+                        {
+                            pi.SetValue(obj, dr[pi.Name]);
+                        }
+                        dictFE.Add(obj.FileName, obj);
+                    
+
                 }
-                dictFE.Add(obj.FileName, obj);
             }
             return dictFE;
         }
@@ -290,63 +337,91 @@ namespace DAL
             if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
             try
             {
-                // get properties from entity class
-                PropertyInfo[] PIs = typeof(FileEntity).GetProperties();
 
-                //Create table of data according to properties so it can be adapted to connection
-                IDbCommand cmdInsert = DataFactory.CreateCommand(string.Empty);
-                IDbCommand cmdcheck = DataFactory.CreateCommand(string.Empty);
-                //create new Lists for colum names and parameters
-                List<string> InsertColumnNames = new List<string>();
-                List<string> InsertColumnValues = new List<string>();
-                //Iterate through each prorperty to coerce a parameter
-                foreach (PropertyInfo pi in PIs)
+                using (IDbCommand cmdcheck = DataFactory.CreateCommand(string.Empty))
                 {
-                    //Create new parameter object
-                    IDbDataParameter pm = cmdInsert.CreateParameter();
-                    //Set Parameter name from property name
-                    pm.ParameterName = string.Format("@{0}", pi.Name.ToString());
-                    //Set value from property of object
-                    pm.Value = pi.GetValue(obj);
-                    //Add parameter to command
-                    cmdInsert.Parameters.Add(pm);
-                    //Add to list for generating string
-                    InsertColumnValues.Add(pm.ParameterName);
-                    InsertColumnNames.Add("[" + pi.Name.ToString() + "]");
+                    IDbDataParameter pmchk = cmdcheck.CreateParameter();
+                    pmchk.ParameterName = "@FileName";
+                    pmchk.Value = obj.FileName;
+                    cmdcheck.Parameters.Add(pmchk);
+
+                    pmchk = cmdcheck.CreateParameter();
+                    pmchk.ParameterName = "@DateModified";
+                    pmchk.Value = obj.DateModified;
+                    cmdcheck.Parameters.Add(pmchk);
+
+
+                    //string strCheckExist = string.Format("SELECT [FileName] FROM [tbl_Files] WHERE [FileName] = {0} OR [FileContent] = {1}", "@FileName", "@FileContent");
+                    string strCheckExist = string.Format("SELECT [FileName] FROM [tbl_Files] WHERE [FileName] = {0}", "@FileName", "@DateModified");
+                    cmdcheck.CommandText = strCheckExist;
+                    var result = cmdcheck.ExecuteScalar();
+                    
+                        if (result ==null)
+                        {
+                            // get properties from entity class
+                            PropertyInfo[] PIs = typeof(FileEntity).GetProperties();
+
+                            //Create table of data according to properties so it can be adapted to connection
+                            IDbCommand cmdInsert = DataFactory.CreateCommand(string.Empty);
+
+                            //create new Lists for colum names and parameters
+                            List<string> InsertColumnNames = new List<string>();
+                            List<string> InsertColumnValues = new List<string>();
+                            //Iterate through each prorperty to coerce a parameter
+                            foreach (PropertyInfo pi in PIs)
+                            {
+                                //Create new parameter object
+                                IDbDataParameter pm = cmdInsert.CreateParameter();
+                                //Set Parameter name from property name
+                                pm.ParameterName = string.Format("@{0}", pi.Name.ToString());
+                                //Set value from property of object
+                                pm.Value = pi.GetValue(obj);
+                                //Add parameter to command
+                                cmdInsert.Parameters.Add(pm);
+                                //Add to list for generating string
+                                InsertColumnValues.Add(pm.ParameterName);
+                                InsertColumnNames.Add("[" + pi.Name.ToString() + "]");
+                                //clean up
+                                pm = null;
+                            }
+                            string strInsert = string.Format("INSERT INTO [tbl_Files] ({0}) VALUES ({1});", string.Join(",", InsertColumnNames.ToArray()), string.Join(",", InsertColumnValues.ToArray()));
+                            cmdInsert.CommandText = strInsert;
+                            cmdInsert.ExecuteNonQuery();
+                        }
+                        else
+                        {
+                        result = null;
+                        }
+                    
+                    //Clean up
+
+                    cmdcheck.Dispose();
+                    //cmdInsert.Dispose();
+                    pmchk = null;
+                    //strInsert = string.Empty;
+                    strCheckExist = string.Empty;
+                    //InsertColumnNames = null;
+                    //InsertColumnValues = null;
+                    obj = null;
+                    //Close connection
+                    DataFactory.ActiveConn.Close();
+                    //DataFactory.ActiveConn.Dispose();
+                    //GC.Collect(5,GCCollectionMode.Optimized);
+
+
                 }
-                IDbDataParameter pmchk = cmdcheck.CreateParameter();
-                pmchk.ParameterName = "@FileName";
-                pmchk.Value = obj.FileName;
-                cmdcheck.Parameters.Add(pmchk);
-
-                string strInsert = string.Format("INSERT INTO [tbl_Files] ({0}) VALUES ({1});", string.Join(",", InsertColumnNames.ToArray()), string.Join(",", InsertColumnValues.ToArray()));
-                string strCheckExist = string.Format("SELECT * FROM [tbl_Files] WHERE [FileName] = {0}", "@FileName");
-
-                cmdInsert.CommandText = strInsert;
-                cmdcheck.CommandText = strCheckExist;
-
-                var result = cmdcheck.ExecuteScalar();
-
-                if (result == null)
-                {
-                    cmdInsert.ExecuteNonQuery();
-                }
-
-                //Clean up
-                cmdcheck.Dispose();
-                cmdInsert.Dispose();
-                //Close connection
-                DataFactory.ActiveConn.Close();
             }
+                    
+
+
+
+
+
+                    
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
-            finally
-            {
-
-            }
-
         }
 
         #region IDisposable Support
@@ -361,7 +436,8 @@ namespace DAL
                     dictFE = null;
                     dictFileName = null;
                     listFE = null;
-                    ((IDisposable)Datatable).Dispose();
+                    Datatable.Dispose();
+                    //((IDisposable)Datatable).Dispose();
                     DataFactory.ActiveConn.Close();
                     // TODO: dispose managed state (managed objects).
                 }

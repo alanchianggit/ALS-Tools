@@ -3,20 +3,53 @@ using System.Data;
 using Entity;
 using DAL;
 using System;
+using Microsoft.Win32.SafeHandles;
 
 namespace BusinessLayer
 {
+    public class MethodFile : FileEntity, IDisposable
+    {
+        private Dictionary<string, FileEntity> _FilesList = new Dictionary<string, FileEntity>();
+
+        public MethodFile() { }
+
+        public Dictionary<string, FileEntity> getFilesList()
+        {
+            using (FileDataDAL obj = new FileDataDAL())
+            { return _FilesList = obj.GetList(); }
+        }
+
+        public FileEntity this[string key]
+        {
+            // returns value if exists
+            get
+            {
+                getFilesList();
+                return _FilesList[key];
+            }
+
+            // updates if exists, adds if doesn't exist
+            set { _FilesList[key] = value; }
+        }
+
+        public string GetFileName(string method)
+        {
+            string fn = string.Empty;
+            using (FileDataDAL obj = new FileDataDAL())
+            { return fn = obj.GetFileName(method); }
+
+            
+        }
+    }
+
+
+
+
     public class Files : FileEntity, IDisposable
     {
         private Dictionary<string, FileEntity> _FilesList = new Dictionary<string, FileEntity>();
         private Dictionary<string, string> _FileNameList = new Dictionary<string, string>();
-        public Files()
-        {
-            using (FileDataDAL obj = new FileDataDAL())
-            {
-                _FilesList = obj.GetList();
-            }
-        }
+        public Files() { }
 
         public FileEntity this[string key]
         {
@@ -28,7 +61,7 @@ namespace BusinessLayer
         }
 
 
-        public Dictionary<string,FileEntity> getFilesList()
+        public Dictionary<string, FileEntity> getFilesList()
         {
             using (FileDataDAL obj = new FileDataDAL())
             { return _FilesList = obj.GetList(); }
@@ -60,6 +93,7 @@ namespace BusinessLayer
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
+
         override protected void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -67,7 +101,9 @@ namespace BusinessLayer
                 if (disposing)
                 {
                     _FileNameList = null;
-                    _FilesList=null;
+                    _FilesList = null;
+                    base.Dispose(disposing);
+
                     // TODO: dispose managed state (managed objects).
                 }
 
@@ -75,6 +111,7 @@ namespace BusinessLayer
                 // TODO: set large fields to null.
 
                 disposedValue = true;
+
             }
         }
 

@@ -11,6 +11,17 @@ namespace RunLoader
 {
     public partial class FileAccessForm : Form
     {
+        private static FileAccessForm inst;
+        public static FileAccessForm GetForm
+        {
+            get
+            {
+                if (inst == null || inst.IsDisposed)
+                    inst = new FileAccessForm();
+                return inst;
+            }
+        }
+
         private List<string> InputCheckedNodes = new List<string>();
         private List<string> OutputCheckedNodes = new List<string>();
         private bool FirstConnect = true;
@@ -56,7 +67,7 @@ namespace RunLoader
                 {
                     return;
                 }
-                dlg.Dispose();
+                
 
                 //PopulateListView();
             }
@@ -137,7 +148,7 @@ namespace RunLoader
                 {
                     this.txt_Output.Text = fbd.SelectedPath;
                 }
-                fbd.Dispose();
+
             }
 
         }
@@ -270,7 +281,6 @@ namespace RunLoader
                 //Allow multiple files
                 opd.Multiselect = true;
                 opd.ShowDialog();
-                opd.Dispose();
                 return opd.FileNames;
                 
             }
@@ -282,28 +292,40 @@ namespace RunLoader
         {
             foreach (string checkednode in InputCheckedNodes)
             {
-                byte[] data;
-                using (FileStream fs = new System.IO.FileStream(checkednode, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+                try
                 {
-                    BinaryReader reader = new System.IO.BinaryReader(fs);
-                    data = reader.ReadBytes((int)fs.Length);
+                    byte[] data;
+                    using (FileStream fs = new System.IO.FileStream(checkednode, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+                    {
+                        BinaryReader reader = new System.IO.BinaryReader(fs);
+                        data = reader.ReadBytes((int)fs.Length);
+                    }
+                    //Instantiate new file
+                    using (Files FE = new Files())
+                    {
+                        FileInfo fi = new FileInfo(tv_InputFiles.Nodes[checkednode].Text);
+
+                        //Populate object
+                        FE.FileName = fi.Name;
+                        FE.FileContent = data;
+                        FE.DateUploaded = GetDateWithoutMilliseconds(DateTime.Now);
+                        FE.Type = fi.Extension;
+                        FE.Size = data.Length;
+                        FE.DateModified = GetDateWithoutMilliseconds(fi.LastWriteTime);
+                        //Add to DB
+                        FE.Add();
+                        data = null;
+
+                        UpdateStatusConsole(string.Format("{0} has been processed.", fi.Name));
+                    }
+                    //GC.Collect();
+                    GC.Collect();
+
                 }
-                //Instantiate new file
-                using (Files FE = new Files())
+                catch (Exception ex)
                 {
-                    FileInfo fi = new FileInfo(tv_InputFiles.Nodes[checkednode].Text);
-
-                    //Populate object
-                    FE.FileName = fi.Name;
-                    FE.FileContent = data;
-                    FE.DateUploaded = GetDateWithoutMilliseconds(DateTime.Now);
-                    FE.Type = fi.Extension;
-                    FE.Size = data.Length;
-                    //Add to DB
-                    FE.Add();
+                    Console.WriteLine(ex.Message);
                 }
-                GC.Collect();
-
             }
         }
 
@@ -412,6 +434,16 @@ namespace RunLoader
                 }
 
             }
+        }
+
+        private void btn_ClearOutput_Click(object sender, EventArgs e)
+        {
+            this.tv_OutputFiles.Nodes.Clear();
+        }
+
+        private void btn_ClearInput_Click(object sender, EventArgs e)
+        {
+            this.tv_InputFiles.Nodes.Clear();
         }
 
 
