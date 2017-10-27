@@ -11,6 +11,7 @@ using System.IO;
 using System.Xml.Serialization;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Schema;
 using Entity;
 using BusinessLayer;
 using System.IO.Compression;
@@ -21,7 +22,8 @@ namespace RunLoader
     public partial class Analysis_Management : Form
     {
         DataSet ds = new DataSet();
-        private const string filename = @"D:\Data\10129650\Method\AcqMethod.xml";
+        private string filename = string.Empty;
+	XmlSchemaSet schemaSet = new XmlSchemaSet();
 
         private bool FirstConnect = true;
         private static Analysis_Management inst;
@@ -130,8 +132,7 @@ namespace RunLoader
         private void readxml()
         {
             ds = new DataSet();
-            
-            ds.ReadXml(filename);
+            ds.ReadXml(filename,XmlReadMode.InferSchema);
             dataGridView1.DataSource = ds.Tables["SampleParameter"];
             dataGridView1.EditMode = DataGridViewEditMode.EditOnEnter;
         }
@@ -177,6 +178,7 @@ namespace RunLoader
                         entry.ExtractToFile(fullPath, overwrite: true);
                     }
                 }
+		filename = Path.Combine(outputpath, @"Method\AcqMethod.xml");
 
             }
         }
@@ -235,9 +237,22 @@ namespace RunLoader
 
         private void btn_SaveChanges_Click(object sender, EventArgs e)
         {
-            ds.WriteXml(filename);
+		DataRow dr = ds.Tables["SampleParameter"].NewRow();
+		dr["AcqID"] = "-1";
+		dr["ListID"] = "0";
+		dr["GroupID"] = "2";
+		dr["SampleID"] = "5";
+		dr["SampleListDisplayOrder"] = "4";
+		dr["SampleType"] = "Sample";
+		dr["TotalDilution"] = "100";
+		dr["SampleName"]="TestAlan";
+		ds.Tables["SampleParameter"].Rows.Add(dr);
+		ds.AcceptChanges();
+            ds.WriteXml(filename+"1", XmlWriteMode.WriteSchema);
         }
     }
 
 
 }
+
+
