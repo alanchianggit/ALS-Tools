@@ -101,7 +101,7 @@
             this.txt_FileLocation.Name = "txt_FileLocation";
             this.txt_FileLocation.Size = new System.Drawing.Size(276, 20);
             this.txt_FileLocation.TabIndex = 1;
-            this.txt_FileLocation.Text = "C:\\users\\alan\\documents\\Backend1.accdb";
+            this.txt_FileLocation.Text = @"\\alvncws008\groups\minerals\spectroscopy\icp-ms\ms logs\BackEnd2.accdb";
             // 
             // txt_Output
             // 
@@ -179,3 +179,4 @@
         private System.Windows.Forms.Button btn_SaveChanges;
     }
 }
+
