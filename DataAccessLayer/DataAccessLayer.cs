@@ -396,28 +396,12 @@ namespace DAL
                     //Clean up
 
                     cmdcheck.Dispose();
-                    //cmdInsert.Dispose();
                     pmchk = null;
-                    //strInsert = string.Empty;
                     strCheckExist = string.Empty;
-                    //InsertColumnNames = null;
-                    //InsertColumnValues = null;
                     obj = null;
-                    //Close connection
                     DataFactory.ActiveConn.Close();
-                    //DataFactory.ActiveConn.Dispose();
-                    //GC.Collect(5,GCCollectionMode.Optimized);
-
-
                 }
             }
-                    
-
-
-
-
-
-                    
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);

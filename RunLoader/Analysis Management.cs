@@ -20,13 +20,16 @@ namespace RunLoader
 {
     public partial class Analysis_Management : Form
     {
+        DataSet ds = new DataSet();
+        private const string filename = @"D:\Data\10129650\Method\AcqMethod.xml";
+
         private bool FirstConnect = true;
         private static Analysis_Management inst;
         public static Analysis_Management GetForm
         {
             get
             {
-                if (inst == null || inst.IsDisposed)  inst = new Analysis_Management(); 
+                if (inst == null || inst.IsDisposed) inst = new Analysis_Management();
                 return inst;
             }
         }
@@ -121,31 +124,60 @@ namespace RunLoader
             //CreateSampleList();
             Connect();
             GetMethodFile();
+            readxml();
         }
+        
+        private void readxml()
+        {
+            ds = new DataSet();
+            
+            ds.ReadXml(filename);
+            dataGridView1.DataSource = ds.Tables["SampleParameter"];
+            dataGridView1.EditMode = DataGridViewEditMode.EditOnEnter;
+        }
+
 
         private void GetMethodFile()
         {
             //Stream unzippedEntrystream;
             using (MethodFile mf = new MethodFile())
             {
-                
-                string outputPath = Path.GetFullPath(string.Format(@"{0}\{1}", this.txt_Output.Text,this.cmb_RunNum.Text));
-                FileInfo fi = new FileInfo(outputPath);
-                if (Directory.Exists(outputPath.Replace(fi.Extension, string.Empty))==false)
+                //check if file exists, then store path as string
+                string filepath = File.Exists(this.cmb_RunNum.Text) ? Path.GetFullPath(this.cmb_RunNum.Text) : string.Empty;
+
+                FileInfo fi = new FileInfo(filepath);
+                //If output directory does not contain new method, then create it
+                if (Directory.Exists(Path.Combine(this.txt_Output.Text, fi.Name.Replace(fi.Extension, string.Empty))) == false)
                 {
-                    Directory.CreateDirectory(outputPath.Replace(fi.Extension,string.Empty));
+                    Directory.CreateDirectory(Path.Combine(this.txt_Output.Text, fi.Name.Replace(fi.Extension, string.Empty)));
                 }
-                
+                string outputpath = Path.Combine(this.txt_Output.Text, fi.Name.Replace(fi.Extension, string.Empty));
+                //query method file based on correlation
                 string methodfile = mf.GetFileName(this.cmb_Method.Text);
+                //Load zip into memory
                 MemoryStream ms = new MemoryStream(mf[methodfile].FileContent);
+                //load content as zip archive
                 ZipArchive archive = new ZipArchive(ms);
+                // iterate through each file
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    //NEed to redo file structure
-                    entry.ExtractToFile(string.Format(@"{0}\{1}", outputPath.Replace(fi.Extension, string.Empty), entry.FullName), overwrite: true);
-                    //unzippedEntrystream = entry.Open();
+                    //Create fullpath for each file
+                    string fullPath = Path.Combine(outputpath, entry.FullName);
+                    //if directory doesn't exist
+                    if (!Directory.Exists(fullPath))
+                    {
+                        //create directory after replacing entry name from full path
+                        Directory.CreateDirectory(fullPath.Replace(entry.Name, string.Empty));
+                        // extract the file
+                        entry.ExtractToFile(fullPath, overwrite: true);
+                    }
+                    else
+                    {
+                        //extract file when directory exists already
+                        entry.ExtractToFile(fullPath, overwrite: true);
+                    }
                 }
-                
+
             }
         }
         private string GetPath()
@@ -153,7 +185,7 @@ namespace RunLoader
             string path = string.Empty;
             try
             {
-                path = Path.GetFullPath(string.Format(@"{0}{1}", this.txt_Directory.Text, this.cmb_RunNum.Text));
+                path = File.Exists(this.cmb_RunNum.Text) ? Path.GetFullPath(this.cmb_RunNum.Text) : string.Empty;
             }
             catch (Exception ex)
             {
@@ -184,6 +216,26 @@ namespace RunLoader
                 writer.Close();
             }
 
+        }
+
+        private void btn_LoadRun_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                ofd.Multiselect = false;
+                ofd.Filter = "CSV files|*.csv";
+                ofd.InitialDirectory = @"C:\Agilent\ICPMH\1\Sequence\";
+                ofd.ReadOnlyChecked = true;
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    this.cmb_RunNum.Text = ofd.FileName;
+                }
+            }
+        }
+
+        private void btn_SaveChanges_Click(object sender, EventArgs e)
+        {
+            ds.WriteXml(filename);
         }
     }
 
