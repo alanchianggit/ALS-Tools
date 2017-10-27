@@ -132,20 +132,7 @@ namespace RunLoader
         private void readxml()
         {
             ds = new DataSet();
-
-XmlReader reader = XmlReader.Create(filename);
-XmlSchemaSet schemaSet = new XmlSchemaSet();
-XmlSchemaInference schema = new XmlSchemaInference();
-
-schemaSet = schema.InferSchema(reader);
-
-foreach (XmlSchema s in schemaSet.Schemas())
-{
-    s.Write(Console.Out);
-}            
-
-
-            ds.ReadXml(filename);
+            ds.ReadXml(filename,XmlReadMode.InferSchema);
             dataGridView1.DataSource = ds.Tables["SampleParameter"];
             dataGridView1.EditMode = DataGridViewEditMode.EditOnEnter;
         }
@@ -250,20 +237,25 @@ foreach (XmlSchema s in schemaSet.Schemas())
 
         private void btn_SaveChanges_Click(object sender, EventArgs e)
         {
-		XmlReader reader = XmlReader.Create(filename);
-		schemaSet = new XmlSchemaSet();
-		XmlSchemaInference schema = new XmlSchemaInference();
-	
-		schemaSet = schema.InferSchema(reader);
-	
-		//foreach (XmlSchema s in schemaSet.Schemas())
+//		XmlReader reader = XmlReader.Create(filename);
+//		schemaSet = new XmlSchemaSet();
+//		XmlSchemaInference schema = new XmlSchemaInference();
+//	
+//		schemaSet = schema.InferSchema(reader);
+//	
+//		//foreach (XmlSchema s in schemaSet.Schemas())
 //		{
 //		    s.Write(Console.Out);
 //		}
+		DataRow dr = ds.Tables["SampleParameter"].NewRow();
+		dr["SampleName"]="TestAlan";
+		ds.Tables["SampleParameter"].Rows.Add(dr);
+		ds.Tables["SampleParameter"].AcceptChanges();
             ds.WriteXml(filename, XmlWriteMode.WriteSchema);
         }
     }
 
 
 }
+
 
