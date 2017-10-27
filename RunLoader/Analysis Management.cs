@@ -11,6 +11,7 @@ using System.IO;
 using System.Xml.Serialization;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Schema;
 using Entity;
 using BusinessLayer;
 using System.IO.Compression;
@@ -21,7 +22,8 @@ namespace RunLoader
     public partial class Analysis_Management : Form
     {
         DataSet ds = new DataSet();
-        private const string filename = @"D:\Data\10129650\Method\AcqMethod.xml";
+        private string filename = string.Empty;
+	XmlSchemaSet schemaSet = new XmlSchemaSet();
 
         private bool FirstConnect = true;
         private static Analysis_Management inst;
@@ -130,7 +132,19 @@ namespace RunLoader
         private void readxml()
         {
             ds = new DataSet();
-            
+
+XmlReader reader = XmlReader.Create(filename);
+XmlSchemaSet schemaSet = new XmlSchemaSet();
+XmlSchemaInference schema = new XmlSchemaInference();
+
+schemaSet = schema.InferSchema(reader);
+
+foreach (XmlSchema s in schemaSet.Schemas())
+{
+    s.Write(Console.Out);
+}            
+
+
             ds.ReadXml(filename);
             dataGridView1.DataSource = ds.Tables["SampleParameter"];
             dataGridView1.EditMode = DataGridViewEditMode.EditOnEnter;
@@ -177,6 +191,7 @@ namespace RunLoader
                         entry.ExtractToFile(fullPath, overwrite: true);
                     }
                 }
+		filename = Path.Combine(outputpath, @"Method\AcqMethod.xml");
 
             }
         }
@@ -235,9 +250,20 @@ namespace RunLoader
 
         private void btn_SaveChanges_Click(object sender, EventArgs e)
         {
-            ds.WriteXml(filename);
+		XmlReader reader = XmlReader.Create(filename);
+		schemaSet = new XmlSchemaSet();
+		XmlSchemaInference schema = new XmlSchemaInference();
+	
+		schemaSet = schema.InferSchema(reader);
+	
+		//foreach (XmlSchema s in schemaSet.Schemas())
+//		{
+//		    s.Write(Console.Out);
+//		}
+            ds.WriteXml(filename, XmlWriteMode.WriteSchema);
         }
     }
 
 
 }
+
