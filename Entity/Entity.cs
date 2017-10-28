@@ -97,7 +97,7 @@ namespace Entity
     {
         private string _Skip;
         private string _SampleName;
-        private string _Comment;
+        //private string _Comment;
         private string _Vial;
         private string _FileName;
         private string _Dilution;
