@@ -42,6 +42,7 @@ namespace RunLoader
         public Analysis_Management()
         {
             InitializeComponent();
+		this.txt_Output.Text = @"\\alvncws008\groups\minerals\spectroscopy\userfiles\alan\data\";
         }
 
         private XElement CSVtoXML()
@@ -132,7 +133,7 @@ namespace RunLoader
         private void readxml()
         {
             ds = new DataSet();
-            ds.ReadXml(filename,XmlReadMode.InferSchema);
+            ds.ReadXml(filename,XmlReadMode.InferTypedSchema);
             dataGridView1.DataSource = ds.Tables["SampleParameter"];
             dataGridView1.EditMode = DataGridViewEditMode.EditOnEnter;
         }
@@ -237,7 +238,9 @@ namespace RunLoader
 
         private void btn_SaveChanges_Click(object sender, EventArgs e)
         {
+
 		DataRow dr = ds.Tables["SampleParameter"].NewRow();
+/*
 		dr["AcqID"] = "-1";
 		dr["ListID"] = "0";
 		dr["GroupID"] = "2";
@@ -248,7 +251,19 @@ namespace RunLoader
 		dr["SampleName"]="TestAlan";
 		ds.Tables["SampleParameter"].Rows.Add(dr);
 		ds.AcceptChanges();
-            ds.WriteXml(filename+"1", XmlWriteMode.WriteSchema);
+*/
+		ds.Tables["SampleParameter"].Rows.Add(dr);
+		ds.WriteXml(filename+1,XmlWriteMode.IgnoreSchema);
+/*		
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.Load(filename);
+		XmlNode nodeToDelete = xmlDoc.SelectSingleNode("/root/[@ID="+nodeId+"]");
+            if (nodeToDelete != null)
+            {
+                nodeToDelete.ParentNode.RemoveChild(nodeToDelete);
+            }
+            xmlDoc.Save("XMLFileName.xml");
+*/
         }
     }
 
