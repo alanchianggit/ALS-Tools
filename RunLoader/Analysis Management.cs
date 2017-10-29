@@ -43,6 +43,7 @@ namespace RunLoader
         {
             InitializeComponent();
 		this.txt_Output.Text = @"\\alvncws008\groups\minerals\spectroscopy\userfiles\alan\data\";
+		this.txt_Method.Text = "ME-MS61iL";
         }
 
         private XElement CSVtoXML()
@@ -135,6 +136,8 @@ namespace RunLoader
             ds = new DataSet();
             ds.ReadXml(filename,XmlReadMode.InferTypedSchema);
             dataGridView1.DataSource = ds.Tables["SampleParameter"];
+		dataGridView1.DataMember="
+
             dataGridView1.EditMode = DataGridViewEditMode.EditOnEnter;
         }
 
@@ -240,7 +243,10 @@ namespace RunLoader
         {
 
 		DataRow dr = ds.Tables["SampleParameter"].NewRow();
-/*
+		foreach (DataColumn dc in ds.Tables["SampleParameter"].Columns)
+{
+MessageBox.Show(dc.ColumnName);
+}
 		dr["AcqID"] = "-1";
 		dr["ListID"] = "0";
 		dr["GroupID"] = "2";
@@ -249,10 +255,11 @@ namespace RunLoader
 		dr["SampleType"] = "Sample";
 		dr["TotalDilution"] = "100";
 		dr["SampleName"]="TestAlan";
+		dr["AcquisitionDataSet_id"]="0";
+
 		ds.Tables["SampleParameter"].Rows.Add(dr);
 		ds.AcceptChanges();
-*/
-		ds.Tables["SampleParameter"].Rows.Add(dr);
+
 		ds.WriteXml(filename+1,XmlWriteMode.IgnoreSchema);
 /*		
 		XmlDocument xmlDoc = new XmlDocument();
