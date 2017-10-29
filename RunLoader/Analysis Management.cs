@@ -23,7 +23,7 @@ namespace RunLoader
     {
         DataSet ds = new DataSet();
         private string filename = string.Empty;
-	XmlSchemaSet schemaSet = new XmlSchemaSet();
+        XmlSchemaSet schemaSet = new XmlSchemaSet();
 
         private bool FirstConnect = true;
         private static Analysis_Management inst;
@@ -125,20 +125,20 @@ namespace RunLoader
         {
             //CreateSampleList();
             Connect();
-            GetMethodFile();
-            readxml();
+            RetrieveMethodFiles();
+            DisplayXML();
         }
-        
-        private void readxml()
+
+        private void DisplayXML()
         {
             ds = new DataSet();
-            ds.ReadXml(filename,XmlReadMode.InferSchema);
+            ds.ReadXml(filename, XmlReadMode.InferSchema);
             dataGridView1.DataSource = ds.Tables["SampleParameter"];
             dataGridView1.EditMode = DataGridViewEditMode.EditOnEnter;
         }
 
 
-        private void GetMethodFile()
+        private void RetrieveMethodFiles()
         {
             //Stream unzippedEntrystream;
             using (MethodFile mf = new MethodFile())
@@ -178,7 +178,7 @@ namespace RunLoader
                         entry.ExtractToFile(fullPath, overwrite: true);
                     }
                 }
-		filename = Path.Combine(outputpath, @"Method\AcqMethod.xml");
+                filename = Path.Combine(outputpath, @"Method\AcqMethod.xml");
 
             }
         }
@@ -237,18 +237,18 @@ namespace RunLoader
 
         private void btn_SaveChanges_Click(object sender, EventArgs e)
         {
-		DataRow dr = ds.Tables["SampleParameter"].NewRow();
-		dr["AcqID"] = "-1";
-		dr["ListID"] = "0";
-		dr["GroupID"] = "2";
-		dr["SampleID"] = "5";
-		dr["SampleListDisplayOrder"] = "4";
-		dr["SampleType"] = "Sample";
-		dr["TotalDilution"] = "100";
-		dr["SampleName"]="TestAlan";
-		ds.Tables["SampleParameter"].Rows.Add(dr);
-		ds.AcceptChanges();
-            ds.WriteXml(filename+"1", XmlWriteMode.WriteSchema);
+            DataRow dr = ds.Tables["SampleParameter"].NewRow();
+            dr["AcqID"] = "-1";
+            dr["ListID"] = "0";
+            dr["GroupID"] = "2";
+            dr["SampleID"] = "5";
+            dr["SampleListDisplayOrder"] = "4";
+            dr["SampleType"] = "Sample";
+            dr["TotalDilution"] = "100";
+            dr["SampleName"] = "TestAlan";
+            ds.Tables["SampleParameter"].Rows.Add(dr);
+            ds.AcceptChanges();
+            ds.WriteXml(filename + "1", XmlWriteMode.WriteSchema);
         }
     }
 
