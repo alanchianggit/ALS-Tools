@@ -23,7 +23,7 @@ namespace RunLoader
     {
         DataSet ds = new DataSet();
         private string filename = string.Empty;
-        XmlSchemaSet schemaSet = new XmlSchemaSet();
+	XmlSchemaSet schemaSet = new XmlSchemaSet();
 
         private bool FirstConnect = true;
         private static Analysis_Management inst;
@@ -42,6 +42,8 @@ namespace RunLoader
         public Analysis_Management()
         {
             InitializeComponent();
+		this.txt_Output.Text = @"\\alvncws008\groups\minerals\spectroscopy\userfiles\alan\data\";
+		this.txt_Method.Text = "ME-MS61iL";
         }
 
         private XElement CSVtoXML()
@@ -125,20 +127,22 @@ namespace RunLoader
         {
             //CreateSampleList();
             Connect();
-            RetrieveMethodFiles();
-            DisplayXML();
+            GetMethodFile();
+            readxml();
         }
-
-        private void DisplayXML()
+        
+        private void readxml()
         {
             ds = new DataSet();
-            ds.ReadXml(filename, XmlReadMode.InferSchema);
+            ds.ReadXml(filename,XmlReadMode.InferTypedSchema);
             dataGridView1.DataSource = ds.Tables["SampleParameter"];
+		dataGridView1.DataMember="
+
             dataGridView1.EditMode = DataGridViewEditMode.EditOnEnter;
         }
 
 
-        private void RetrieveMethodFiles()
+        private void GetMethodFile()
         {
             //Stream unzippedEntrystream;
             using (MethodFile mf = new MethodFile())
@@ -178,7 +182,7 @@ namespace RunLoader
                         entry.ExtractToFile(fullPath, overwrite: true);
                     }
                 }
-                filename = Path.Combine(outputpath, @"Method\AcqMethod.xml");
+		filename = Path.Combine(outputpath, @"Method\AcqMethod.xml");
 
             }
         }
@@ -237,18 +241,36 @@ namespace RunLoader
 
         private void btn_SaveChanges_Click(object sender, EventArgs e)
         {
-            DataRow dr = ds.Tables["SampleParameter"].NewRow();
-            dr["AcqID"] = "-1";
-            dr["ListID"] = "0";
-            dr["GroupID"] = "2";
-            dr["SampleID"] = "5";
-            dr["SampleListDisplayOrder"] = "4";
-            dr["SampleType"] = "Sample";
-            dr["TotalDilution"] = "100";
-            dr["SampleName"] = "TestAlan";
-            ds.Tables["SampleParameter"].Rows.Add(dr);
-            ds.AcceptChanges();
-            ds.WriteXml(filename + "1", XmlWriteMode.WriteSchema);
+
+		DataRow dr = ds.Tables["SampleParameter"].NewRow();
+		foreach (DataColumn dc in ds.Tables["SampleParameter"].Columns)
+{
+MessageBox.Show(dc.ColumnName);
+}
+		dr["AcqID"] = "-1";
+		dr["ListID"] = "0";
+		dr["GroupID"] = "2";
+		dr["SampleID"] = "5";
+		dr["SampleListDisplayOrder"] = "4";
+		dr["SampleType"] = "Sample";
+		dr["TotalDilution"] = "100";
+		dr["SampleName"]="TestAlan";
+		dr["AcquisitionDataSet_id"]="0";
+
+		ds.Tables["SampleParameter"].Rows.Add(dr);
+		ds.AcceptChanges();
+
+		ds.WriteXml(filename+1,XmlWriteMode.IgnoreSchema);
+/*		
+		XmlDocument xmlDoc = new XmlDocument();
+		xmlDoc.Load(filename);
+		XmlNode nodeToDelete = xmlDoc.SelectSingleNode("/root/[@ID="+nodeId+"]");
+            if (nodeToDelete != null)
+            {
+                nodeToDelete.ParentNode.RemoveChild(nodeToDelete);
+            }
+            xmlDoc.Save("XMLFileName.xml");
+*/
         }
     }
 
