@@ -93,10 +93,10 @@ namespace Entity
     }
 
 
-    public class Sample
+    public class WebviewSampleParameter : SampleParameter
     {
         private string _Skip;
-        private string _SampleName;
+        private string _WebviewSampleName;
         //private string _Comment;
         private string _Vial;
         private string _FileName;
@@ -104,15 +104,15 @@ namespace Entity
         private string _Level;
         private string _Type;
 
-        public Sample() { }
+        public WebviewSampleParameter() { }
 
-        public Sample(string[] arr)
+        public WebviewSampleParameter(string[] arr)
         {
             Skip = arr[0] == string.Empty ? string.Empty : arr[0];
             Type = arr[1] == string.Empty ? string.Empty : arr[1];
             Vial = arr[2] == string.Empty ? string.Empty : arr[2];
             FileName = arr[3] == string.Empty ? string.Empty : arr[3];
-            SampleName = arr[4] == string.Empty ? string.Empty : arr[4];
+            WebviewSampleName = arr[4] == string.Empty ? string.Empty : arr[4];
             Level = arr[5] == string.Empty ? string.Empty : arr[5];
             Dilution = arr[6] == string.Empty ? string.Empty : arr[6];
         }
@@ -142,15 +142,15 @@ namespace Entity
         }
 
 
-        public string SampleName
+        public string WebviewSampleName
         {
             get
             {
-                return SampleName = _SampleName;
+                return WebviewSampleName = _WebviewSampleName;
             }
             set
             {
-                _SampleName = value;
+                _WebviewSampleName = value;
             }
         }
 
@@ -199,6 +199,157 @@ namespace Entity
             set
             {
                 _Level = value;
+            }
+        }
+    }
+
+    public class SampleParameter
+    {
+        protected int _AcqID;
+        protected int _ListID;
+        protected int _GroupID;
+        protected int _SampleID;
+        protected int _SampleListDisplayOrder;
+        protected string _SampleType;
+        protected string _SampleName;
+        protected string _SamplePosition;
+        protected int _TotalDiluition;
+        protected string _FunctionUsedFlag;
+        protected int _CalibrationLevel;
+        protected int _AcquisitionDataSet_ID;
+
+        public int AcqID
+        {
+            get
+            {
+                return AcqID = _AcqID;
+            }
+            set
+            {
+                _AcqID = value;
+            }
+        }
+
+        public int ListID
+        {
+            get
+            {
+                return ListID = _ListID;
+            }
+            set
+            {
+                _ListID = value;
+            }
+        }
+        public int GroupID
+        {
+            get
+            {
+                return GroupID = _GroupID;
+            }
+            set
+            {
+                _GroupID = value;
+            }
+        }
+        public int SampleID
+        {
+            get
+            {
+                return SampleID = _SampleID;
+            }
+            set
+            {
+                _SampleID = value;
+            }
+        }
+        public int SampleListDisplayOrder
+        {
+            get
+            {
+                return SampleListDisplayOrder = _SampleListDisplayOrder;
+            }
+            set
+            {
+                _SampleListDisplayOrder = value;
+            }
+        }
+        public string SampleType
+        {
+            get
+            {
+                return SampleType = _SampleType;
+            }
+            set
+            {
+                _SampleType = value;
+            }
+        }
+        public string SampleName
+        {
+            get
+            {
+                return SampleName = _SampleName;
+            }
+            set
+            {
+                _SampleName = value;    
+            }
+        }
+        public string SamplePosition
+        {
+            get
+            {
+                return SamplePosition = _SamplePosition;
+            }
+            set
+            {
+                _SamplePosition = value;
+            }
+        }
+        public int TotalDiluition
+        {
+            get
+            {
+                return TotalDiluition = _TotalDiluition;
+            }
+            set
+            {
+                _TotalDiluition = value;    
+            }
+        }
+        public string FunctionUsedFlag
+        {
+            get
+            {
+                return FunctionUsedFlag = _FunctionUsedFlag;
+            }
+            set
+            {
+                _FunctionUsedFlag = value;  
+            }
+        }
+
+        public int CalibrationLevel
+        {
+            get
+            {
+                return CalibrationLevel = _CalibrationLevel;
+            }
+            set
+            {
+                _CalibrationLevel = value;
+            }
+        }
+        public int AcquisitionDataSet_ID
+        {
+            get
+            {
+                return AcquisitionDataSet_ID = _AcquisitionDataSet_ID;
+            }
+            set
+            {
+                _AcquisitionDataSet_ID = value;
             }
         }
     }
