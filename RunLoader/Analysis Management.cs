@@ -37,7 +37,7 @@ namespace RunLoader
         }
 
 
-        List<Sample> listSamples;
+        List<WebviewSampleParameter> listSamples;
 
         public Analysis_Management()
         {
@@ -102,7 +102,7 @@ namespace RunLoader
 
         private void CreateSampleList()
         {
-            listSamples = new List<Sample>();
+            listSamples = new List<WebviewSampleParameter>();
             string strPath = string.Empty;
             if (File.Exists(GetPath()) == true) { strPath = GetPath(); } else { return; }
 
@@ -118,7 +118,7 @@ namespace RunLoader
                     //Parse each line in string array to each column
                     string[] SampleArray = row.Split(new[] { ',' }, StringSplitOptions.None);
                     //Create sample
-                    Sample currSample = new Sample(SampleArray);
+                    WebviewSampleParameter currSample = new WebviewSampleParameter(SampleArray);
                     //Add sample to list
                     listSamples.Add(currSample);
                 }
