@@ -37,7 +37,7 @@ namespace RunLoader
         }
 
 
-        List<WebviewSampleParameter> listSamples;
+        List<WebviewSampleParameterEntity> listSamples;
 
         public Analysis_Management()
         {
@@ -102,7 +102,7 @@ namespace RunLoader
 
         private void CreateSampleList()
         {
-            listSamples = new List<WebviewSampleParameter>();
+            listSamples = new List<WebviewSampleParameterEntity>();
             string strPath = string.Empty;
             if (File.Exists(GetPath()) == true) { strPath = GetPath(); } else { return; }
 
@@ -118,7 +118,7 @@ namespace RunLoader
                     //Parse each line in string array to each column
                     string[] SampleArray = row.Split(new[] { ',' }, StringSplitOptions.None);
                     //Create sample
-                    WebviewSampleParameter currSample = new WebviewSampleParameter(SampleArray);
+                    WebviewSampleParameterEntity currSample = new WebviewSampleParameterEntity(SampleArray);
                     //Add sample to list
                     listSamples.Add(currSample);
                 }
@@ -126,7 +126,7 @@ namespace RunLoader
         }
         private void cmd_LoadRun_Click(object sender, EventArgs e)
         {
-            //CreateSampleList();
+            CreateSampleList();
             Connect();
             GetMethodFile();
             readxml();
@@ -135,7 +135,7 @@ namespace RunLoader
         private void readxml()
         {
             ds = new DataSet();
-            ds.ReadXml(filename, XmlReadMode.InferTypedSchema);
+            ds.ReadXml(filename,  XmlReadMode.InferSchema);
             dataGridView1.DataSource = ds.Tables["SampleParameter"];
             dataGridView1.EditMode = DataGridViewEditMode.EditOnEnter;
         }
@@ -155,7 +155,7 @@ namespace RunLoader
                 {
                     Directory.CreateDirectory(Path.Combine(this.txt_Output.Text, fi.Name.Replace(fi.Extension, ".b")));
                 }
-                string outputpath = Path.Combine(this.txt_Output.Text, fi.Name.Replace(fi.Extension, string.Empty));
+                string outputpath = Path.Combine(this.txt_Output.Text, fi.Name.Replace(fi.Extension, ".b"));
                 //query method file based on correlation
                 string methodfile = mf.GetFileName(this.cmb_Method.Text);
                 //Load zip into memory
@@ -196,8 +196,6 @@ namespace RunLoader
             {
                 Console.WriteLine(ex.Message);
             }
-
-
             return path;
         }
 
@@ -223,7 +221,7 @@ namespace RunLoader
 
         }
 
-        private void btn_LoadRun_Click(object sender, EventArgs e)
+        private void btn_LoadRunNum_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
@@ -239,38 +237,22 @@ namespace RunLoader
         }
 
         private void btn_SaveChanges_Click(object sender, EventArgs e)
-        {
+        {            
+            DataTable dt = ds.Tables["SampleParameter"];
+            //dt.WriteXmlSchema(filename.Replace(".xml", ".xsd"));
+ 
+            //object instantiation
+            SampleParameter sp = new SampleParameter();
+            
+            DataRow dr = dt.NewRow();
+            sp.ToDataRow(dr);
+            dt.Rows.Add(dr);
 
-            DataRow dr = ds.Tables["SampleParameter"].NewRow();
-
-            dr["AcqID"] = "-1";
-            dr["ListID"] = "0";
-            dr["GroupID"] = "2";
-            dr["SampleID"] = "5";
-            dr["SampleListDisplayOrder"] = "4";
-            dr["SampleType"] = "Sample";
-            dr["SampleName"] = "TestAlan";
-            dr["SamplePosition"] = string.Empty;
-            dr["FunctionUsedFlag"] = string.Empty;
-            dr["TotalDilution"] = "100";
-            dr["CalibrationLevel"] = string.Empty;
-            dr["AcquisitionDataSet_id"] = "0";
-
-
-            ds.Tables["SampleParameter"].Rows.Add(dr);
+            //commit changes to dataset
             ds.AcceptChanges();
 
-            ds.WriteXml(filename + 1, XmlWriteMode.IgnoreSchema);
-            /*		
-                    XmlDocument xmlDoc = new XmlDocument();
-                    xmlDoc.Load(filename);
-                    XmlNode nodeToDelete = xmlDoc.SelectSingleNode("/root/[@ID="+nodeId+"]");
-                        if (nodeToDelete != null)
-                        {
-                            nodeToDelete.ParentNode.RemoveChild(nodeToDelete);
-                        }
-                        xmlDoc.Save("XMLFileName.xml");
-            */
+            ds.WriteXml(filename.Replace(".xml",".txt"));
+            
         }
     }
 

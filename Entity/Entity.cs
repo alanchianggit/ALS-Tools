@@ -87,13 +87,9 @@ namespace Entity
             GC.SuppressFinalize(this);
         }
         #endregion
-
-
-
     }
 
-
-    public class WebviewSampleParameter : SampleParameter
+    public class WebviewSampleParameterEntity : SampleParameterEntity
     {
         private string _Skip;
         private string _WebviewSampleName;
@@ -104,16 +100,16 @@ namespace Entity
         private string _Level;
         private string _Type;
 
-        public WebviewSampleParameter() { }
+        public WebviewSampleParameterEntity() { }
 
-        public WebviewSampleParameter(string[] arr)
+        public WebviewSampleParameterEntity(string[] arr)
         {
             Skip = arr[0] == string.Empty ? string.Empty : arr[0];
             Type = arr[1] == string.Empty ? string.Empty : arr[1];
             Vial = arr[2] == string.Empty ? string.Empty : arr[2];
             FileName = arr[3] == string.Empty ? string.Empty : arr[3];
             WebviewSampleName = arr[4] == string.Empty ? string.Empty : arr[4];
-            Level = arr[5] == string.Empty ? string.Empty : arr[5];
+            Level = arr[5] == string.Empty ? null : arr[5];
             Dilution = arr[6] == string.Empty ? string.Empty : arr[6];
         }
         public string Skip
@@ -138,6 +134,7 @@ namespace Entity
             set
             {
                 _Type = value;
+                _SampleType = value;
             }
         }
 
@@ -151,6 +148,7 @@ namespace Entity
             set
             {
                 _WebviewSampleName = value;
+                _SampleName = value;
             }
         }
 
@@ -187,6 +185,10 @@ namespace Entity
             set
             {
                 _Dilution = value;
+                int parsednumber;
+                bool intParseOK = int.TryParse(value, out parsednumber);
+                if (intParseOK) _TotalDilution = parsednumber;
+
             }
         }
 
@@ -199,11 +201,12 @@ namespace Entity
             set
             {
                 _Level = value;
+                _CalibrationLevel = value;
             }
         }
     }
 
-    public class SampleParameter
+    public class SampleParameterEntity
     {
         protected int _AcqID;
         protected int _ListID;
@@ -213,9 +216,9 @@ namespace Entity
         protected string _SampleType;
         protected string _SampleName;
         protected string _SamplePosition;
-        protected int _TotalDiluition;
+        protected int _TotalDilution;
         protected string _FunctionUsedFlag;
-        protected int _CalibrationLevel;
+        protected string _CalibrationLevel;
         protected int _AcquisitionDataSet_ID;
 
         public int AcqID
@@ -293,7 +296,7 @@ namespace Entity
             }
             set
             {
-                _SampleName = value;    
+                _SampleName = value;
             }
         }
         public string SamplePosition
@@ -307,15 +310,15 @@ namespace Entity
                 _SamplePosition = value;
             }
         }
-        public int TotalDiluition
+        public int TotalDilution
         {
             get
             {
-                return TotalDiluition = _TotalDiluition;
+                return TotalDilution = _TotalDilution;
             }
             set
             {
-                _TotalDiluition = value;    
+                _TotalDilution = value;
             }
         }
         public string FunctionUsedFlag
@@ -326,11 +329,11 @@ namespace Entity
             }
             set
             {
-                _FunctionUsedFlag = value;  
+                _FunctionUsedFlag = value;
             }
         }
 
-        public int CalibrationLevel
+        public string CalibrationLevel
         {
             get
             {

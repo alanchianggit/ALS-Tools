@@ -76,7 +76,7 @@
             this.btn_LoadRun.TabIndex = 3;
             this.btn_LoadRun.Text = "...";
             this.btn_LoadRun.UseVisualStyleBackColor = true;
-            this.btn_LoadRun.Click += new System.EventHandler(this.btn_LoadRun_Click);
+            this.btn_LoadRun.Click += new System.EventHandler(this.btn_LoadRunNum_Click);
             // 
             // cmb_Method
             // 

@@ -4,6 +4,7 @@ using Entity;
 using DAL;
 using System;
 using Microsoft.Win32.SafeHandles;
+using System.Reflection;
 
 namespace BusinessLayer
 {
@@ -38,7 +39,7 @@ namespace BusinessLayer
             using (FileDataDAL obj = new FileDataDAL())
             { return fn = obj.GetFileName(method); }
 
-            
+
         }
     }
 
@@ -133,4 +134,36 @@ namespace BusinessLayer
 
 
     }
+
+    public class SampleParameter : SampleParameterEntity
+    {
+        public SampleParameter()
+        {
+            AcqID = -1;
+            ListID = 0;
+            GroupID = 2;
+            SampleID = 5;
+            SampleListDisplayOrder = 4;
+            SampleType = "Sample";
+            SampleName = "Undefined";
+            FunctionUsedFlag = "false";
+            TotalDilution = 1;
+            CalibrationLevel = null;
+            AcquisitionDataSet_ID = 0;
+        }
+        public DataRow ToDataRow(DataRow dr)
+        {
+            //DataTable dt = new DataTable();
+            //DataRow dr = dt.NewRow();
+
+            foreach (PropertyInfo pi in typeof(SampleParameter).GetProperties())
+            {
+                //dt.Columns.Add(pi.Name, pi.PropertyType);
+                dr[pi.Name] = pi.GetValue(this);
+            }
+
+            return dr;
+        }
+    }
+
 }
