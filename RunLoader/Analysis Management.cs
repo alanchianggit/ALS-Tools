@@ -17,6 +17,7 @@ using BusinessLayer;
 using System.IO.Compression;
 using DAL;
 
+
 namespace RunLoader
 {
     public partial class Analysis_Management : Form
@@ -100,11 +101,11 @@ namespace RunLoader
         }
 
 
-        private void CreateSampleList()
+        private List<WebviewSampleParameterEntity> GetSampleList()
         {
             listSamples = new List<WebviewSampleParameterEntity>();
             string strPath = string.Empty;
-            if (File.Exists(GetPath()) == true) { strPath = GetPath(); } else { return; }
+            if (File.Exists(GetPath()) == true) { strPath = GetPath(); } else {return listSamples; }
 
             using (StreamReader sr = new StreamReader(strPath))
             {
@@ -123,19 +124,22 @@ namespace RunLoader
                     listSamples.Add(currSample);
                 }
             }
+            return listSamples;
         }
         private void cmd_LoadRun_Click(object sender, EventArgs e)
         {
-            CreateSampleList();
+            GetSampleList();
             Connect();
             GetMethodFile();
-            readxml();
+            ReadXML();
         }
 
-        private void readxml()
+        private void ReadXML()
         {
-            ds = new DataSet();
-            ds.ReadXml(filename,  XmlReadMode.InferSchema);
+            using (AnalysisManagementLogic AML = new AnalysisManagementLogic())
+            {
+                ds = AML.DataSetReadXML(filename);
+            }
             dataGridView1.DataSource = ds.Tables["SampleParameter"];
             dataGridView1.EditMode = DataGridViewEditMode.EditOnEnter;
         }
@@ -237,22 +241,25 @@ namespace RunLoader
         }
 
         private void btn_SaveChanges_Click(object sender, EventArgs e)
-        {            
-            DataTable dt = ds.Tables["SampleParameter"];
-            //dt.WriteXmlSchema(filename.Replace(".xml", ".xsd"));
- 
-            //object instantiation
-            SampleParameter sp = new SampleParameter();
+        {
             
-            DataRow dr = dt.NewRow();
-            sp.ToDataRow(dr);
-            dt.Rows.Add(dr);
+            
+            using (AnalysisManagementLogic AML = new AnalysisManagementLogic())
+            {
+                DataTable dt = ds.Tables["SampleParameter"];
+                
+                var rowColl = ds.Tables["SampleGroup"].AsEnumerable();
+                string gID = (from r in rowColl
+                               where r.Field<string>("SampleGroupName") == "Unknown Samples"
+                               select r.Field<string>("GroupID")).First<string>();
 
+                AML.ImportDataTable(dt, listSamples, int.Parse(gID));
+            }
             //commit changes to dataset
             ds.AcceptChanges();
 
-            ds.WriteXml(filename.Replace(".xml",".txt"));
-            
+            ds.WriteXml(filename.Replace(".xml", ".txt"));
+
         }
     }
 

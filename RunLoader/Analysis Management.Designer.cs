@@ -61,7 +61,7 @@
             // 
             // cmd_LoadRun
             // 
-            this.cmd_LoadRun.Location = new System.Drawing.Point(181, 149);
+            this.cmd_LoadRun.Location = new System.Drawing.Point(178, 88);
             this.cmd_LoadRun.Name = "cmd_LoadRun";
             this.cmd_LoadRun.Size = new System.Drawing.Size(110, 68);
             this.cmd_LoadRun.TabIndex = 0;
@@ -101,7 +101,7 @@
             this.txt_FileLocation.Name = "txt_FileLocation";
             this.txt_FileLocation.Size = new System.Drawing.Size(276, 20);
             this.txt_FileLocation.TabIndex = 1;
-            this.txt_FileLocation.Text = @"\\alvncws008\groups\minerals\spectroscopy\icp-ms\ms logs\BackEnd2.accdb";
+            this.txt_FileLocation.Text = "\\\\alvncws008\\groups\\minerals\\spectroscopy\\icp-ms\\ms logs\\BackEnd2.accdb";
             // 
             // txt_Output
             // 
@@ -123,18 +123,18 @@
             // dataGridView1
             // 
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(390, 48);
+            this.dataGridView1.Location = new System.Drawing.Point(294, 12);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(717, 383);
+            this.dataGridView1.Size = new System.Drawing.Size(719, 219);
             this.dataGridView1.TabIndex = 6;
             // 
             // btn_SaveChanges
             // 
-            this.btn_SaveChanges.Location = new System.Drawing.Point(181, 233);
+            this.btn_SaveChanges.Location = new System.Drawing.Point(178, 172);
             this.btn_SaveChanges.Name = "btn_SaveChanges";
-            this.btn_SaveChanges.Size = new System.Drawing.Size(153, 97);
+            this.btn_SaveChanges.Size = new System.Drawing.Size(110, 59);
             this.btn_SaveChanges.TabIndex = 7;
-            this.btn_SaveChanges.Text = "Save Changes";
+            this.btn_SaveChanges.Text = "Save Changes and Write XML";
             this.btn_SaveChanges.UseVisualStyleBackColor = true;
             this.btn_SaveChanges.Click += new System.EventHandler(this.btn_SaveChanges_Click);
             // 
@@ -142,7 +142,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1305, 549);
+            this.ClientSize = new System.Drawing.Size(1025, 242);
             this.Controls.Add(this.btn_SaveChanges);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.txt_Output);

@@ -151,6 +151,13 @@ namespace BusinessLayer
             CalibrationLevel = null;
             AcquisitionDataSet_ID = 0;
         }
+        public SampleParameter(WebviewSampleParameterEntity wsp)
+        {
+            foreach (PropertyInfo pi in typeof(SampleParameter).GetProperties())
+            {
+                typeof(SampleParameter).GetProperty(pi.Name).SetValue(this, typeof(WebviewSampleParameterEntity).GetProperty(pi.Name).GetValue(wsp));
+            }
+        }
         public DataRow ToDataRow(DataRow dr)
         {
             //DataTable dt = new DataTable();
@@ -164,6 +171,10 @@ namespace BusinessLayer
 
             return dr;
         }
+
+
     }
 
 }
+
+
