@@ -242,18 +242,9 @@ namespace RunLoader
 
         private void btn_SaveChanges_Click(object sender, EventArgs e)
         {
-            
-            
             using (AnalysisManagementLogic AML = new AnalysisManagementLogic())
             {
-                DataTable dt = ds.Tables["SampleParameter"];
-                
-                var rowColl = ds.Tables["SampleGroup"].AsEnumerable();
-                string gID = (from r in rowColl
-                               where r.Field<string>("SampleGroupName") == "Unknown Samples"
-                               select r.Field<string>("GroupID")).First<string>();
-
-                AML.ImportDataTable(dt, listSamples, int.Parse(gID));
+                AML.ImportSampleListToDataTable(ds, listSamples);
             }
             //commit changes to dataset
             ds.AcceptChanges();

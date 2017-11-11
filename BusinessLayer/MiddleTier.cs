@@ -157,6 +157,11 @@ namespace BusinessLayer
             {
                 typeof(SampleParameter).GetProperty(pi.Name).SetValue(this, typeof(WebviewSampleParameterEntity).GetProperty(pi.Name).GetValue(wsp));
             }
+            //Default values
+            this.AcqID = -1;
+            this.GroupID = 1;
+            this.FunctionUsedFlag = "false";
+            this.TotalDilution = 1;
         }
         public DataRow ToDataRow(DataRow dr)
         {

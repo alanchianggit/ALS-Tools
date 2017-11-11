@@ -11,16 +11,61 @@ namespace BusinessLayer
     public class AnalysisManagementLogic : IDisposable
     {
         public AnalysisManagementLogic() { }
-        public DataTable ImportDataTable(DataTable dt, List<WebviewSampleParameterEntity> listSamples,int gID)
+        public DataTable ImportSampleListToDataTable(DataSet ds, List<WebviewSampleParameterEntity> listSamples)
         {
+            int DisplayOrder;
+            int GroupID;
+
+            //set output datatable to sample parameter table
+            DataTable dt = ds.Tables["SampleParameter"];
+            
+            
+
+            
+            try
+            //find GroupID for unknown sample
+            {
+                //Enumerate sample group table
+                var rowColl = ds.Tables["SampleGroup"].AsEnumerable();
+                string gID = (from r in rowColl
+                              where r.Field<string>("SampleGroupName") == "Unknown Samples"
+                              select r.Field<string>("GroupID")).First<string>();
+                GroupID = int.Parse(gID);
+            }
+            catch (ArgumentNullException ee)
+            {
+                Console.WriteLine(ee.Message);
+                GroupID = 1;
+            }
+
+            try
+            //find display order
+            {
+                var rowCol1 = ds.Tables["SampleParameter"].AsEnumerable();
+                string _displayOrder = (from r in rowCol1
+                                        where r.Field<string>("GroupID") == GroupID.ToString()
+                                        select r.Field<string>("SampleListDisplayOrder")).Max();
+                DisplayOrder = int.Parse(_displayOrder);
+            }
+            catch (ArgumentNullException ANex)
+            {
+                Console.WriteLine(ANex.Message);
+                Console.WriteLine("Default Display order to '-1'");
+                DisplayOrder = -1;
+            }
+
+
+
+            //Loop through list of samples to import into datatable
             foreach (WebviewSampleParameterEntity wsp in listSamples)
             {
-                //object instantiation
-                SampleParameter sp = new SampleParameter(wsp);
-                sp.AcqID = -1;
-                sp.ListID = 0;
+                //Iterators for each sample
+                DisplayOrder += 1;
                 
-                sp.GroupID = gID;
+                SampleParameter sp = new SampleParameter(wsp);
+                sp.GroupID = GroupID;
+                sp.SampleListDisplayOrder = DisplayOrder;
+                sp.SamplePosition = "T0V2";
                 DataRow dr = dt.NewRow();
                 sp.ToDataRow(dr);
                 dt.Rows.Add(dr);
@@ -28,6 +73,7 @@ namespace BusinessLayer
 
             return dt;
         }
+
 
         public DataSet DataSetReadXML(string XMLPath)
         {
