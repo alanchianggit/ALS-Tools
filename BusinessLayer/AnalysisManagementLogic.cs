@@ -35,6 +35,7 @@ namespace BusinessLayer
             catch (ArgumentNullException ee)
             {
                 Console.WriteLine(ee.Message);
+                Console.WriteLine("Default to 1 (after 0=Calibration standards)");
                 GroupID = 1;
             }
 
