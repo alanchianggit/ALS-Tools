@@ -15,6 +15,7 @@ namespace BusinessLayer
         {
             int DisplayOrder;
             int GroupID;
+            int SampleID;
 
             //set output datatable to sample parameter table
             DataTable dt = ds.Tables["SampleParameter"];
@@ -39,8 +40,8 @@ namespace BusinessLayer
                 GroupID = 1;
             }
 
-            try
             //find display order
+            try
             {
                 var rowCol1 = ds.Tables["SampleParameter"].AsEnumerable();
                 string _displayOrder = (from r in rowCol1
@@ -55,7 +56,17 @@ namespace BusinessLayer
                 DisplayOrder = -1;
             }
 
+            //Find SampleID
+            try
+            {
 
+            }
+            catch (ArgumentNullException ANex)
+            {
+                Console.WriteLine(ANex.Message);
+                Console.WriteLine("Default SampleID to '0'");
+                SampleID = 0;
+            }
 
             //Loop through list of samples to import into datatable
             foreach (WebviewSampleParameterEntity wsp in listSamples)
