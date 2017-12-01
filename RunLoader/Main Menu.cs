@@ -29,5 +29,10 @@ namespace RunLoader
         {
             Archiver.ArchiverForm.GetForm.Show();
         }
+
+        private void btn_Operations_Click(object sender, EventArgs e)
+        {
+            Operations.GetForm.Show();
+        }
     }
 }
