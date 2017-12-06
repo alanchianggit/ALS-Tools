@@ -35,15 +35,16 @@
             this.openFileAccessFormToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fileAccessFormToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.archiverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.eventsWindowsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.productionManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.analysisManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.windowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.eventsWindowsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.productionManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dataCheckerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -74,21 +75,22 @@
             this.newSessionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newSigninToolStripMenuItem});
             this.newSessionToolStripMenuItem.Name = "newSessionToolStripMenuItem";
-            this.newSessionToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
+            this.newSessionToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.newSessionToolStripMenuItem.Text = "&Session";
             // 
             // newSigninToolStripMenuItem
             // 
             this.newSigninToolStripMenuItem.Name = "newSigninToolStripMenuItem";
-            this.newSigninToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.newSigninToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.newSigninToolStripMenuItem.Text = "&New/Sign-in";
             this.newSigninToolStripMenuItem.Click += new System.EventHandler(this.newSigninToolStripMenuItem_Click);
             // 
             // openFileAccessFormToolStripMenuItem
             // 
             this.openFileAccessFormToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileAccessFormToolStripMenuItem,
             this.archiverToolStripMenuItem,
+            this.fileAccessFormToolStripMenuItem,
+            this.dataCheckerToolStripMenuItem,
             this.toolStripSeparator1,
             this.eventsWindowsToolStripMenuItem,
             this.productionManagementToolStripMenuItem,
@@ -100,21 +102,38 @@
             // fileAccessFormToolStripMenuItem
             // 
             this.fileAccessFormToolStripMenuItem.Name = "fileAccessFormToolStripMenuItem";
-            this.fileAccessFormToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.fileAccessFormToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.fileAccessFormToolStripMenuItem.Text = "&File Access Form";
             this.fileAccessFormToolStripMenuItem.Click += new System.EventHandler(this.fileAccessFormToolStripMenuItem_Click);
             // 
             // archiverToolStripMenuItem
             // 
             this.archiverToolStripMenuItem.Name = "archiverToolStripMenuItem";
-            this.archiverToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.archiverToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.archiverToolStripMenuItem.Text = "A&rchiver";
             this.archiverToolStripMenuItem.Click += new System.EventHandler(this.archiverToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(204, 6);
+            // 
+            // eventsWindowsToolStripMenuItem
+            // 
+            this.eventsWindowsToolStripMenuItem.Name = "eventsWindowsToolStripMenuItem";
+            this.eventsWindowsToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.eventsWindowsToolStripMenuItem.Text = "Events Management";
+            // 
+            // productionManagementToolStripMenuItem
+            // 
+            this.productionManagementToolStripMenuItem.Name = "productionManagementToolStripMenuItem";
+            this.productionManagementToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.productionManagementToolStripMenuItem.Text = "Production Management";
             // 
             // analysisManagementToolStripMenuItem
             // 
             this.analysisManagementToolStripMenuItem.Name = "analysisManagementToolStripMenuItem";
-            this.analysisManagementToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.analysisManagementToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.analysisManagementToolStripMenuItem.Text = "&Analysis Management";
             this.analysisManagementToolStripMenuItem.Click += new System.EventHandler(this.analysisManagementToolStripMenuItem_Click);
             // 
@@ -135,7 +154,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.aboutToolStripMenuItem.Text = "&About";
             // 
             // statusStrip1
@@ -154,22 +173,11 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(118, 17);
             this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
             // 
-            // toolStripSeparator1
+            // dataCheckerToolStripMenuItem
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(204, 6);
-            // 
-            // eventsWindowsToolStripMenuItem
-            // 
-            this.eventsWindowsToolStripMenuItem.Name = "eventsWindowsToolStripMenuItem";
-            this.eventsWindowsToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.eventsWindowsToolStripMenuItem.Text = "Events Management";
-            // 
-            // productionManagementToolStripMenuItem
-            // 
-            this.productionManagementToolStripMenuItem.Name = "productionManagementToolStripMenuItem";
-            this.productionManagementToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
-            this.productionManagementToolStripMenuItem.Text = "Production Management";
+            this.dataCheckerToolStripMenuItem.Name = "dataCheckerToolStripMenuItem";
+            this.dataCheckerToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.dataCheckerToolStripMenuItem.Text = "Data Checker";
             // 
             // Operations
             // 
@@ -209,5 +217,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem eventsWindowsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem productionManagementToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dataCheckerToolStripMenuItem;
     }
 }

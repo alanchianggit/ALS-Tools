@@ -116,7 +116,7 @@ namespace Entity
         {
             get
             {
-                return Skip = _Skip;
+                return _Skip;
             }
             set
             {
@@ -128,7 +128,7 @@ namespace Entity
         {
             get
             {
-                return Type = _Type;
+                return _Type;
             }
 
             set
@@ -143,7 +143,7 @@ namespace Entity
         {
             get
             {
-                return WebviewSampleName = _WebviewSampleName;
+                return _WebviewSampleName;
             }
             set
             {
@@ -156,7 +156,7 @@ namespace Entity
         {
             get
             {
-                return Vial = _Vial;
+                return _Vial;
             }
             set
             {
@@ -168,7 +168,7 @@ namespace Entity
         {
             get
             {
-                return FileName = _FileName;
+                return _FileName;
             }
             set
             {
@@ -180,7 +180,7 @@ namespace Entity
         {
             get
             {
-                return Dilution = _Dilution;
+                return _Dilution;
             }
             set
             {
@@ -196,7 +196,7 @@ namespace Entity
         {
             get
             {
-                return Level = _Level;
+                return _Level;
             }
             set
             {
@@ -225,7 +225,7 @@ namespace Entity
         {
             get
             {
-                return AcqID = _AcqID;
+                return _AcqID;
             }
             set
             {
@@ -237,7 +237,7 @@ namespace Entity
         {
             get
             {
-                return ListID = _ListID;
+                return _ListID;
             }
             set
             {
@@ -248,7 +248,7 @@ namespace Entity
         {
             get
             {
-                return GroupID = _GroupID;
+                return _GroupID;
             }
             set
             {
@@ -259,7 +259,7 @@ namespace Entity
         {
             get
             {
-                return SampleID = _SampleID;
+                return _SampleID;
             }
             set
             {
@@ -270,7 +270,7 @@ namespace Entity
         {
             get
             {
-                return SampleListDisplayOrder = _SampleListDisplayOrder;
+                return _SampleListDisplayOrder;
             }
             set
             {
@@ -281,7 +281,7 @@ namespace Entity
         {
             get
             {
-                return SampleType = _SampleType;
+                return _SampleType;
             }
             set
             {
@@ -292,7 +292,7 @@ namespace Entity
         {
             get
             {
-                return SampleName = _SampleName;
+                return _SampleName;
             }
             set
             {
@@ -303,7 +303,7 @@ namespace Entity
         {
             get
             {
-                return SamplePosition = _SamplePosition;
+                return _SamplePosition;
             }
             set
             {
@@ -314,7 +314,7 @@ namespace Entity
         {
             get
             {
-                return TotalDilution = _TotalDilution;
+                return _TotalDilution;
             }
             set
             {
@@ -325,7 +325,7 @@ namespace Entity
         {
             get
             {
-                return FunctionUsedFlag = _FunctionUsedFlag;
+                return _FunctionUsedFlag;
             }
             set
             {
@@ -337,7 +337,7 @@ namespace Entity
         {
             get
             {
-                return CalibrationLevel = _CalibrationLevel;
+                return _CalibrationLevel;
             }
             set
             {
@@ -348,11 +348,116 @@ namespace Entity
         {
             get
             {
-                return AcquisitionDataSet_ID = _AcquisitionDataSet_ID;
+                return _AcquisitionDataSet_ID;
             }
             set
             {
                 _AcquisitionDataSet_ID = value;
+            }
+        }
+    }
+
+    public class LogEvent
+    {
+        protected string _LogName;
+        protected DateTime _TimeCreated;
+        protected string _Source;
+        protected string _ID;
+        protected string _Level;
+        protected string _User;
+        protected string _Computer;
+        protected string _Details;
+
+        public string LogName
+        {
+            get
+            {
+                return _LogName;
+            }
+            set
+            {
+                _LogName = value;
+            }
+        }
+
+
+        public DateTime TimeCreated
+        {
+            get
+            {
+                return _TimeCreated;
+            }
+        }
+        
+        public string Source
+        {
+            get
+            {
+                return _Source;
+            }
+            set
+            {
+                _Source = value;
+            }
+        }
+
+        public string ID
+        {
+            get
+            {
+                return _ID;
+            }
+            set
+            {
+                _ID = value;
+            }
+        }
+
+        public string Level
+        {
+            get
+            {
+                return _Level;
+            }
+            set
+            {
+                _Level = value;
+            }
+        }
+
+        public string User
+        {
+            get
+            {
+                return _User;
+            }
+            set
+            {
+                _User = value;
+            }
+        }
+
+        public string Computer
+        {
+            get
+            {
+                return _Computer;
+            }
+            set
+            {
+                _Computer = value;
+            }
+        }
+
+        public string Details
+        {
+            get
+            {
+                return _Details;
+            }
+            set
+            {
+                _Details = value;
             }
         }
     }

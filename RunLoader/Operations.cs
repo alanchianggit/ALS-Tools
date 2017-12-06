@@ -61,7 +61,6 @@ namespace RunLoader
         }
 
         Signin si;
-        
         private void newSigninToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (si==null || si.IsDisposed)
@@ -73,8 +72,15 @@ namespace RunLoader
             {
                 si.WindowState = FormWindowState.Normal;
             }
+            ShowChildForm(si);
+        }
+
+        private void ShowChildForm(Form si)
+        {
+            
             si.MdiParent = this;
             si.Show();
+            si.BringToFront();
         }
     }
 }

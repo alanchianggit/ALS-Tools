@@ -19,12 +19,8 @@ namespace BusinessLayer
 
             //set output datatable to sample parameter table
             DataTable dt = ds.Tables["SampleParameter"];
-            
-            
-
-            
-            try
             //find GroupID for unknown sample
+            try
             {
                 //Enumerate sample group table
                 var rowColl = ds.Tables["SampleGroup"].AsEnumerable();
@@ -59,13 +55,17 @@ namespace BusinessLayer
             //Find SampleID
             try
             {
-
+                var rowCol1 = ds.Tables["SampleParameter"].AsEnumerable();
+                string _sampleid = (from r in rowCol1
+                                        where r.Field<string>("GroupID") == GroupID.ToString()
+                                        select r.Field<string>("SampleID")).Max();
+                SampleID = int.Parse(_sampleid);
             }
             catch (ArgumentNullException ANex)
             {
                 Console.WriteLine(ANex.Message);
-                Console.WriteLine("Default SampleID to '0'");
-                SampleID = 0;
+                Console.WriteLine("Default SampleID to '-1'");
+                SampleID = -1;
             }
 
             //Loop through list of samples to import into datatable
@@ -73,11 +73,13 @@ namespace BusinessLayer
             {
                 //Iterators for each sample
                 DisplayOrder += 1;
+                SampleID += 1;
                 
                 SampleParameter sp = new SampleParameter(wsp);
                 sp.GroupID = GroupID;
                 sp.SampleListDisplayOrder = DisplayOrder;
                 sp.SamplePosition = "T0V2";
+                sp.SampleID = SampleID;
                 DataRow dr = dt.NewRow();
                 sp.ToDataRow(dr);
                 dt.Rows.Add(dr);
