@@ -91,14 +91,14 @@ namespace Entity
 
     public class WebviewSampleParameterEntity : SampleParameterEntity
     {
-        private string _Skip;
-        private string _WebviewSampleName;
+        protected string _Skip;
+        protected string _WebviewSampleName;
         //private string _Comment;
-        private string _Vial;
-        private string _FileName;
-        private string _Dilution;
-        private string _Level;
-        private string _Type;
+        protected string _Vial;
+        protected string _FileName;
+        protected string _Dilution;
+        protected string _Level;
+        protected string _Type;
 
         public WebviewSampleParameterEntity() { }
 
@@ -362,11 +362,22 @@ namespace Entity
         protected string _LogName;
         protected DateTime _TimeCreated;
         protected string _Source;
-        protected string _ID;
+        protected int _ID;
         protected string _Level;
         protected string _User;
         protected string _Computer;
         protected string _Details;
+
+        public LogEvent()
+        {
+            this.TimeCreated = DateTime.Now;
+        }
+
+        public LogEvent(string argLog, string argDetails)
+        {
+            this.LogName = argLog;
+            this.Details = argDetails;
+        }
 
         public string LogName
         {
@@ -387,6 +398,10 @@ namespace Entity
             {
                 return _TimeCreated;
             }
+            set
+            {
+                _TimeCreated = value;
+            }
         }
         
         public string Source
@@ -401,7 +416,7 @@ namespace Entity
             }
         }
 
-        public string ID
+        public int ID
         {
             get
             {

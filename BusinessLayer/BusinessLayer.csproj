@@ -46,6 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnalysisManagementLogic.cs" />
+    <Compile Include="EventsLogic.cs" />
+    <Compile Include="FileAccessLogic.cs" />
     <Compile Include="MiddleTier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

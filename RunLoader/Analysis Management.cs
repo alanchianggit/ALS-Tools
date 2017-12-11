@@ -26,6 +26,8 @@ namespace RunLoader
         private string filename = string.Empty;
         XmlSchemaSet schemaSet = new XmlSchemaSet();
 
+        List<WebviewSampleParameterEntity> listSamples;
+
         private bool FirstConnect = true;
         private static Analysis_Management inst;
         public static Analysis_Management GetForm
@@ -38,7 +40,7 @@ namespace RunLoader
         }
 
 
-        List<WebviewSampleParameterEntity> listSamples;
+        
 
         public Analysis_Management()
         {
@@ -48,18 +50,7 @@ namespace RunLoader
             this.cmb_Method.Text = "ME-MS41i";
         }
 
-        private XElement CSVtoXML()
-        {
 
-            string[] lines = File.ReadAllLines(GetPath());
-
-            XElement xml = new XElement("SampleSequence", lines
-                .Select(line => new XElement("Item", line.Split(',')
-                .Select((column, index) => new XElement("Column" + index, column)))));
-
-            return xml;
-
-        }
 
         private void Connect()
         {
@@ -203,27 +194,7 @@ namespace RunLoader
             return path;
         }
 
-        private void SerializeDataSet(string filename)
-        {
-            XmlSerializer ser = new XmlSerializer(typeof(DataSet));
-            // Creates a DataSet; adds a table, column, and ten rows. 
-            DataSet ds = new DataSet("myDataSet");
-            DataTable t = new DataTable("table1");
-            DataColumn c = new DataColumn("thing");
-            t.Columns.Add(c);
-            ds.Tables.Add(t);
-            DataRow r;
-            for (int i = 0; i < 10; i++)
-            {
-                r = t.NewRow();
-                r[0] = "Thing " + i;
-                t.Rows.Add(r);
-                TextWriter writer = new StreamWriter(filename);
-                ser.Serialize(writer, ds);
-                writer.Close();
-            }
 
-        }
 
         private void btn_LoadRunNum_Click(object sender, EventArgs e)
         {
@@ -252,6 +223,41 @@ namespace RunLoader
             ds.WriteXml(filename.Replace(".xml", ".txt"));
 
         }
+
+        //private XElement CSVtoXML()
+        //{
+
+        //    string[] lines = File.ReadAllLines(GetPath());
+
+        //    XElement xml = new XElement("SampleSequence", lines
+        //        .Select(line => new XElement("Item", line.Split(',')
+        //        .Select((column, index) => new XElement("Column" + index, column)))));
+
+        //    return xml;
+
+        //}
+
+        //private void SerializeDataSet(string filename)
+        //{
+        //    XmlSerializer ser = new XmlSerializer(typeof(DataSet));
+        //    // Creates a DataSet; adds a table, column, and ten rows. 
+        //    DataSet ds = new DataSet("myDataSet");
+        //    DataTable t = new DataTable("table1");
+        //    DataColumn c = new DataColumn("thing");
+        //    t.Columns.Add(c);
+        //    ds.Tables.Add(t);
+        //    DataRow r;
+        //    for (int i = 0; i < 10; i++)
+        //    {
+        //        r = t.NewRow();
+        //        r[0] = "Thing " + i;
+        //        t.Rows.Add(r);
+        //        TextWriter writer = new StreamWriter(filename);
+        //        ser.Serialize(writer, ds);
+        //        writer.Close();
+        //    }
+
+        //}
     }
 
 

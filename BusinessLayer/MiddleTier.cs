@@ -38,8 +38,6 @@ namespace BusinessLayer
             string fn = string.Empty;
             using (FileDataDAL obj = new FileDataDAL())
             { return fn = obj.GetFileName(method); }
-
-
         }
     }
 

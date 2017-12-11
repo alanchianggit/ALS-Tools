@@ -57,10 +57,23 @@ namespace RunLoader
 
         private void analysisManagementToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Analysis_Management.GetForm.Show();
+            string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
+
+            if (!strType.Contains("Analysis_Management") || frm == null || frm.IsDisposed)
+            {
+                frm = new Analysis_Management();
+                frm = Analysis_Management.GetForm;
+            }
+            else
+            {
+                frm.WindowState = FormWindowState.Normal;
+            }
+            ShowChildForm(frm);
+
         }
 
         Signin si;
+        
         private void newSigninToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (si==null || si.IsDisposed)
@@ -75,12 +88,28 @@ namespace RunLoader
             ShowChildForm(si);
         }
 
-        private void ShowChildForm(Form si)
+        private void ShowChildForm(Form fm)
         {
             
-            si.MdiParent = this;
-            si.Show();
-            si.BringToFront();
+            fm.MdiParent = this;
+            fm.Show();
+            fm.BringToFront();
         }
+        Form frm;
+        private void eventsWindowsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string strType = frm != null ? strType = frm.GetType().ToString() : strType=string.Empty;
+            if (!strType.Contains("Events") || (frm == null || frm.IsDisposed))
+            {
+                frm= new Events();
+                frm = RunLoader.Events.GetForm;
+            }
+            else
+            {
+                frm.WindowState = FormWindowState.Normal;
+            }
+            ShowChildForm(frm);
+        }
+
     }
 }
