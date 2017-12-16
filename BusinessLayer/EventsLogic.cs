@@ -22,7 +22,7 @@ namespace BusinessLayer
             return LE;
         }
 
-        public void Update(LogEvent le)
+        public void Post(LogEvent le)
         {
             
         }

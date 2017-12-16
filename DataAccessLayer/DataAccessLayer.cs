@@ -330,8 +330,78 @@ namespace DAL
             return dictFE;
         }
 
+        public void Add(LogEvent LE)
+        {
+            if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
+            try
+            {
+
+                using (IDbCommand cmdcheck = DataFactory.CreateCommand(string.Empty))
+                {
+                    IDbDataParameter pmchk = cmdcheck.CreateParameter();
+
+                    pmchk = cmdcheck.CreateParameter();
+                    pmchk.ParameterName = "@LogName";
+                    pmchk.Value = LE.LogName;
+                    cmdcheck.Parameters.Add(pmchk);
 
 
+                    //string strCheckExist = string.Format("SELECT [FileName] FROM [tbl_Files] WHERE [FileName] = {0} OR [FileContent] = {1}", "@FileName", "@FileContent");
+                    string strCheckExist = string.Format("SELECT [FileName] FROM [tbl_Files] WHERE [FileName] = {0}", "@FileName", "@DateModified");
+                    cmdcheck.CommandText = strCheckExist;
+                    var result = cmdcheck.ExecuteScalar();
+
+                    if (result == null)
+                    {
+                        // get properties from entity class
+                        PropertyInfo[] PIs = typeof(LogEvent).GetProperties();
+
+                        //Create table of data according to properties so it can be adapted to connection
+                        IDbCommand cmdInsert = DataFactory.CreateCommand(string.Empty);
+
+                        //create new Lists for colum names and parameters
+                        List<string> InsertColumnNames = new List<string>();
+                        List<string> InsertColumnValues = new List<string>();
+                        //Iterate through each prorperty to coerce a parameter
+                        foreach (PropertyInfo pi in PIs)
+                        {
+                            //Create new parameter object
+                            IDbDataParameter pm = cmdInsert.CreateParameter();
+                            //Set Parameter name from property name
+                            pm.ParameterName = string.Format("@{0}", pi.Name.ToString());
+                            //Set value from property of object
+                            pm.Value = pi.GetValue(LE);
+                            //Add parameter to command
+                            cmdInsert.Parameters.Add(pm);
+                            //Add to list for generating string
+                            InsertColumnValues.Add(pm.ParameterName);
+                            InsertColumnNames.Add("[" + pi.Name.ToString() + "]");
+                            //clean up
+                            pm = null;
+                        }
+                        string strInsert = string.Format("INSERT INTO [tbl_Events] ({0}) VALUES ({1});", string.Join(",", InsertColumnNames.ToArray()), string.Join(",", InsertColumnValues.ToArray()));
+                        cmdInsert.CommandText = strInsert;
+                        cmdInsert.ExecuteNonQuery();
+                    }
+                    else
+                    {
+                        result = null;
+                    }
+
+                    //Clean up
+
+                    cmdcheck.Dispose();
+                    pmchk = null;
+                    strCheckExist = string.Empty;
+                    LE = null;
+                    DataFactory.ActiveConn.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
         public void Add(FileEntity obj)
         {
             if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
