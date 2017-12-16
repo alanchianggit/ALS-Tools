@@ -16,7 +16,7 @@ namespace BusinessLayer
             LogEvent LE = new LogEvent();
             LE.LogName = argLog;
             LE.Details = argDetails;
-            LE.Computer = Environment.MachineName;
+            LE.Terminal = Environment.MachineName;
             LE.Source = base.ToString();
 
             return LE;

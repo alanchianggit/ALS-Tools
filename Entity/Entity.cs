@@ -365,7 +365,7 @@ namespace Entity
         protected int _ID;
         protected string _Level;
         protected string _User;
-        protected string _Computer;
+        protected string _Terminal;
         protected string _Details;
 
         public LogEvent()
@@ -452,15 +452,15 @@ namespace Entity
             }
         }
 
-        public string Computer
+        public string Terminal
         {
             get
             {
-                return _Computer;
+                return _Terminal;
             }
             set
             {
-                _Computer = value;
+                _Terminal = value;
             }
         }
 
