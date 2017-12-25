@@ -34,6 +34,7 @@ namespace RunLoader
         public Operations()
         {
             InitializeComponent();
+            DAL.DataFactory.Instance.Reset();
             newSigninToolStripMenuItem.PerformClick();
             if (Connected)
             {

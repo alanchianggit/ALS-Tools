@@ -35,7 +35,7 @@ namespace RunLoader
             using (EventsLogic el = new EventsLogic())
             {
                 LogEvent newevent = el.Add(this.cmb_Log.Text, this.txt_Details.Text);
-                
+                el.Post(newevent);
             }
                 
             

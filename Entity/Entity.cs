@@ -362,11 +362,18 @@ namespace Entity
         protected string _LogName;
         protected DateTime _TimeCreated;
         protected string _Source;
-        protected int _ID;
+        protected string _ID;
         protected string _Level;
         protected string _User;
         protected string _Terminal;
         protected string _Details;
+
+
+        private DateTime GetDateWithoutMilliseconds(DateTime d)
+        {
+            return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
+        }
+
 
         public LogEvent()
         {
@@ -400,7 +407,7 @@ namespace Entity
             }
             set
             {
-                _TimeCreated = value;
+                _TimeCreated = GetDateWithoutMilliseconds(value);
             }
         }
         
@@ -416,7 +423,7 @@ namespace Entity
             }
         }
 
-        public int ID
+        public string ID
         {
             get
             {

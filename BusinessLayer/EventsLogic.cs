@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Entity;
+using DAL;
 
 namespace BusinessLayer
 {
@@ -18,13 +19,20 @@ namespace BusinessLayer
             LE.Details = argDetails;
             LE.Terminal = Environment.MachineName;
             LE.Source = base.ToString();
-
+            LE.Level = base.ToString();
+            LE.User = Environment.UserName;
+            LE.ID = LE.LogName + LE.TimeCreated;
             return LE;
         }
 
+
         public void Post(LogEvent le)
         {
-            
+            using (EventsDAL eDAL = new EventsDAL())
+            {
+                DataFactory.CreateConnection();
+                eDAL.Add(le);
+            }
         }
 
         #region IDisposable Support
