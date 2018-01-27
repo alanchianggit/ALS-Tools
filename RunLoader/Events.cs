@@ -40,5 +40,15 @@ namespace RunLoader
                 
             
         }
+
+        private void txt_Time_TextChanged(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void txt_Details_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

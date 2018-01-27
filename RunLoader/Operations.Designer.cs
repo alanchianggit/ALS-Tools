@@ -136,6 +136,7 @@
             this.productionManagementToolStripMenuItem.Name = "productionManagementToolStripMenuItem";
             this.productionManagementToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
             this.productionManagementToolStripMenuItem.Text = "Production Management";
+            this.productionManagementToolStripMenuItem.Click += new System.EventHandler(this.productionManagementToolStripMenuItem_Click);
             // 
             // analysisManagementToolStripMenuItem
             // 

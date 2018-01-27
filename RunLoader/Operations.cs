@@ -112,5 +112,19 @@ namespace RunLoader
             ShowChildForm(frm);
         }
 
+        private void productionManagementToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
+            if (!strType.Contains("Production") || (frm == null || frm.IsDisposed))
+            {
+                frm = new Production();
+                frm = RunLoader.Production.GetForm;
+            }
+            else
+            {
+                frm.WindowState = FormWindowState.Normal;
+            }
+            ShowChildForm(frm);
+        }
     }
 }
