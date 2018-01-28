@@ -483,4 +483,189 @@ namespace Entity
             }
         }
     }
+
+    public abstract class ProductionEntity:IDisposable
+    {
+        protected string name;
+        protected DateTime startTime;
+        protected DateTime endTime;
+        protected string starter;
+        protected string ender;
+        protected string iD;
+        protected string type;
+        protected int quantity;
+        protected string method;
+        protected string eqpName;
+
+
+        public DateTime StartTime
+        {
+            get
+            {
+                return startTime;
+            }
+
+            set
+            {
+                startTime = value;
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+
+            set
+            {
+                name = value;
+            }
+        }
+
+        public DateTime EndTime
+        {
+            get
+            {
+                return endTime;
+            }
+
+            set
+            {
+                endTime = value;
+            }
+        }
+
+        public string Starter
+        {
+            get
+            {
+                return starter;
+            }
+
+            set
+            {
+                starter = value;
+            }
+        }
+
+        public string Ender
+        {
+            get
+            {
+                return ender;
+            }
+
+            set
+            {
+                ender = value;
+            }
+        }
+
+        public string ID
+        {
+            get
+            {
+                return iD;
+            }
+
+            set
+            {
+                iD = value;
+            }
+        }
+
+        public string Type
+        {
+            get
+            {
+                return type;
+            }
+
+            set
+            {
+                type = value;
+            }
+        }
+
+        public int Quantity
+        {
+            get
+            {
+                return quantity;
+            }
+
+            set
+            {
+                quantity = value;
+            }
+        }
+
+        public string Method
+        {
+            get
+            {
+                return method;
+            }
+
+            set
+            {
+                method = value;
+            }
+        }
+
+        public string EqpName
+        {
+            get
+            {
+                return eqpName;
+            }
+
+            set
+            {
+                eqpName = value;
+            }
+        }
+
+        public ProductionEntity()
+        {
+
+        }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~ProductionEntity() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        void IDisposable.Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
+    }
 }

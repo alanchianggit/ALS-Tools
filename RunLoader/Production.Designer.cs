@@ -29,27 +29,29 @@
         private void InitializeComponent()
         {
             this.Label_ProductionID = new System.Windows.Forms.Label();
-            this.cmb_ProductionID = new System.Windows.Forms.ComboBox();
+            this.cmb_Name = new System.Windows.Forms.ComboBox();
             this.Label_EqpName = new System.Windows.Forms.Label();
             this.cmb_EqpName = new System.Windows.Forms.ComboBox();
             this.Label_Type = new System.Windows.Forms.Label();
             this.cmb_Type = new System.Windows.Forms.ComboBox();
             this.Label_StartTime = new System.Windows.Forms.Label();
-            this.dateTime_Start = new System.Windows.Forms.DateTimePicker();
+            this.dateTime_StartTime = new System.Windows.Forms.DateTimePicker();
             this.Label_Starter = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.txt_Starter = new System.Windows.Forms.TextBox();
             this.Label_Quantity = new System.Windows.Forms.Label();
-            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.txt_Quantity = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.Label_EqpFilter = new System.Windows.Forms.Label();
+            this.dateTime_EndTime = new System.Windows.Forms.DateTimePicker();
             this.cmb_EqpFilter = new System.Windows.Forms.ComboBox();
-            this.Label_EndTime = new System.Windows.Forms.Label();
+            this.txt_Ender = new System.Windows.Forms.TextBox();
             this.Label_Ender = new System.Windows.Forms.Label();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.dateTime_End = new System.Windows.Forms.DateTimePicker();
+            this.Label_EndTime = new System.Windows.Forms.Label();
+            this.Label_EqpFilter = new System.Windows.Forms.Label();
+            this.Label_Method = new System.Windows.Forms.Label();
+            this.cmb_Method = new System.Windows.Forms.ComboBox();
             this.btn_Create = new System.Windows.Forms.Button();
             this.btn_Update = new System.Windows.Forms.Button();
-            this.btn_Discard = new System.Windows.Forms.Button();
+            this.btn_Clear = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -64,14 +66,15 @@
             this.Label_ProductionID.TabIndex = 0;
             this.Label_ProductionID.Text = "Production ID";
             // 
-            // cmb_ProductionID
+            // cmb_Name
             // 
-            this.cmb_ProductionID.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.cmb_ProductionID.FormattingEnabled = true;
-            this.cmb_ProductionID.Location = new System.Drawing.Point(91, 30);
-            this.cmb_ProductionID.Name = "cmb_ProductionID";
-            this.cmb_ProductionID.Size = new System.Drawing.Size(200, 21);
-            this.cmb_ProductionID.TabIndex = 2;
+            this.cmb_Name.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmb_Name.FormattingEnabled = true;
+            this.cmb_Name.Location = new System.Drawing.Point(91, 30);
+            this.cmb_Name.Name = "cmb_Name";
+            this.cmb_Name.Size = new System.Drawing.Size(200, 21);
+            this.cmb_Name.TabIndex = 2;
+            this.cmb_Name.TextChanged += new System.EventHandler(this.ControlTextChanged);
             // 
             // Label_EqpName
             // 
@@ -92,6 +95,7 @@
             this.cmb_EqpName.Name = "cmb_EqpName";
             this.cmb_EqpName.Size = new System.Drawing.Size(205, 21);
             this.cmb_EqpName.TabIndex = 2;
+            this.cmb_EqpName.TextChanged += new System.EventHandler(this.ControlTextChanged);
             // 
             // Label_Type
             // 
@@ -112,6 +116,7 @@
             this.cmb_Type.Name = "cmb_Type";
             this.cmb_Type.Size = new System.Drawing.Size(200, 21);
             this.cmb_Type.TabIndex = 2;
+            this.cmb_Type.TextChanged += new System.EventHandler(this.ControlTextChanged);
             // 
             // Label_StartTime
             // 
@@ -124,15 +129,16 @@
             this.Label_StartTime.TabIndex = 0;
             this.Label_StartTime.Text = "Start Time";
             // 
-            // dateTime_Start
+            // dateTime_StartTime
             // 
-            this.dateTime_Start.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.dateTime_Start.CustomFormat = "yyyy-MM-dd hh:mm:ss tt";
-            this.dateTime_Start.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dateTime_Start.Location = new System.Drawing.Point(391, 84);
-            this.dateTime_Start.Name = "dateTime_Start";
-            this.dateTime_Start.Size = new System.Drawing.Size(205, 20);
-            this.dateTime_Start.TabIndex = 3;
+            this.dateTime_StartTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.dateTime_StartTime.CustomFormat = "yyyy-MM-dd hh:mm:ss tt";
+            this.dateTime_StartTime.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.dateTime_StartTime.Location = new System.Drawing.Point(391, 84);
+            this.dateTime_StartTime.Name = "dateTime_StartTime";
+            this.dateTime_StartTime.Size = new System.Drawing.Size(205, 20);
+            this.dateTime_StartTime.TabIndex = 3;
+            this.dateTime_StartTime.ValueChanged += new System.EventHandler(this.ControlTextChanged);
             // 
             // Label_Starter
             // 
@@ -145,13 +151,14 @@
             this.Label_Starter.TabIndex = 0;
             this.Label_Starter.Text = "Start Analyst";
             // 
-            // textBox1
+            // txt_Starter
             // 
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Location = new System.Drawing.Point(91, 84);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(200, 20);
-            this.textBox1.TabIndex = 4;
+            this.txt_Starter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.txt_Starter.Location = new System.Drawing.Point(91, 84);
+            this.txt_Starter.Name = "txt_Starter";
+            this.txt_Starter.Size = new System.Drawing.Size(200, 20);
+            this.txt_Starter.TabIndex = 4;
+            this.txt_Starter.TextChanged += new System.EventHandler(this.ControlTextChanged);
             // 
             // Label_Quantity
             // 
@@ -164,13 +171,14 @@
             this.Label_Quantity.TabIndex = 0;
             this.Label_Quantity.Text = "Quantity";
             // 
-            // textBox3
+            // txt_Quantity
             // 
-            this.textBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox3.Location = new System.Drawing.Point(391, 57);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(205, 20);
-            this.textBox3.TabIndex = 4;
+            this.txt_Quantity.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.txt_Quantity.Location = new System.Drawing.Point(391, 57);
+            this.txt_Quantity.Name = "txt_Quantity";
+            this.txt_Quantity.Size = new System.Drawing.Size(205, 20);
+            this.txt_Quantity.TabIndex = 4;
+            this.txt_Quantity.TextChanged += new System.EventHandler(this.ControlTextChanged);
             // 
             // tableLayoutPanel1
             // 
@@ -179,13 +187,13 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.Controls.Add(this.dateTime_End, 3, 4);
-            this.tableLayoutPanel1.Controls.Add(this.dateTime_Start, 3, 3);
+            this.tableLayoutPanel1.Controls.Add(this.dateTime_EndTime, 3, 4);
+            this.tableLayoutPanel1.Controls.Add(this.dateTime_StartTime, 3, 3);
             this.tableLayoutPanel1.Controls.Add(this.cmb_EqpFilter, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.textBox2, 1, 4);
+            this.tableLayoutPanel1.Controls.Add(this.txt_Ender, 1, 4);
             this.tableLayoutPanel1.Controls.Add(this.Label_ProductionID, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.textBox1, 1, 3);
-            this.tableLayoutPanel1.Controls.Add(this.cmb_ProductionID, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.txt_Starter, 1, 3);
+            this.tableLayoutPanel1.Controls.Add(this.cmb_Name, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.Label_Ender, 0, 4);
             this.tableLayoutPanel1.Controls.Add(this.cmb_Type, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.Label_Type, 0, 2);
@@ -194,9 +202,11 @@
             this.tableLayoutPanel1.Controls.Add(this.Label_EndTime, 2, 4);
             this.tableLayoutPanel1.Controls.Add(this.Label_EqpFilter, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.Label_Quantity, 2, 2);
-            this.tableLayoutPanel1.Controls.Add(this.textBox3, 3, 2);
+            this.tableLayoutPanel1.Controls.Add(this.txt_Quantity, 3, 2);
             this.tableLayoutPanel1.Controls.Add(this.Label_EqpName, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.cmb_EqpName, 3, 1);
+            this.tableLayoutPanel1.Controls.Add(this.Label_Method, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.cmb_Method, 3, 0);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 5;
@@ -209,16 +219,16 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(599, 137);
             this.tableLayoutPanel1.TabIndex = 5;
             // 
-            // Label_EqpFilter
+            // dateTime_EndTime
             // 
-            this.Label_EqpFilter.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.Label_EqpFilter.AutoSize = true;
-            this.Label_EqpFilter.ForeColor = System.Drawing.SystemColors.Control;
-            this.Label_EqpFilter.Location = new System.Drawing.Point(3, 7);
-            this.Label_EqpFilter.Name = "Label_EqpFilter";
-            this.Label_EqpFilter.Size = new System.Drawing.Size(82, 13);
-            this.Label_EqpFilter.TabIndex = 0;
-            this.Label_EqpFilter.Text = "Equipment Filter";
+            this.dateTime_EndTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.dateTime_EndTime.CustomFormat = "yyyy-MM-dd hh:mm:ss tt";
+            this.dateTime_EndTime.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.dateTime_EndTime.Location = new System.Drawing.Point(391, 112);
+            this.dateTime_EndTime.Name = "dateTime_EndTime";
+            this.dateTime_EndTime.Size = new System.Drawing.Size(205, 20);
+            this.dateTime_EndTime.TabIndex = 3;
+            this.dateTime_EndTime.ValueChanged += new System.EventHandler(this.ControlTextChanged);
             // 
             // cmb_EqpFilter
             // 
@@ -229,16 +239,14 @@
             this.cmb_EqpFilter.Size = new System.Drawing.Size(200, 21);
             this.cmb_EqpFilter.TabIndex = 2;
             // 
-            // Label_EndTime
+            // txt_Ender
             // 
-            this.Label_EndTime.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.Label_EndTime.AutoSize = true;
-            this.Label_EndTime.ForeColor = System.Drawing.SystemColors.Control;
-            this.Label_EndTime.Location = new System.Drawing.Point(297, 115);
-            this.Label_EndTime.Name = "Label_EndTime";
-            this.Label_EndTime.Size = new System.Drawing.Size(52, 13);
-            this.Label_EndTime.TabIndex = 0;
-            this.Label_EndTime.Text = "End Time";
+            this.txt_Ender.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.txt_Ender.Location = new System.Drawing.Point(91, 112);
+            this.txt_Ender.Name = "txt_Ender";
+            this.txt_Ender.Size = new System.Drawing.Size(200, 20);
+            this.txt_Ender.TabIndex = 4;
+            this.txt_Ender.TextChanged += new System.EventHandler(this.ControlTextChanged);
             // 
             // Label_Ender
             // 
@@ -251,23 +259,48 @@
             this.Label_Ender.TabIndex = 0;
             this.Label_Ender.Text = "End Analyst";
             // 
-            // textBox2
+            // Label_EndTime
             // 
-            this.textBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox2.Location = new System.Drawing.Point(91, 112);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(200, 20);
-            this.textBox2.TabIndex = 4;
+            this.Label_EndTime.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.Label_EndTime.AutoSize = true;
+            this.Label_EndTime.ForeColor = System.Drawing.SystemColors.Control;
+            this.Label_EndTime.Location = new System.Drawing.Point(297, 115);
+            this.Label_EndTime.Name = "Label_EndTime";
+            this.Label_EndTime.Size = new System.Drawing.Size(52, 13);
+            this.Label_EndTime.TabIndex = 0;
+            this.Label_EndTime.Text = "End Time";
             // 
-            // dateTime_End
+            // Label_EqpFilter
             // 
-            this.dateTime_End.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.dateTime_End.CustomFormat = "yyyy-MM-dd hh:mm:ss tt";
-            this.dateTime_End.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dateTime_End.Location = new System.Drawing.Point(391, 112);
-            this.dateTime_End.Name = "dateTime_End";
-            this.dateTime_End.Size = new System.Drawing.Size(205, 20);
-            this.dateTime_End.TabIndex = 3;
+            this.Label_EqpFilter.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.Label_EqpFilter.AutoSize = true;
+            this.Label_EqpFilter.ForeColor = System.Drawing.SystemColors.Control;
+            this.Label_EqpFilter.Location = new System.Drawing.Point(3, 7);
+            this.Label_EqpFilter.Name = "Label_EqpFilter";
+            this.Label_EqpFilter.Size = new System.Drawing.Size(82, 13);
+            this.Label_EqpFilter.TabIndex = 0;
+            this.Label_EqpFilter.Text = "Equipment Filter";
+            // 
+            // Label_Method
+            // 
+            this.Label_Method.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.Label_Method.AutoSize = true;
+            this.Label_Method.ForeColor = System.Drawing.SystemColors.Control;
+            this.Label_Method.Location = new System.Drawing.Point(297, 7);
+            this.Label_Method.Name = "Label_Method";
+            this.Label_Method.Size = new System.Drawing.Size(43, 13);
+            this.Label_Method.TabIndex = 0;
+            this.Label_Method.Text = "Method";
+            // 
+            // cmb_Method
+            // 
+            this.cmb_Method.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmb_Method.FormattingEnabled = true;
+            this.cmb_Method.Location = new System.Drawing.Point(391, 3);
+            this.cmb_Method.Name = "cmb_Method";
+            this.cmb_Method.Size = new System.Drawing.Size(205, 21);
+            this.cmb_Method.TabIndex = 2;
+            this.cmb_Method.TextChanged += new System.EventHandler(this.ControlTextChanged);
             // 
             // btn_Create
             // 
@@ -277,6 +310,7 @@
             this.btn_Create.TabIndex = 6;
             this.btn_Create.Text = "Create";
             this.btn_Create.UseVisualStyleBackColor = true;
+            this.btn_Create.Click += new System.EventHandler(this.btn_Create_Click);
             // 
             // btn_Update
             // 
@@ -287,14 +321,15 @@
             this.btn_Update.Text = "Update";
             this.btn_Update.UseVisualStyleBackColor = true;
             // 
-            // btn_Discard
+            // btn_Clear
             // 
-            this.btn_Discard.Location = new System.Drawing.Point(400, 164);
-            this.btn_Discard.Name = "btn_Discard";
-            this.btn_Discard.Size = new System.Drawing.Size(142, 51);
-            this.btn_Discard.TabIndex = 6;
-            this.btn_Discard.Text = "Discard";
-            this.btn_Discard.UseVisualStyleBackColor = true;
+            this.btn_Clear.Location = new System.Drawing.Point(400, 164);
+            this.btn_Clear.Name = "btn_Clear";
+            this.btn_Clear.Size = new System.Drawing.Size(142, 51);
+            this.btn_Clear.TabIndex = 6;
+            this.btn_Clear.Text = "Clear";
+            this.btn_Clear.UseVisualStyleBackColor = true;
+            this.btn_Clear.Click += new System.EventHandler(this.btn_Clear_Click);
             // 
             // Production
             // 
@@ -302,7 +337,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(44)))), ((int)(((byte)(51)))));
             this.ClientSize = new System.Drawing.Size(1239, 231);
-            this.Controls.Add(this.btn_Discard);
+            this.Controls.Add(this.btn_Clear);
             this.Controls.Add(this.btn_Update);
             this.Controls.Add(this.btn_Create);
             this.Controls.Add(this.tableLayoutPanel1);
@@ -317,26 +352,28 @@
 
         #endregion
         private System.Windows.Forms.Label Label_ProductionID;
-        private System.Windows.Forms.ComboBox cmb_ProductionID;
+        private System.Windows.Forms.ComboBox cmb_Name;
         private System.Windows.Forms.Label Label_EqpName;
         private System.Windows.Forms.ComboBox cmb_EqpName;
         private System.Windows.Forms.Label Label_Type;
         private System.Windows.Forms.ComboBox cmb_Type;
         private System.Windows.Forms.Label Label_StartTime;
-        private System.Windows.Forms.DateTimePicker dateTime_Start;
+        private System.Windows.Forms.DateTimePicker dateTime_StartTime;
         private System.Windows.Forms.Label Label_Starter;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox txt_Starter;
         private System.Windows.Forms.Label Label_Quantity;
-        private System.Windows.Forms.TextBox textBox3;
+        private System.Windows.Forms.TextBox txt_Quantity;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.ComboBox cmb_EqpFilter;
         private System.Windows.Forms.Label Label_EqpFilter;
-        private System.Windows.Forms.DateTimePicker dateTime_End;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.DateTimePicker dateTime_EndTime;
+        private System.Windows.Forms.TextBox txt_Ender;
         private System.Windows.Forms.Label Label_Ender;
         private System.Windows.Forms.Label Label_EndTime;
         private System.Windows.Forms.Button btn_Create;
         private System.Windows.Forms.Button btn_Update;
-        private System.Windows.Forms.Button btn_Discard;
+        private System.Windows.Forms.Button btn_Clear;
+        private System.Windows.Forms.Label Label_Method;
+        private System.Windows.Forms.ComboBox cmb_Method;
     }
 }

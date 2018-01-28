@@ -49,6 +49,7 @@
     <Compile Include="EventsLogic.cs" />
     <Compile Include="FileAccessLogic.cs" />
     <Compile Include="MiddleTier.cs" />
+    <Compile Include="ProductionLogic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

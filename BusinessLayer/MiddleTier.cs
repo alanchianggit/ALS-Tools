@@ -154,6 +154,7 @@ namespace BusinessLayer
             foreach (PropertyInfo pi in typeof(SampleParameter).GetProperties())
             {
                 typeof(SampleParameter).GetProperty(pi.Name).SetValue(this, typeof(WebviewSampleParameterEntity).GetProperty(pi.Name).GetValue(wsp));
+                
             }
             //Default values
             this.AcqID = -1;
