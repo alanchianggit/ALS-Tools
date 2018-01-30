@@ -801,6 +801,10 @@ namespace DAL
         }
         #endregion
 
+        public void Update(ProductionEntity pe)
+        {
+
+        }
     }
 }
 

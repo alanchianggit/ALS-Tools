@@ -74,6 +74,19 @@ namespace RunLoader
 
         }
 
+        private  void StoreProduction()
+        {
+            currProd.Ender = txt_Ender.Text;
+            currProd.Starter = txt_Starter.Text;
+            currProd.StartTime = DateTime.Parse( dateTime_StartTime.Text);
+            currProd.EndTime = DateTime.Parse(dateTime_EndTime.Text);
+            currProd.Method = cmb_Method.Text;
+            currProd.ProductionName = cmb_ProductionName.Text;
+            currProd.Type = cmb_Type.Text ;
+            currProd.Quantity = int.Parse(txt_Quantity.ToString());
+            currProd.EqpName = cmb_EqpName.Text;
+        }
+
         private void btn_Clear_Click(object sender, EventArgs e)
         {
             currProd.GetProduction();
@@ -104,6 +117,12 @@ namespace RunLoader
                         break;
                 }
             }
+        }
+
+        private void btn_Update_Click(object sender, EventArgs e)
+        {
+            StoreProduction();
+
         }
     }
 }

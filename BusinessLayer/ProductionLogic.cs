@@ -27,6 +27,14 @@ namespace BusinessLayer
 
         }
 
+        public void UpdateDB()
+        {
+            using (ProductionDAL pdal = new ProductionDAL())
+            {
+                pdal.Update(this);
+            }
+        }
+
 
         public Productions GetProduction()
         {
@@ -41,10 +49,7 @@ namespace BusinessLayer
                     pi.SetValue(this, pi.GetValue(newProd));
 
                 }
-
-
                 return this;
-                
             }
         }
 
