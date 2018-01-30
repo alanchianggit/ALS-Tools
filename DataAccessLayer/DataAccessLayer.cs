@@ -380,7 +380,11 @@ namespace DAL
 
         public FileDataDAL()
         {
-
+            if (DataFactory.ActiveConn != null)
+            {
+                DataFactory.CreateConnection();
+            }
+            
         }
 
         private DataTable GetDatatable()
@@ -587,10 +591,58 @@ namespace DAL
     public class ProductionDAL : IDisposable
     {
 
-        public DataTable GetDataTable(string productionName)
+        public ProductionDAL()
+        {
+            if (DataFactory.ActiveConn == null)
+            {
+                DataFactory.CreateConnection();
+            }
+        }
+
+        public ProductionEntity RetrieveProductionData(ProductionEntity pe)
+        {
+            return pe = RetrieveProductionData(pe.ProductionName);
+
+        }
+
+        public ProductionEntity RetrieveProductionData(string productionName)
+        {
+            ProductionEntity pe = new ProductionEntity();
+            pe.ProductionName = productionName;
+
+            DataTable dt = new DataTable();
+            dt = GetDataTable(pe);
+            if (dt.Rows.Count == 1)
+            {
+                DataRow dr = dt.Rows[0];
+                //Reflection method
+                foreach (PropertyInfo pi in typeof(ProductionEntity).GetProperties())
+                {
+                    if (!DBNull.Value.Equals(dr[pi.Name]))
+                    {
+                        pi.SetValue(pe, dr[pi.Name]);
+                    }
+                    else
+                    {
+                        //do nothing (i.e. not set value)
+                    }
+                        
+                    
+                }
+            }
+            else
+            {
+                Console.WriteLine("Multiple Record. Abort.");
+            }
+            return pe;
+
+
+            
+        }
+        private DataTable GetDataTable(ProductionEntity prod)
         {
             DataTable dt = new DataTable();
-            string strSQL = string.Format("SELECT * FROM [tbl_Production] WHERE [ProductionName]='{0}'",productionName);
+            string strSQL = string.Format("SELECT * FROM [tbl_Production] WHERE [ProductionName]='{0}'",prod.ProductionName);
             if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
             try
             {

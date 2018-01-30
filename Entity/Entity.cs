@@ -491,7 +491,7 @@ namespace Entity
         protected DateTime _endTime;
         protected string _starter;
         protected string _ender;
-        protected string _ID;
+        protected int _ID;
         protected string _type;
         protected int _quantity;
         protected string _method;
@@ -567,7 +567,7 @@ namespace Entity
             }
         }
 
-        public string ID
+        public int ID
         {
             get
             {
@@ -638,7 +638,7 @@ namespace Entity
         }
         public ProductionEntity()
         {
-            StartTime = default(DateTime);
+            //StartTime = default(DateTime);
             
         }
 

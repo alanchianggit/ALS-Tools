@@ -49,8 +49,23 @@ namespace RunLoader
         {
             txt_Ender.Text = currProd.Ender;
             txt_Starter.Text = currProd.Starter;
-            dateTime_StartTime.Text = currProd.StartTime.ToString();
-            dateTime_EndTime.Text = currProd.EndTime.ToString();
+            if (currProd.StartTime == DateTime.MinValue)
+            {
+                dateTime_StartTime.Text = dateTime_StartTime.MinDate.ToString();
+            }
+            else
+            {
+                dateTime_StartTime.Text = currProd.StartTime.ToString();
+            }
+
+            if (currProd.EndTime == DateTime.MinValue)
+            {
+                dateTime_EndTime.Text = dateTime_EndTime.MinDate.ToString();
+            }
+            else
+            {
+                dateTime_EndTime.Text = currProd.EndTime.ToString();
+            }
             cmb_Method.Text = currProd.Method;
             cmb_ProductionName.Text = currProd.ProductionName;
             cmb_Type.Text = currProd.Type;
@@ -61,16 +76,29 @@ namespace RunLoader
 
         private void btn_Clear_Click(object sender, EventArgs e)
         {
+            currProd.GetProduction();
+            if (currProd.ID == int.MinValue)
+            {
+                ClearFields();
+            }
+            else
+            {
+                ShowProduction();
+            }
+        }
+
+        private void ClearFields()
+        {
             foreach (Control ctrl in tableLayoutPanel1.Controls)
             {
-                switch (ctrl.Name.Substring(0,4))
+                switch (ctrl.Name.Substring(0, 4))
                 {
                     case "cmb_":
                     case "txt_":
                         ctrl.ResetText();
                         break;
                     case "date":
-                        ctrl.Text = DateTime.Now.ToString();
+                        ctrl.Text = DateTime.MinValue.ToString();
                         break;
                     default:
                         break;

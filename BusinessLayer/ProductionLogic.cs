@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Entity;
-using DAL;
 using System.Reflection;
+using DAL;
+
 using System.Data;
 
 namespace BusinessLayer
@@ -19,22 +20,32 @@ namespace BusinessLayer
 
         }
 
-        private DataTable Datatable
+        public Productions(string productionname)
         {
-            get
-            {
-                using (ProductionDAL pdal = new ProductionDAL())
-                {
-                    datatable = pdal.GetDataTable(this.ProductionName);
-                }
-                    
-                return datatable;
-            }
+            this.ProductionName = productionname;
+            this.GetProduction();
+
         }
 
-        public void GetProduction()
+
+        public Productions GetProduction()
         {
-            
+            using (ProductionDAL pdal = new ProductionDAL())
+            {
+                ProductionEntity newProd = new ProductionEntity();
+                //pdal.GetDataTable(this.ProductionName);
+                newProd = pdal.RetrieveProductionData(this);
+
+                foreach (PropertyInfo pi in typeof(ProductionEntity).GetProperties())
+                {
+                    pi.SetValue(this, pi.GetValue(newProd));
+
+                }
+
+
+                return this;
+                
+            }
         }
 
         public void CreateNew(Productions currProd)
