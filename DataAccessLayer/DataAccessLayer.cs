@@ -10,6 +10,7 @@ using System.Net;
 using System.Data.SQLite;
 using Entity;
 using System.Reflection;
+using System.Linq;
 
 namespace DAL
 {
@@ -583,6 +584,171 @@ namespace DAL
         #endregion
     }
 
+    public class ProductionDAL : IDisposable
+    {
 
+        public DataTable GetDataTable(string productionName)
+        {
+            DataTable dt = new DataTable();
+            string strSQL = string.Format("SELECT * FROM [tbl_Production] WHERE [ProductionName]='{0}'",productionName);
+            if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
+            try
+            {
+                //conn = DataFactory.ActiveConn;
+                IDbCommand cmd = DataFactory.CreateCommand(strSQL);
+                using (DbDataAdapter da = DataFactory.CreateAdapter(cmd))
+                {
+                    //DataTable dt = new DataTable("FileData");
+                    da.Fill(dt);
+                    //this.Datatable = dt;
+                }
+                cmd.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return dt;
+
+        }
+        public void Add(ProductionEntity obj)
+        {
+            if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
+            try
+            {
+
+                using (IDbCommand cmdcheck = DataFactory.CreateCommand(string.Empty))
+                {
+                    IDbDataParameter pmchk = cmdcheck.CreateParameter();
+                    pmchk.ParameterName = "@ProductionName";
+                    pmchk.Value = obj.ProductionName;
+                    cmdcheck.Parameters.Add(pmchk);
+                    
+                    //string strCheckExist = string.Format("SELECT [FileName] FROM [tbl_Files] WHERE [FileName] = {0} OR [FileContent] = {1}", "@FileName", "@FileContent");
+                    string strCheckExist = string.Format("SELECT [ProductionName] FROM [tbl_Production] WHERE [ProductionName] = {0}", "@ProductionName");
+                    cmdcheck.CommandText = strCheckExist;
+                    var result = cmdcheck.ExecuteScalar();
+
+                    if (result == null)
+                    {
+                        // get properties from entity class
+                        PropertyInfo[] PIs = typeof(ProductionEntity).GetProperties();
+
+                        //Create table of data according to properties so it can be adapted to connection
+                        IDbCommand cmdInsert = DataFactory.CreateCommand(string.Empty);
+
+                        //create new Lists for colum names and parameters
+                        List<string> InsertColumnNames = new List<string>();
+                        List<string> InsertColumnValues = new List<string>();
+
+                        //create exception fields list
+                        List<string> ExceptionFields = new List<string>();
+                        ExceptionFields.Add("ID");
+
+                        //Iterate through each prorperty to coerce a parameter
+                        foreach (PropertyInfo pi in PIs)
+                        {
+                            if (ExceptionFields.Exists(e => !e.Contains(pi.Name)) && pi.GetValue(obj) != null)
+                            {
+                                //Create new parameter object
+                                IDbDataParameter pm = cmdInsert.CreateParameter();
+                                //Set Parameter name from property name
+                                pm.ParameterName = string.Format("@{0}", pi.Name.ToString());
+                                //Set value from property of object
+                                switch (pi.PropertyType.ToString())
+                                {
+                                    case "System.DateTime":
+                                        try
+                                        {
+                                            if ((DateTime)pi.GetValue(obj) == DateTime.MinValue)
+                                            {
+                                                pm.Value = DBNull.Value;
+                                            }
+                                            else
+                                            {
+                                                pm.Value = pi.GetValue(obj);
+                                            }
+                                        }
+                                        catch(Exception ex)
+                                        {
+                                            Console.WriteLine(ex.Message);
+                                        }
+                                        break;
+                                    default:
+                                        pm.Value = pi.GetValue(obj);
+                                        break;
+                                }
+                                
+                                //Add parameter to command
+                                cmdInsert.Parameters.Add(pm);
+                                //Add to list for generating string
+                                InsertColumnValues.Add(pm.ParameterName);
+                                InsertColumnNames.Add("[" + pi.Name.ToString() + "]");
+                                //clean up
+                                pm = null;
+                            }
+                        }
+
+                        string strInsert = string.Format("INSERT INTO [tbl_Production] ({0}) VALUES ({1});", string.Join(",", InsertColumnNames.ToArray()), string.Join(",", InsertColumnValues.ToArray()));
+                        cmdInsert.CommandText = strInsert;
+                        cmdInsert.ExecuteNonQuery();
+                    }
+                    else
+                    {
+                        result = null;
+                    }
+
+                    //Clean up
+
+                    cmdcheck.Dispose();
+                    pmchk = null;
+                    strCheckExist = string.Empty;
+                    obj = null;
+                    DataFactory.ActiveConn.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~ProductionDAL() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        void IDisposable.Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
+
+    }
 }
 

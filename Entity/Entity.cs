@@ -484,43 +484,47 @@ namespace Entity
         }
     }
 
-    public abstract class ProductionEntity:IDisposable
+    public class ProductionEntity:IDisposable
     {
-        protected string name;
-        protected DateTime startTime;
-        protected DateTime endTime;
-        protected string starter;
-        protected string ender;
-        protected string iD;
-        protected string type;
-        protected int quantity;
-        protected string method;
-        protected string eqpName;
+        protected string _name;
+        protected DateTime _startTime;
+        protected DateTime _endTime;
+        protected string _starter;
+        protected string _ender;
+        protected string _ID;
+        protected string _type;
+        protected int _quantity;
+        protected string _method;
+        protected string _eqpname;
 
+        private DateTime GetDateWithoutMilliseconds(DateTime d)
+        {
+            return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
+        }
 
         public DateTime StartTime
         {
             get
             {
-                return startTime;
+                    return _startTime;
             }
 
             set
             {
-                startTime = value;
+                _startTime = GetDateWithoutMilliseconds(value);
             }
         }
 
-        public string Name
+        public string ProductionName
         {
             get
             {
-                return name;
+                return _name;
             }
 
             set
             {
-                name = value;
+                _name = value;
             }
         }
 
@@ -528,12 +532,12 @@ namespace Entity
         {
             get
             {
-                return endTime;
+                return _endTime;
             }
 
             set
             {
-                endTime = value;
+                _endTime = GetDateWithoutMilliseconds( value);
             }
         }
 
@@ -541,12 +545,12 @@ namespace Entity
         {
             get
             {
-                return starter;
+                return _starter;
             }
 
             set
             {
-                starter = value;
+                _starter = value;
             }
         }
 
@@ -554,12 +558,12 @@ namespace Entity
         {
             get
             {
-                return ender;
+                return _ender;
             }
 
             set
             {
-                ender = value;
+                _ender = value;
             }
         }
 
@@ -567,12 +571,12 @@ namespace Entity
         {
             get
             {
-                return iD;
+                return _ID;
             }
 
             set
             {
-                iD = value;
+                _ID = value;
             }
         }
 
@@ -580,12 +584,12 @@ namespace Entity
         {
             get
             {
-                return type;
+                return _type;
             }
 
             set
             {
-                type = value;
+                _type = value;
             }
         }
 
@@ -593,12 +597,12 @@ namespace Entity
         {
             get
             {
-                return quantity;
+                return _quantity;
             }
 
             set
             {
-                quantity = value;
+                _quantity = value;
             }
         }
 
@@ -606,12 +610,12 @@ namespace Entity
         {
             get
             {
-                return method;
+                return _method;
             }
 
             set
             {
-                method = value;
+                _method = value;
             }
         }
 
@@ -619,19 +623,25 @@ namespace Entity
         {
             get
             {
-                return eqpName;
+                return _eqpname;
             }
 
             set
             {
-                eqpName = value;
+                _eqpname = value;
             }
         }
 
+        public ProductionEntity(string name)
+        {
+            ProductionName = name;
+        }
         public ProductionEntity()
         {
-
+            StartTime = default(DateTime);
+            
         }
+
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls

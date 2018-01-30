@@ -6,18 +6,47 @@ using System.Threading.Tasks;
 using Entity;
 using DAL;
 using System.Reflection;
-
+using System.Data;
 
 namespace BusinessLayer
 {
     public class Productions : ProductionEntity, IDisposable, IProductionLogic
     {
-        public Productions CreateNew(Productions currProd)
-        {
-            Productions newProd = new Productions();
+        protected DataTable datatable;
 
-            return newProd;
+        public Productions()
+        {
+
         }
+
+        private DataTable Datatable
+        {
+            get
+            {
+                using (ProductionDAL pdal = new ProductionDAL())
+                {
+                    datatable = pdal.GetDataTable(this.ProductionName);
+                }
+                    
+                return datatable;
+            }
+        }
+
+        public void GetProduction()
+        {
+            
+        }
+
+        public void CreateNew(Productions currProd)
+        {
+            //Productions newProd = new Productions(currProd.ProductionName);
+            using (ProductionDAL pdal = new ProductionDAL())
+            {
+                DataFactory.CreateConnection();
+                pdal.Add(currProd);
+            }
+        }
+
         public void UpdateProperty(object sender)
         {
             // get type of objects
@@ -53,6 +82,7 @@ namespace BusinessLayer
     public interface IProductionLogic
     {
         void UpdateProperty(object sender);
-        Productions CreateNew(Productions currProd);
+        //Productions CreateNew(Productions currProd);
+        //Productions CreateNew(string str);
     }
 }

@@ -42,7 +42,7 @@ namespace RunLoader
 
         private void btn_Create_Click(object sender, EventArgs e)
         {
-            currProd = new Productions();
+            currProd.CreateNew(currProd);
         }
 
         private void ShowProduction()
@@ -52,7 +52,7 @@ namespace RunLoader
             dateTime_StartTime.Text = currProd.StartTime.ToString();
             dateTime_EndTime.Text = currProd.EndTime.ToString();
             cmb_Method.Text = currProd.Method;
-            cmb_Name.Text = currProd.Name;
+            cmb_ProductionName.Text = currProd.ProductionName;
             cmb_Type.Text = currProd.Type;
             txt_Quantity.Text = currProd.Quantity.ToString();
             cmb_EqpName.Text = currProd.EqpName;

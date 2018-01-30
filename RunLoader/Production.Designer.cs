@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.Label_ProductionID = new System.Windows.Forms.Label();
-            this.cmb_Name = new System.Windows.Forms.ComboBox();
+            this.cmb_ProductionName = new System.Windows.Forms.ComboBox();
             this.Label_EqpName = new System.Windows.Forms.Label();
             this.cmb_EqpName = new System.Windows.Forms.ComboBox();
             this.Label_Type = new System.Windows.Forms.Label();
@@ -66,15 +66,15 @@
             this.Label_ProductionID.TabIndex = 0;
             this.Label_ProductionID.Text = "Production ID";
             // 
-            // cmb_Name
+            // cmb_ProductionName
             // 
-            this.cmb_Name.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.cmb_Name.FormattingEnabled = true;
-            this.cmb_Name.Location = new System.Drawing.Point(91, 30);
-            this.cmb_Name.Name = "cmb_Name";
-            this.cmb_Name.Size = new System.Drawing.Size(200, 21);
-            this.cmb_Name.TabIndex = 2;
-            this.cmb_Name.TextChanged += new System.EventHandler(this.ControlTextChanged);
+            this.cmb_ProductionName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmb_ProductionName.FormattingEnabled = true;
+            this.cmb_ProductionName.Location = new System.Drawing.Point(91, 30);
+            this.cmb_ProductionName.Name = "cmb_ProductionName";
+            this.cmb_ProductionName.Size = new System.Drawing.Size(200, 21);
+            this.cmb_ProductionName.TabIndex = 2;
+            this.cmb_ProductionName.TextChanged += new System.EventHandler(this.ControlTextChanged);
             // 
             // Label_EqpName
             // 
@@ -193,7 +193,7 @@
             this.tableLayoutPanel1.Controls.Add(this.txt_Ender, 1, 4);
             this.tableLayoutPanel1.Controls.Add(this.Label_ProductionID, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.txt_Starter, 1, 3);
-            this.tableLayoutPanel1.Controls.Add(this.cmb_Name, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.cmb_ProductionName, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.Label_Ender, 0, 4);
             this.tableLayoutPanel1.Controls.Add(this.cmb_Type, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.Label_Type, 0, 2);
@@ -352,7 +352,7 @@
 
         #endregion
         private System.Windows.Forms.Label Label_ProductionID;
-        private System.Windows.Forms.ComboBox cmb_Name;
+        private System.Windows.Forms.ComboBox cmb_ProductionName;
         private System.Windows.Forms.Label Label_EqpName;
         private System.Windows.Forms.ComboBox cmb_EqpName;
         private System.Windows.Forms.Label Label_Type;
