@@ -31,7 +31,17 @@ namespace BusinessLayer
         {
             using (ProductionDAL pdal = new ProductionDAL())
             {
-                pdal.Update(this);
+                DataFactory.CreateConnection();
+                bool Existence = pdal.CheckExistence(this);
+
+                if (Existence==true)
+                {
+                    pdal.Update(this); 
+                }
+                else
+                {
+                    Console.WriteLine("No record found to be updated");
+                }
             }
         }
 
@@ -58,8 +68,19 @@ namespace BusinessLayer
             //Productions newProd = new Productions(currProd.ProductionName);
             using (ProductionDAL pdal = new ProductionDAL())
             {
+                
                 DataFactory.CreateConnection();
-                pdal.Add(currProd);
+                bool Existence = pdal.CheckExistence(currProd);
+                if (Existence== false)
+                {
+                    pdal.Add(currProd);
+                    GetProduction();
+                }
+                else
+                {
+                    Console.WriteLine("Record existed already");
+                }
+                
             }
         }
 
@@ -83,7 +104,37 @@ namespace BusinessLayer
                 case "System.Int32":
                     if (string.IsNullOrEmpty((string)newValue))
                     {
-                        newValue = "0";
+                        newValue = int.MinValue;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            newValue = int.Parse((string)newValue);
+                        }
+                        catch (Exception ex)
+                        {
+                            newValue = int.MinValue;
+                            Console.WriteLine(ex.Message);
+                        }
+                    }
+                    break;
+                case "System.DateTime":
+                    if (string.IsNullOrEmpty((string)newValue))
+                    {
+                        newValue = DateTime.MinValue;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            newValue = DateTime.Parse((string)newValue);
+                        }
+                        catch (Exception ex)
+                        {
+                            newValue = DateTime.MinValue;
+                            Console.WriteLine(ex.Message);
+                        }
                     }
                     break;
                 default:

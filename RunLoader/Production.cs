@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Entity;
 using BusinessLayer;
+using DAL;
+
 
 
 namespace RunLoader
@@ -16,12 +18,15 @@ namespace RunLoader
     public partial class Production : Form
     {
         public Productions currProd;
-        //private DateTime defaultTime = DateTime.Now;
+        private List<string> _logs = new List<string>();
+        private List<string> _prods = new List<string>();
 
         public Production()
         {
             InitializeComponent();
             currProd = new Productions();
+            UpdateLogs();
+            UpdateProductionIDs();
         }
 
         private static Production inst;
@@ -38,38 +43,30 @@ namespace RunLoader
         private void ControlTextChanged(object sender, EventArgs e)
         {
             currProd.UpdateProperty(sender);
+            if (sender == this.cmb_ProductionName)
+            {
+                currProd.GetProduction();
+                ShowProduction();
+            }
         }
 
         private void btn_Create_Click(object sender, EventArgs e)
         {
             currProd.CreateNew(currProd);
+            ShowProduction();
+
         }
 
         private void ShowProduction()
         {
             txt_Ender.Text = currProd.Ender;
             txt_Starter.Text = currProd.Starter;
-            if (currProd.StartTime == DateTime.MinValue)
-            {
-                dateTime_StartTime.Text = dateTime_StartTime.MinDate.ToString();
-            }
-            else
-            {
-                dateTime_StartTime.Text = currProd.StartTime.ToString();
-            }
-
-            if (currProd.EndTime == DateTime.MinValue)
-            {
-                dateTime_EndTime.Text = dateTime_EndTime.MinDate.ToString();
-            }
-            else
-            {
-                dateTime_EndTime.Text = currProd.EndTime.ToString();
-            }
+            txt_StartTime.Text = currProd.StartTime == DateTime.MinValue ? string.Empty : currProd.StartTime.ToString() ;
+            txt_EndTime.Text = currProd.EndTime == DateTime.MinValue ? string.Empty : currProd.EndTime.ToString();
             cmb_Method.Text = currProd.Method;
             cmb_ProductionName.Text = currProd.ProductionName;
             cmb_Type.Text = currProd.Type;
-            txt_Quantity.Text = currProd.Quantity.ToString();
+            txt_Quantity.Text = currProd.Quantity == int.MinValue || currProd.Quantity == 0 ? string.Empty : currProd.Quantity.ToString() ;
             cmb_EqpName.Text = currProd.EqpName;
 
         }
@@ -78,12 +75,12 @@ namespace RunLoader
         {
             currProd.Ender = txt_Ender.Text;
             currProd.Starter = txt_Starter.Text;
-            currProd.StartTime = DateTime.Parse( dateTime_StartTime.Text);
-            currProd.EndTime = DateTime.Parse(dateTime_EndTime.Text);
+            currProd.StartTime = string.IsNullOrEmpty(txt_StartTime.Text) ? DateTime.MinValue : DateTime.Parse(txt_StartTime.Text);
+            currProd.EndTime = string.IsNullOrEmpty(txt_EndTime.Text) ? DateTime.MinValue : DateTime.Parse(txt_EndTime.Text);
             currProd.Method = cmb_Method.Text;
             currProd.ProductionName = cmb_ProductionName.Text;
             currProd.Type = cmb_Type.Text ;
-            currProd.Quantity = int.Parse(txt_Quantity.ToString());
+            currProd.Quantity = string.IsNullOrEmpty(txt_Quantity.Text) ? int.MinValue : int.Parse(txt_Quantity.Text);
             currProd.EqpName = cmb_EqpName.Text;
         }
 
@@ -122,7 +119,44 @@ namespace RunLoader
         private void btn_Update_Click(object sender, EventArgs e)
         {
             StoreProduction();
+            currProd.UpdateDB();
+            ShowProduction();
+        }
 
+        private void UpdateLogs()
+        {
+            using (ProductionDAL pdal = new ProductionDAL())
+            {
+                DataTable dt = pdal.GetAvailableLogs();
+                _logs = dt.AsEnumerable().Select(r => r.Field<string>("LogID")).ToList();
+            }
+            this.cmb_EqpName.Items.AddRange(_logs.ToArray());
+            this.cmb_EqpFilter.Items.AddRange(_logs.ToArray());
+        }
+
+        private void UpdateProductionIDs()
+        {
+            using (ProductionDAL pdal = new ProductionDAL())
+            {
+                if (this.cmb_EqpFilter.Text == string.Empty)
+                {
+                    DataTable dt = pdal.GetProductionIDs();
+                    _prods = dt.AsEnumerable().Select(r => r.Field<string>("ProductionName")).ToList();
+                }
+                else
+                {
+                    DataTable dt = pdal.GetProductionIDs(cmb_EqpFilter.Text);
+                    _prods = dt.AsEnumerable().Select(r => r.Field<string>("ProductionName")).ToList();
+                }
+                
+            }
+            this.cmb_ProductionName.Items.Clear();
+            this.cmb_ProductionName.Items.AddRange(_prods.ToArray());
+        }
+
+        private void cmb_EqpFilter_TextChanged(object sender, EventArgs e)
+        {
+            UpdateProductionIDs();
         }
     }
 }

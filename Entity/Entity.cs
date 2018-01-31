@@ -410,7 +410,7 @@ namespace Entity
                 _TimeCreated = GetDateWithoutMilliseconds(value);
             }
         }
-        
+
         public string Source
         {
             get
@@ -484,11 +484,11 @@ namespace Entity
         }
     }
 
-    public class ProductionEntity:IDisposable
+    public class ProductionEntity : IDisposable
     {
         protected string _name;
-        protected DateTime _startTime;
-        protected DateTime _endTime;
+        protected DateTime? _startTime;
+        protected DateTime? _endTime;
         protected string _starter;
         protected string _ender;
         protected int _ID;
@@ -506,7 +506,7 @@ namespace Entity
         {
             get
             {
-                    return _startTime;
+                return _startTime.Value;
             }
 
             set
@@ -514,6 +514,8 @@ namespace Entity
                 _startTime = GetDateWithoutMilliseconds(value);
             }
         }
+
+
 
         public string ProductionName
         {
@@ -532,12 +534,12 @@ namespace Entity
         {
             get
             {
-                return _endTime;
+                    return _endTime.Value;
             }
 
             set
             {
-                _endTime = GetDateWithoutMilliseconds( value);
+                _endTime = GetDateWithoutMilliseconds(value);
             }
         }
 
@@ -638,8 +640,9 @@ namespace Entity
         }
         public ProductionEntity()
         {
-            //StartTime = default(DateTime);
-            
+            StartTime = DateTime.MinValue;
+            EndTime = DateTime.MinValue;
+            Quantity = int.MinValue;
         }
 
 
