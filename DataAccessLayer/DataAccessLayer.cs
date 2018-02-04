@@ -40,6 +40,12 @@ namespace DAL
 
     public class DataFactory : IDisposable
     {
+        //create new Lists for colum names and parameters
+        public static List<string> FieldNames = new List<string>();
+        public static List<string> FieldValues = new List<string>();
+        //create exception fields list
+        public List<string> ExceptionFields = new List<string>();
+
         private const string defaultDB = @"C:\Users\Alan\Documents\BackEnd1.accdb";
         public static DataFactory Instance = new DataFactory();
         public void Reset()
@@ -87,6 +93,118 @@ namespace DAL
             //create connection using database type
             return DataFactory.CreateConnection(dbtype, DBDataSource);
 
+        }
+
+        public static DataTable QueryTable(string strSQL)
+        {
+            DataTable dt = new DataTable();
+            if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
+            try
+            {
+                IDbCommand cmd = DataFactory.CreateCommand(strSQL);
+                using (DbDataAdapter da = DataFactory.CreateAdapter(cmd))
+                {
+                    da.Fill(dt);
+                }
+                cmd.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return dt;
+        }
+
+        public static void RunNonQuery(IDbCommand cmd, string strSQL)
+        {
+            if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
+            try
+            {
+                cmd.CommandText = strSQL;
+                cmd.ExecuteNonQuery();
+
+                DataFactory.ActiveConn.Close();
+            }
+            catch (Exception ex)
+            {
+                DataFactory.ActiveConn.Close();
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public static IDbCommand ExtractParameters(object obj, List<string> excepfields)
+        {
+
+            // get properties from entity class
+
+            PropertyInfo[] PIs = obj.GetType().GetProperties();
+            //Create table of data according to properties so it can be adapted to connection
+            IDbCommand cmd = DataFactory.CreateCommand(string.Empty);
+
+
+            //Iterate through each prorperty to coerce a parameter
+            foreach (PropertyInfo pi in PIs)
+            {
+                if (!excepfields.Contains(pi.Name) && pi.GetValue(obj) != null)
+                {
+                    //Create new parameter object
+                    IDbDataParameter pm = cmd.CreateParameter();
+                    //Set Parameter name from property name
+                    pm.ParameterName = string.Format("@{0}", pi.Name.ToString());
+                    //Set value from property of object
+                    switch (pi.PropertyType.ToString())
+                    {
+                        case "System.DateTime":
+                            try
+                            {
+                                if ((DateTime)pi.GetValue(obj) == DateTime.MinValue)
+                                {
+                                    pm.Value = DBNull.Value;
+                                }
+                                else
+                                {
+                                    pm.Value = pi.GetValue(obj);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.Message);
+                            }
+                            break;
+                        case "System.Int32":
+                            try
+                            {
+                                if ((int)pi.GetValue(obj) == int.MinValue || (int)pi.GetValue(obj) == 0)
+                                {
+                                    pm.Value = DBNull.Value;
+                                }
+                                else
+                                {
+                                    pm.Value = pi.GetValue(obj);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.Message);
+                            }
+                            break;
+                        default:
+                            pm.Value = pi.GetValue(obj);
+                            break;
+                    }
+
+                    //Add parameter to command
+                    cmd.Parameters.Add(pm);
+                    //Add to list for generating string
+                    FieldValues.Add(pm.ParameterName);
+                    FieldNames.Add("[" + pi.Name.ToString() + "]");
+                    //clean up
+                    pm = null;
+                    PIs = null;
+                }
+            }
+            return cmd;
         }
 
         public static IDbConnection CreateConnection(DatabaseType dbtype, string DBDataSource)
@@ -252,122 +370,7 @@ namespace DAL
         }
     }
 
-    public class EventsDAL : IDisposable
-    {
-
-
-        public void Add(LogEvent LE)
-        {
-            if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
-            try
-            {
-
-                using (IDbCommand cmdcheck = DataFactory.CreateCommand(string.Empty))
-                {
-                    IDbDataParameter pmchk = cmdcheck.CreateParameter();
-
-                    pmchk = cmdcheck.CreateParameter();
-                    pmchk.ParameterName = "@LogName";
-                    pmchk.Value = LE.LogName;
-                    cmdcheck.Parameters.Add(pmchk);
-
-                    pmchk = cmdcheck.CreateParameter();
-                    pmchk.ParameterName = "@TimeCreated";
-                    pmchk.Value = LE.TimeCreated;
-                    cmdcheck.Parameters.Add(pmchk);
-
-                    //string strCheckExist = string.Format("SELECT [FileName] FROM [tbl_Files] WHERE [FileName] = {0} OR [FileContent] = {1}", "@FileName", "@FileContent");
-                    string strCheckExist = string.Format("SELECT [ID] FROM [tbl_Events] WHERE [LogName] = {0} AND [TimeCreated] = {1}", "@LogName", "@TimeCreated");
-                    cmdcheck.CommandText = strCheckExist;
-                    var result = cmdcheck.ExecuteScalar();
-
-                    if (result == null)
-                    {
-                        // get properties from entity class
-                        PropertyInfo[] PIs = typeof(LogEvent).GetProperties();
-
-                        //Create table of data according to properties so it can be adapted to connection
-                        IDbCommand cmdInsert = DataFactory.CreateCommand(string.Empty);
-
-                        //create new Lists for colum names and parameters
-                        List<string> InsertColumnNames = new List<string>();
-                        List<string> InsertColumnValues = new List<string>();
-                        //Iterate through each prorperty to coerce a parameter
-                        foreach (PropertyInfo pi in PIs)
-                        {
-                            //Create new parameter object
-                            IDbDataParameter pm = cmdInsert.CreateParameter();
-                            //Set Parameter name from property name
-                            pm.ParameterName = string.Format("@{0}", pi.Name.ToString());
-                            //Set value from property of object
-                            pm.Value = pi.GetValue(LE);
-                            //Add parameter to command
-                            cmdInsert.Parameters.Add(pm);
-                            //Add to list for generating string
-                            InsertColumnValues.Add(pm.ParameterName);
-                            InsertColumnNames.Add("[" + pi.Name.ToString() + "]");
-                            //clean up
-                            pm = null;
-                        }
-                        string strInsert = string.Format("INSERT INTO [tbl_Events] ({0}) VALUES ({1});", string.Join(",", InsertColumnNames.ToArray()), string.Join(",", InsertColumnValues.ToArray()));
-                        cmdInsert.CommandText = strInsert;
-                        cmdInsert.ExecuteNonQuery();
-                    }
-                    else
-                    {
-                        result = null;
-                    }
-
-                    //Clean up
-
-                    cmdcheck.Dispose();
-                    pmchk = null;
-                    strCheckExist = string.Empty;
-                    LE = null;
-                    DataFactory.ActiveConn.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects).
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-
-                disposedValue = true;
-            }
-        }
-
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~EventsDAL() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        // This code added to correctly implement the disposable pattern.
-        void IDisposable.Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
-        }
-        #endregion
-    }
+   
 
 
     public class FileDataDAL : IDisposable
@@ -393,13 +396,10 @@ namespace DAL
             if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
             try
             {
-                //conn = DataFactory.ActiveConn;
                 IDbCommand cmd = DataFactory.CreateCommand(strSQL);
                 using (DbDataAdapter da = DataFactory.CreateAdapter(cmd))
                 {
-                    //DataTable dt = new DataTable("FileData");
                     da.Fill(this.Datatable);
-                    //this.Datatable = dt;
                 }
                 cmd.Dispose();
             }
@@ -497,7 +497,7 @@ namespace DAL
                     if (result == null)
                     {
                         // get properties from entity class
-                        PropertyInfo[] PIs = typeof(FileEntity).GetProperties();
+                        PropertyInfo[] PIs = obj.GetType().GetProperties();
 
                         //Create table of data according to properties so it can be adapted to connection
                         IDbCommand cmdInsert = DataFactory.CreateCommand(string.Empty);
@@ -588,21 +588,40 @@ namespace DAL
         #endregion
     }
 
-    public class ProductionDAL : IDisposable
+    public class ProductionDAL : DataFactory, IDisposable
     {
+        private string _strUpdate
+        {
+            get
+            {
+                //need to build update statement
+                string strSQL = "UPDATE [tbl_Production] SET ";
+                for (int i = 0; i <= FieldNames.Count - 1; i++)
+                {
+                    if (i > 0)
+                    {
+                        strSQL += ",";
+                    }
+                    strSQL += string.Format("{0}={1}", FieldNames[i], FieldValues[i]);
+                }
 
+                return strSQL;
+            }
+        }
         public ProductionDAL()
         {
             if (DataFactory.ActiveConn == null)
             {
                 DataFactory.CreateConnection();
             }
+            ExceptionFields.Clear();
+            FieldValues.Clear();
+            FieldNames.Clear();
         }
 
         public ProductionEntity RetrieveProductionData(ProductionEntity pe)
         {
             return pe = RetrieveProductionData(pe.ProductionName);
-
         }
 
         public ProductionEntity RetrieveProductionData(string productionName)
@@ -627,8 +646,6 @@ namespace DAL
                         pi.SetValue(pe, null);
                         //do nothing (i.e. not set value)
                     }
-
-
                 }
             }
             else
@@ -636,126 +653,45 @@ namespace DAL
                 Console.WriteLine("Multiple Record. Abort.");
             }
             return pe;
-
-
-
         }
         private DataTable GetDataTable(ProductionEntity prod)
         {
             DataTable dt = new DataTable();
             string strSQL = string.Format("SELECT * FROM [tbl_Production] WHERE [ProductionName]='{0}'", prod.ProductionName);
-            if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
-            try
-            {
-                //conn = DataFactory.ActiveConn;
-                IDbCommand cmd = DataFactory.CreateCommand(strSQL);
-                using (DbDataAdapter da = DataFactory.CreateAdapter(cmd))
-                {
-                    //DataTable dt = new DataTable("FileData");
-                    da.Fill(dt);
-                    //this.Datatable = dt;
-                }
-                cmd.Dispose();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            dt = QueryTable(strSQL);
             return dt;
 
         }
+
         public void Add(ProductionEntity obj)
         {
-            if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
-            try
+            if (!CheckExistence(obj))
             {
-                // get properties from entity class
-                PropertyInfo[] PIs = typeof(ProductionEntity).GetProperties();
-
-                //Create table of data according to properties so it can be adapted to connection
-                IDbCommand cmdInsert = DataFactory.CreateCommand(string.Empty);
-
-                //create new Lists for colum names and parameters
-                List<string> FieldNames = new List<string>();
-                List<string> FieldValues = new List<string>();
-
-                //create exception fields list
-                List<string> ExceptionFields = new List<string>();
+                ExceptionFields.Clear();
                 ExceptionFields.Add("ID");
-
-                //Iterate through each prorperty to coerce a parameter
-                foreach (PropertyInfo pi in PIs)
-                {
-                    if (!ExceptionFields.Contains(pi.Name) && pi.GetValue(obj) != null)
-                    {
-                        //Create new parameter object
-                        IDbDataParameter pm = cmdInsert.CreateParameter();
-                        //Set Parameter name from property name
-                        pm.ParameterName = string.Format("@{0}", pi.Name.ToString());
-                        //Set value from property of object
-                        switch (pi.PropertyType.ToString())
-                        {
-                            case "System.DateTime":
-                                try
-                                {
-                                    if ((DateTime)pi.GetValue(obj) == DateTime.MinValue)
-                                    {
-                                        pm.Value = DBNull.Value;
-                                    }
-                                    else
-                                    {
-                                        pm.Value = pi.GetValue(obj);
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    Console.WriteLine(ex.Message);
-                                }
-                                break;
-                            case "System.Int32":
-                                try
-                                {
-                                    if ((int)pi.GetValue(obj) == int.MinValue || (int)pi.GetValue(obj) == 0)
-                                    {
-                                        pm.Value = DBNull.Value;
-                                    }
-                                    else
-                                    {
-                                        pm.Value = pi.GetValue(obj);
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    Console.WriteLine(ex.Message);
-                                }
-                                break;
-                            default:
-                                pm.Value = pi.GetValue(obj);
-                                break;
-                        }
-
-                        //Add parameter to command
-                        cmdInsert.Parameters.Add(pm);
-                        //Add to list for generating string
-                        FieldValues.Add(pm.ParameterName);
-                        FieldNames.Add("[" + pi.Name.ToString() + "]");
-                        //clean up
-                        pm = null;
-                    }
-                }
-
-                string strInsert = string.Format("INSERT INTO [tbl_Production] ({0}) VALUES ({1});", string.Join(",", FieldNames.ToArray()), string.Join(",", FieldValues.ToArray()));
-                cmdInsert.CommandText = strInsert;
-                cmdInsert.ExecuteNonQuery();
-
-                obj = null;
-                DataFactory.ActiveConn.Close();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
+                IDbCommand cmd = ExtractParameters(obj, ExceptionFields);
+                string strSQL = string.Format("INSERT INTO [tbl_Production] ({0}) VALUES ({1});", string.Join(",", FieldNames.ToArray()), string.Join(",", FieldValues.ToArray()));
+                RunNonQuery(cmd, strSQL);
             }
         }
+
+        public void Update(ProductionEntity obj)
+        {
+            if (CheckExistence(obj))
+            {
+                ExceptionFields.Clear();
+                ExceptionFields.Add("ID");
+                ExceptionFields.Add("ProductionName");
+
+                IDbCommand cmd = ExtractParameters(obj, ExceptionFields);
+
+
+                string strSQL = string.Format("{0} WHERE ProductionName='{1}'",_strUpdate, obj.ProductionName);
+
+                RunNonQuery(cmd, strSQL);
+            }
+        }
+
 
 
         #region IDisposable Support
@@ -796,6 +732,7 @@ namespace DAL
         public bool CheckExistence(ProductionEntity obj)
         {
             bool boolExist;
+            if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
             using (IDbCommand cmdcheck = DataFactory.CreateCommand(string.Empty))
             {
                 IDbDataParameter pmchk = cmdcheck.CreateParameter();
@@ -811,152 +748,24 @@ namespace DAL
                 else { boolExist = false; }
 
                 //Clean up
-
                 cmdcheck.Dispose();
                 pmchk = null;
                 strCheckExist = string.Empty;
                 obj = null;
                 DataFactory.ActiveConn.Close();
-
-
             }
             return boolExist;
         }
 
-        public void Update(ProductionEntity obj)
-        {
-            if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
-            try
-            {
-
-
-                // get properties from entity class
-                PropertyInfo[] PIs = typeof(ProductionEntity).GetProperties();
-
-                //Create table of data according to properties so it can be adapted to connection
-                IDbCommand cmdUpdate = DataFactory.CreateCommand(string.Empty);
-
-                //create new Lists for colum names and parameters
-                List<string> FieldNames = new List<string>();
-                List<string> FieldValues = new List<string>();
-
-                //create exception fields list
-                List<string> ExceptionFields = new List<string>();
-                ExceptionFields.Add("ID");
-                ExceptionFields.Add("ProductionName");
-
-                //Iterate through each prorperty to coerce a parameter
-                foreach (PropertyInfo pi in PIs)
-                {
-                    //if (ExceptionFields.Exists(e => !e.Contains(pi.Name)) && pi.GetValue(obj) != null)
-                    if (!ExceptionFields.Contains(pi.Name) && pi.GetValue(obj) != null)
-                    {
-                        //Create new parameter object
-                        IDbDataParameter pm = cmdUpdate.CreateParameter();
-                        //Set Parameter name from property name
-                        pm.ParameterName = string.Format("@{0}", pi.Name.ToString());
-                        //Set value from property of object
-                        switch (pi.PropertyType.ToString())
-                        {
-                            case "System.DateTime":
-                                try
-                                {
-                                    if ((DateTime)pi.GetValue(obj) == DateTime.MinValue)
-                                    {
-                                        pm.Value = DBNull.Value;
-                                    }
-                                    else
-                                    {
-                                        pm.Value = pi.GetValue(obj);
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    Console.WriteLine(ex.Message);
-                                }
-                                break;
-                            case "System.Int32":
-                                try
-                                {
-                                    if ((int)pi.GetValue(obj) == int.MinValue || (int)pi.GetValue(obj) == 0)
-                                    {
-                                        pm.Value = DBNull.Value;
-                                    }
-                                    else
-                                    {
-                                        pm.Value = pi.GetValue(obj);
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    Console.WriteLine(ex.Message);
-                                }
-                                break;
-                            default:
-                                pm.Value = pi.GetValue(obj);
-                                break;
-                        }
-
-                        //Add parameter to command
-                        cmdUpdate.Parameters.Add(pm);
-                        //Add to list for generating string
-                        FieldValues.Add(pm.ParameterName);
-                        FieldNames.Add("[" + pi.Name.ToString() + "]");
-                        //clean up
-                        pm = null;
-                    }
-                }
-                // need to build update statement
-                string strUpdate = "UPDATE [tbl_Production] SET ";
-                for (int i = 0; i <= FieldNames.Count - 1; i++)
-                {
-                    if (i > 0)
-                    {
-                        strUpdate += ",";
-                    }
-                    strUpdate += string.Format("{0}={1}", FieldNames[i], FieldValues[i]);
-                }
-
-                strUpdate += " WHERE ProductionName='" + obj.ProductionName + "'";
-
-
-                cmdUpdate.CommandText = strUpdate;
-                cmdUpdate.ExecuteNonQuery();
-
-                obj = null;
-                DataFactory.ActiveConn.Close();
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-
+        
+        
         public DataTable GetAvailableLogs()
         {
             DataTable dt = new DataTable();
-            string strSQL = string.Format("SELECT [ID],[LogID] FROM [tbl_AvailableLogs] WHERE [Department]='ICP-MS'");
-            if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
-            try
-            {
-                //conn = DataFactory.ActiveConn;
-                IDbCommand cmd = DataFactory.CreateCommand(strSQL);
-                using (DbDataAdapter da = DataFactory.CreateAdapter(cmd))
-                {
-                    //DataTable dt = new DataTable("FileData");
-                    da.Fill(dt);
-                    //this.Datatable = dt;
-                }
-                cmd.Dispose();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
+            dt = QueryTable(string.Format("SELECT [ID],[LogID] FROM [tbl_AvailableLogs] WHERE [Department]='ICP-MS'"));
             return dt;
         }
+     
         public DataTable GetProductionIDs()
         {
             DataTable dt = new DataTable();
@@ -976,26 +785,114 @@ namespace DAL
                 EqpFilter = string.Format(" AND [EqpName] = '{0}'", EqpFilter);
             }
 
-            string strSQL = string.Format("SELECT [ProductionName] FROM [tbl_Production] WHERE [ProductionName] IN (SELECT [ProductionName] FROM [tbl_Production]){0}",EqpFilter);
-            if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
-            try
-            {
-                //conn = DataFactory.ActiveConn;
-                IDbCommand cmd = DataFactory.CreateCommand(strSQL);
-                using (DbDataAdapter da = DataFactory.CreateAdapter(cmd))
-                {
-                    //DataTable dt = new DataTable("FileData");
-                    da.Fill(dt);
-                    //this.Datatable = dt;
-                }
-                cmd.Dispose();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            string strSQL = string.Format("SELECT [ProductionName] FROM [tbl_Production] WHERE [ProductionName] IN (SELECT [ProductionName] FROM [tbl_Production]){0} ORDER BY [ProductionName]", EqpFilter);
+            dt = QueryTable(strSQL);
+            
             return dt;
         }
+
+        public DataTable GetMethods()
+        {
+            //List<string> methods = new List<string>();
+            DataTable dt = new DataTable();
+            string strSQL = "SELECT [Method] FROM [tbl_Method]";
+            dt = QueryTable(strSQL);
+
+            //methods = dt.AsEnumerable().Select(r => r.Field<string>("Method")).ToList();
+
+
+            return dt;
+        }
+    }
+    public class EventsDAL : DataFactory, IDisposable
+    {
+
+        public void Add(EventEntity obj)
+        {
+            if (!CheckExistence(obj))
+            {
+                ExceptionFields.Clear();
+                ExceptionFields.Add("ID");
+                IDbCommand cmd = ExtractParameters(obj, ExceptionFields);
+                
+                string strSQL = string.Format("INSERT INTO [tbl_Events] ({0}) VALUES ({1});", string.Join(",", FieldNames.ToArray()), string.Join(",", FieldValues.ToArray()));
+                RunNonQuery(cmd, strSQL);
+            }
+        }
+
+        public bool CheckExistence(EventEntity obj)
+        {
+            bool boolExist;
+            if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
+            using (IDbCommand cmdcheck = DataFactory.CreateCommand(string.Empty))
+            {
+                IDbDataParameter pmchk = cmdcheck.CreateParameter();
+                pmchk = cmdcheck.CreateParameter();
+                pmchk.ParameterName = "@LogName";
+                pmchk.Value = obj.LogName;
+                cmdcheck.Parameters.Add(pmchk);
+
+                pmchk = cmdcheck.CreateParameter();
+                pmchk.ParameterName = "@TimeCreated";
+                pmchk.Value = obj.TimeCreated;
+                cmdcheck.Parameters.Add(pmchk);
+
+                string strCheckExist = string.Format("SELECT [ID] FROM [tbl_Events] WHERE [LogName] = {0} AND [TimeCreated] = {1}", "@LogName", "@TimeCreated");
+                cmdcheck.CommandText = strCheckExist;
+                var result = cmdcheck.ExecuteScalar();
+
+                if (result != null) { boolExist = true; }
+                else { boolExist = false; }
+
+                //Clean up
+
+                cmdcheck.Dispose();
+                pmchk = null;
+                strCheckExist = string.Empty;
+                obj = null;
+                DataFactory.ActiveConn.Close();
+
+
+            }
+            return boolExist;
+        }
+
+        
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~EventsDAL() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        void IDisposable.Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 }
 

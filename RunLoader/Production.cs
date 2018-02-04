@@ -17,9 +17,8 @@ namespace RunLoader
 {
     public partial class Production : Form
     {
+        private string oldvalue;
         public Productions currProd;
-        private List<string> _logs = new List<string>();
-        private List<string> _prods = new List<string>();
 
         public Production()
         {
@@ -27,6 +26,17 @@ namespace RunLoader
             currProd = new Productions();
             UpdateLogs();
             UpdateProductionIDs();
+            UpdateMethodList();
+
+            //DataBinding
+            this.txt_Ender.DataBindings.Add("Text", currProd, "Ender", true, DataSourceUpdateMode.OnPropertyChanged);
+            this.txt_StartTime.DataBindings.Add("Text", currProd, "StartTime", true, DataSourceUpdateMode.OnPropertyChanged);
+            this.txt_EndTime.DataBindings.Add("Text", currProd, "EndTime", true, DataSourceUpdateMode.OnPropertyChanged);
+            this.cmb_EqpName.DataBindings.Add("Text", currProd, "EqpName", true, DataSourceUpdateMode.OnPropertyChanged);
+            this.txt_Starter.DataBindings.Add("Text", currProd, "Starter", true, DataSourceUpdateMode.OnPropertyChanged);
+            this.cmb_Method.DataBindings.Add("Text", currProd, "Method", true, DataSourceUpdateMode.OnPropertyChanged);
+            this.txt_Quantity.DataBindings.Add("Text", currProd, "Quantity", true, DataSourceUpdateMode.OnPropertyChanged);
+            this.cmb_Type.DataBindings.Add("Text", currProd, "Type", true, DataSourceUpdateMode.OnPropertyChanged);
         }
 
         private static Production inst;
@@ -46,43 +56,16 @@ namespace RunLoader
             if (sender == this.cmb_ProductionName)
             {
                 currProd.GetProduction();
-                ShowProduction();
             }
         }
 
         private void btn_Create_Click(object sender, EventArgs e)
         {
-            currProd.CreateNew(currProd);
-            ShowProduction();
+            currProd.CreateNew();
+            UpdateProductionIDs();
 
         }
 
-        private void ShowProduction()
-        {
-            txt_Ender.Text = currProd.Ender;
-            txt_Starter.Text = currProd.Starter;
-            txt_StartTime.Text = currProd.StartTime == DateTime.MinValue ? string.Empty : currProd.StartTime.ToString() ;
-            txt_EndTime.Text = currProd.EndTime == DateTime.MinValue ? string.Empty : currProd.EndTime.ToString();
-            cmb_Method.Text = currProd.Method;
-            cmb_ProductionName.Text = currProd.ProductionName;
-            cmb_Type.Text = currProd.Type;
-            txt_Quantity.Text = currProd.Quantity == int.MinValue || currProd.Quantity == 0 ? string.Empty : currProd.Quantity.ToString() ;
-            cmb_EqpName.Text = currProd.EqpName;
-
-        }
-
-        private  void StoreProduction()
-        {
-            currProd.Ender = txt_Ender.Text;
-            currProd.Starter = txt_Starter.Text;
-            currProd.StartTime = string.IsNullOrEmpty(txt_StartTime.Text) ? DateTime.MinValue : DateTime.Parse(txt_StartTime.Text);
-            currProd.EndTime = string.IsNullOrEmpty(txt_EndTime.Text) ? DateTime.MinValue : DateTime.Parse(txt_EndTime.Text);
-            currProd.Method = cmb_Method.Text;
-            currProd.ProductionName = cmb_ProductionName.Text;
-            currProd.Type = cmb_Type.Text ;
-            currProd.Quantity = string.IsNullOrEmpty(txt_Quantity.Text) ? int.MinValue : int.Parse(txt_Quantity.Text);
-            currProd.EqpName = cmb_EqpName.Text;
-        }
 
         private void btn_Clear_Click(object sender, EventArgs e)
         {
@@ -90,10 +73,6 @@ namespace RunLoader
             if (currProd.ID == int.MinValue)
             {
                 ClearFields();
-            }
-            else
-            {
-                ShowProduction();
             }
         }
 
@@ -118,9 +97,8 @@ namespace RunLoader
 
         private void btn_Update_Click(object sender, EventArgs e)
         {
-            StoreProduction();
             currProd.UpdateDB();
-            ShowProduction();
+
         }
 
         private void UpdateLogs()
@@ -128,35 +106,103 @@ namespace RunLoader
             using (ProductionDAL pdal = new ProductionDAL())
             {
                 DataTable dt = pdal.GetAvailableLogs();
-                _logs = dt.AsEnumerable().Select(r => r.Field<string>("LogID")).ToList();
+                this.cmb_EqpName.DataSource = dt;
+                this.cmb_EqpName.DisplayMember = "LogID";
+                this.cmb_EqpName.ValueMember = "LogID";
+
+                DataTable dt1 = new DataTable();
+                dt1 = dt.Copy();
+                this.cmb_EqpFilter.DataSource = dt1;
+                this.cmb_EqpFilter.DisplayMember = "LogID";
+                this.cmb_EqpFilter.ValueMember = "LogID";
             }
-            this.cmb_EqpName.Items.AddRange(_logs.ToArray());
-            this.cmb_EqpFilter.Items.AddRange(_logs.ToArray());
+
         }
 
         private void UpdateProductionIDs()
         {
+            List<string> _prods = new List<string>();
             using (ProductionDAL pdal = new ProductionDAL())
             {
+                DataTable dt = new DataTable();
                 if (this.cmb_EqpFilter.Text == string.Empty)
                 {
-                    DataTable dt = pdal.GetProductionIDs();
-                    _prods = dt.AsEnumerable().Select(r => r.Field<string>("ProductionName")).ToList();
+                    dt = pdal.GetProductionIDs();
                 }
                 else
                 {
-                    DataTable dt = pdal.GetProductionIDs(cmb_EqpFilter.Text);
-                    _prods = dt.AsEnumerable().Select(r => r.Field<string>("ProductionName")).ToList();
+                    dt = pdal.GetProductionIDs(cmb_EqpFilter.Text);
+
                 }
-                
+                this.cmb_ProductionName.DataSource = dt;
+                this.cmb_ProductionName.DisplayMember = "ProductionName";
+                this.cmb_ProductionName.ValueMember = "ProductionName";
             }
-            this.cmb_ProductionName.Items.Clear();
-            this.cmb_ProductionName.Items.AddRange(_prods.ToArray());
+        }
+
+        private void UpdateMethodList()
+        {
+            using (ProductionDAL pdal = new ProductionDAL())
+            {
+                DataTable dt = new DataTable();
+                dt = pdal.GetMethods();
+                this.cmb_Method.DataSource = dt;
+                this.cmb_Method.DisplayMember = "Method";
+                this.cmb_Method.ValueMember = "Method";
+            }
         }
 
         private void cmb_EqpFilter_TextChanged(object sender, EventArgs e)
         {
             UpdateProductionIDs();
+        }
+
+
+        private void btn_AddEvent_Click(object sender, EventArgs e)
+        {
+            List<EventEntity> le = currProd.Events;
+        }
+
+        private void cmb_ProductionName_Leave(object sender, EventArgs e)
+        {
+            currProd.GetProduction();
+            //ShowProduction();
+        }
+
+        private void TimePicker(object sender, EventArgs e)
+        {
+            TextBox txtb = (TextBox)sender;
+            txtb.Text = DateTime.Now.ToString();
+        }
+
+        private void txtDateTimeLeave(object sender, EventArgs e)
+        {
+            DateTime datetime;
+            TextBox txt = (TextBox)sender;
+            if (DateTime.TryParse(txt.Text, out datetime))
+            {
+                switch (txt.Name)
+                {
+                    case "txt_StartTime":
+                        currProd.StartTime = datetime;
+                        break;
+                    case "txt_EndTime":
+                        currProd.EndTime = datetime;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                txt.Text = oldvalue;
+            }
+        }
+
+        private void txtEnter(object sender, EventArgs e)
+        {
+            TextBox txt = (TextBox)sender;
+            oldvalue = txt.Text;
         }
     }
 }

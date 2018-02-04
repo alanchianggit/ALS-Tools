@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -357,7 +358,7 @@ namespace Entity
         }
     }
 
-    public class LogEvent
+    public class EventEntity
     {
         protected string _LogName;
         protected DateTime _TimeCreated;
@@ -375,12 +376,12 @@ namespace Entity
         }
 
 
-        public LogEvent()
+        public EventEntity()
         {
             this.TimeCreated = DateTime.Now;
         }
 
-        public LogEvent(string argLog, string argDetails)
+        public EventEntity(string argLog, string argDetails)
         {
             this.LogName = argLog;
             this.Details = argDetails;
@@ -484,7 +485,7 @@ namespace Entity
         }
     }
 
-    public class ProductionEntity : IDisposable
+    public class ProductionEntity : IDisposable, INotifyPropertyChanged
     {
         protected string _name;
         protected DateTime? _startTime;
@@ -497,6 +498,16 @@ namespace Entity
         protected string _method;
         protected string _eqpname;
 
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
         private DateTime GetDateWithoutMilliseconds(DateTime d)
         {
             return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
@@ -506,12 +517,28 @@ namespace Entity
         {
             get
             {
-                return _startTime.Value;
+
+                if (_startTime.HasValue)
+                {
+                    return _startTime.Value;
+                }
+                else
+                {
+                    return DateTime.MinValue;
+                }
+
             }
 
             set
             {
+                DateTime datetime;
+
+                if (!DateTime.TryParse(value.ToString(), out datetime))
+                {
+                    return;
+                }
                 _startTime = GetDateWithoutMilliseconds(value);
+                OnPropertyChanged("StartTime");
             }
         }
 
@@ -526,7 +553,9 @@ namespace Entity
 
             set
             {
+                if (value == ProductionName) return;
                 _name = value;
+                OnPropertyChanged("ProductionName");
             }
         }
 
@@ -534,12 +563,26 @@ namespace Entity
         {
             get
             {
+                if (_endTime.HasValue)
+                {
                     return _endTime.Value;
+                }
+                else
+                {
+                    return DateTime.MinValue;
+                }
             }
 
             set
             {
+                DateTime datetime;
+
+                if (!DateTime.TryParse(value.ToString(), out datetime))
+                {
+                    return;
+                }
                 _endTime = GetDateWithoutMilliseconds(value);
+                OnPropertyChanged("EndTime");
             }
         }
 
@@ -552,7 +595,9 @@ namespace Entity
 
             set
             {
+                if (value == Starter) return;
                 _starter = value;
+                OnPropertyChanged("Starter");
             }
         }
 
@@ -565,7 +610,9 @@ namespace Entity
 
             set
             {
+                if (value == Ender) return;
                 _ender = value;
+                OnPropertyChanged("Ender");
             }
         }
 
@@ -578,7 +625,9 @@ namespace Entity
 
             set
             {
+                if (value == ID) return;
                 _ID = value;
+                OnPropertyChanged("ID");
             }
         }
 
@@ -591,7 +640,9 @@ namespace Entity
 
             set
             {
+                if (value == Type) return;
                 _type = value;
+                OnPropertyChanged("Type");
             }
         }
 
@@ -604,7 +655,11 @@ namespace Entity
 
             set
             {
+                int val;
+                if (value == Quantity) return;
+                if (!int.TryParse(value.ToString(), out val)) return;
                 _quantity = value;
+                OnPropertyChanged("Quantity");
             }
         }
 
@@ -617,7 +672,9 @@ namespace Entity
 
             set
             {
+                if (value == Method) return;
                 _method = value;
+                OnPropertyChanged("Method");
             }
         }
 
@@ -630,7 +687,9 @@ namespace Entity
 
             set
             {
+                if (value == EqpName) return;
                 _eqpname = value;
+                OnPropertyChanged("EqpName");
             }
         }
 
@@ -648,6 +707,8 @@ namespace Entity
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
+
+        
 
         protected virtual void Dispose(bool disposing)
         {

@@ -8,13 +8,35 @@ using System.Reflection;
 using DAL;
 
 using System.Data;
+using System.ComponentModel;
 
 namespace BusinessLayer
 {
     public class Productions : ProductionEntity, IDisposable, IProductionLogic
     {
-        protected DataTable datatable;
+        #region Properties
+        protected DataTable _datatable;
+        protected List<EventEntity> _events;
 
+        #endregion
+
+        #region Accessors
+        private DataTable DataTable
+        {
+            get
+            {
+                return _datatable;
+            }
+        }
+
+        public List<EventEntity> Events
+        {
+            get
+            {
+                return _events;
+            }
+        }
+        #endregion
         public Productions()
         {
 
@@ -27,11 +49,12 @@ namespace BusinessLayer
 
         }
 
+        
         public void UpdateDB()
         {
             using (ProductionDAL pdal = new ProductionDAL())
             {
-                DataFactory.CreateConnection();
+                //DataFactory.CreateConnection();
                 bool Existence = pdal.CheckExistence(this);
 
                 if (Existence==true)
@@ -51,7 +74,6 @@ namespace BusinessLayer
             using (ProductionDAL pdal = new ProductionDAL())
             {
                 ProductionEntity newProd = new ProductionEntity();
-                //pdal.GetDataTable(this.ProductionName);
                 newProd = pdal.RetrieveProductionData(this);
 
                 foreach (PropertyInfo pi in typeof(ProductionEntity).GetProperties())
@@ -63,17 +85,16 @@ namespace BusinessLayer
             }
         }
 
-        public void CreateNew(Productions currProd)
+        public void CreateNew()
         {
-            //Productions newProd = new Productions(currProd.ProductionName);
             using (ProductionDAL pdal = new ProductionDAL())
             {
                 
-                DataFactory.CreateConnection();
-                bool Existence = pdal.CheckExistence(currProd);
+                //DataFactory.CreateConnection();
+                bool Existence = pdal.CheckExistence(this);
                 if (Existence== false)
                 {
-                    pdal.Add(currProd);
+                    pdal.Add(this);
                     GetProduction();
                 }
                 else
@@ -149,7 +170,5 @@ namespace BusinessLayer
     public interface IProductionLogic
     {
         void UpdateProperty(object sender);
-        //Productions CreateNew(Productions currProd);
-        //Productions CreateNew(string str);
     }
 }

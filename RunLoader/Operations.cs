@@ -102,8 +102,8 @@ namespace RunLoader
             string strType = frm != null ? strType = frm.GetType().ToString() : strType=string.Empty;
             if (!strType.Contains("Events") || (frm == null || frm.IsDisposed))
             {
-                frm= new Events();
-                frm = RunLoader.Events.GetForm;
+                frm= new frm_Event();
+                frm = RunLoader.frm_Event.GetForm;
             }
             else
             {

@@ -12,30 +12,32 @@ using BusinessLayer;
 
 namespace RunLoader
 {
-    public partial class Events : Form
+    public partial class frm_Event : Form
     {
-        public Events()
+        public LogEvent currEvent;   
+
+        public frm_Event()
         {
             InitializeComponent();
+            currEvent = new LogEvent();
         }
 
-        private static Events inst;
-        public static Events GetForm
+        private static frm_Event inst;
+        public static frm_Event GetForm
         {
             get
             {
                 if (inst == null || inst.IsDisposed)
-                    inst = new Events();
+                    inst = new frm_Event();
                 return inst;
             }
         }
 
         private void btn_Add_Click(object sender, EventArgs e)
         {
-            using (EventsLogic el = new EventsLogic())
+            using (LogEvent el = new LogEvent())
             {
-                LogEvent newevent = el.Add(this.cmb_Log.Text, this.txt_Details.Text);
-                el.Post(newevent);
+                
             }
                 
             

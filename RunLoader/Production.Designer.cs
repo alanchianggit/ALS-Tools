@@ -79,6 +79,7 @@
             this.cmb_ProductionName.Size = new System.Drawing.Size(200, 21);
             this.cmb_ProductionName.TabIndex = 0;
             this.cmb_ProductionName.TextChanged += new System.EventHandler(this.ControlTextChanged);
+            this.cmb_ProductionName.Leave += new System.EventHandler(this.cmb_ProductionName_Leave);
             // 
             // Label_EqpName
             // 
@@ -94,6 +95,7 @@
             // cmb_EqpName
             // 
             this.cmb_EqpName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmb_EqpName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmb_EqpName.FormattingEnabled = true;
             this.cmb_EqpName.Location = new System.Drawing.Point(391, 30);
             this.cmb_EqpName.Name = "cmb_EqpName";
@@ -115,6 +117,7 @@
             // cmb_Type
             // 
             this.cmb_Type.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmb_Type.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmb_Type.FormattingEnabled = true;
             this.cmb_Type.Items.AddRange(new object[] {
             "Online",
@@ -175,6 +178,7 @@
             this.txt_Quantity.Size = new System.Drawing.Size(205, 20);
             this.txt_Quantity.TabIndex = 6;
             this.txt_Quantity.TextChanged += new System.EventHandler(this.ControlTextChanged);
+            this.txt_Quantity.Enter += new System.EventHandler(this.txtEnter);
             // 
             // tableLayoutPanel1
             // 
@@ -281,6 +285,7 @@
             // cmb_Method
             // 
             this.cmb_Method.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmb_Method.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmb_Method.FormattingEnabled = true;
             this.cmb_Method.Location = new System.Drawing.Point(391, 3);
             this.cmb_Method.Name = "cmb_Method";
@@ -295,7 +300,9 @@
             this.txt_StartTime.Name = "txt_StartTime";
             this.txt_StartTime.Size = new System.Drawing.Size(205, 20);
             this.txt_StartTime.TabIndex = 7;
-            this.txt_StartTime.TextChanged += new System.EventHandler(this.ControlTextChanged);
+            this.txt_StartTime.DoubleClick += new System.EventHandler(this.TimePicker);
+            this.txt_StartTime.Enter += new System.EventHandler(this.txtEnter);
+            this.txt_StartTime.Leave += new System.EventHandler(this.txtDateTimeLeave);
             // 
             // txt_EndTime
             // 
@@ -304,7 +311,9 @@
             this.txt_EndTime.Name = "txt_EndTime";
             this.txt_EndTime.Size = new System.Drawing.Size(205, 20);
             this.txt_EndTime.TabIndex = 8;
-            this.txt_EndTime.TextChanged += new System.EventHandler(this.ControlTextChanged);
+            this.txt_EndTime.DoubleClick += new System.EventHandler(this.TimePicker);
+            this.txt_EndTime.Enter += new System.EventHandler(this.txtEnter);
+            this.txt_EndTime.Leave += new System.EventHandler(this.txtDateTimeLeave);
             // 
             // btn_Create
             // 
@@ -353,6 +362,7 @@
             this.btn_AddEvent.TabIndex = 5;
             this.btn_AddEvent.Text = "Add Event";
             this.btn_AddEvent.UseVisualStyleBackColor = true;
+            this.btn_AddEvent.Click += new System.EventHandler(this.btn_AddEvent_Click);
             // 
             // btn_StartRun
             // 

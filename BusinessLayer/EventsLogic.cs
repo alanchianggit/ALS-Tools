@@ -8,9 +8,12 @@ using DAL;
 
 namespace BusinessLayer
 {
-    public class EventsLogic: IDisposable
+    public class LogEvent: EventEntity, IDisposable
     {
-        public EventsLogic() { }
+
+
+
+        public LogEvent() { }
 
         public LogEvent Add(string argLog, string argDetails)
         {
@@ -26,12 +29,12 @@ namespace BusinessLayer
         }
 
 
-        public void Post(LogEvent le)
+        public void Post()
         {
             using (EventsDAL eDAL = new EventsDAL())
             {
                 DataFactory.CreateConnection();
-                eDAL.Add(le);
+                eDAL.Add(this);
             }
         }
 
