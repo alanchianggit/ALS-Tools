@@ -27,6 +27,7 @@ namespace RunLoader
             UpdateLogs();
             UpdateProductionIDs();
             UpdateMethodList();
+            
 
             //DataBinding
             this.txt_Ender.DataBindings.Add("Text", currProd, "Ender", true, DataSourceUpdateMode.OnPropertyChanged);
@@ -117,6 +118,8 @@ namespace RunLoader
                 this.cmb_EqpFilter.ValueMember = "LogID";
             }
 
+            this.cmb_EqpFilter.Text = string.Empty;
+
         }
 
         private void UpdateProductionIDs()
@@ -166,7 +169,6 @@ namespace RunLoader
         private void cmb_ProductionName_Leave(object sender, EventArgs e)
         {
             currProd.GetProduction();
-            //ShowProduction();
         }
 
         private void TimePicker(object sender, EventArgs e)

@@ -7,19 +7,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DAL;
+using Auth;
 
 namespace RunLoader
 {
     public partial class Operations : Form
     {
         
-        public bool Connected
-        {
-            get
-            {
-                return si.Connected;
-            }
-        }
+        //public bool Connected
+        //{
+        //    get
+        //    {
+        //        return si.Connected;
+        //    }
+        //}
 
         private static Operations inst;
         public static Operations GetForm
@@ -34,16 +36,17 @@ namespace RunLoader
         public Operations()
         {
             InitializeComponent();
-            DAL.DataFactory.Instance.Reset();
-            newSigninToolStripMenuItem.PerformClick();
-            if (Connected)
-            {
-                toolStripStatusLabel1.Text = "Connected";
-            }
-            else
-            {
-                toolStripStatusLabel1.Text = "Not connected";
-            }
+            DataFactory.Instance.Reset();
+            AuthEntity.Instance.Reset();
+            //newSigninToolStripMenuItem.PerformClick();
+            //if (Connected)
+            //{
+            //    toolStripStatusLabel1.Text = "Connected";
+            //}
+            //else
+            //{
+            //    toolStripStatusLabel1.Text = "Not connected";
+            //}
         }
 
         private void fileAccessFormToolStripMenuItem_Click(object sender, EventArgs e)
@@ -70,24 +73,24 @@ namespace RunLoader
                 frm.WindowState = FormWindowState.Normal;
             }
             ShowChildForm(frm);
-
+            
         }
 
-        Signin si;
+        //Signin si;
         
-        private void newSigninToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (si==null || si.IsDisposed)
-            {
-                si = new Signin();
-                si = Signin.GetForm;
-            }
-            else
-            {
-                si.WindowState = FormWindowState.Normal;
-            }
-            ShowChildForm(si);
-        }
+        //private void newSigninToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+        //    if (si==null || si.IsDisposed)
+        //    {
+        //        si = new Signin();
+        //        si = Signin.GetForm;
+        //    }
+        //    else
+        //    {
+        //        si.WindowState = FormWindowState.Normal;
+        //    }
+        //    ShowChildForm(si);
+        //}
 
         private void ShowChildForm(Form fm)
         {
@@ -96,6 +99,7 @@ namespace RunLoader
             fm.Show();
             fm.BringToFront();
         }
+
         Form frm;
         private void eventsWindowsToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -119,6 +123,21 @@ namespace RunLoader
             {
                 frm = new Production();
                 frm = RunLoader.Production.GetForm;
+            }
+            else
+            {
+                frm.WindowState = FormWindowState.Normal;
+            }
+            ShowChildForm(frm);
+        }
+
+        private void newSigninToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
+            if (!strType.Contains("Auth") || (frm == null || frm.IsDisposed))
+            {
+                frm = new frmAuth();
+                frm = frmAuth.GetForm;
             }
             else
             {

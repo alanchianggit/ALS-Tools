@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DAL;
+using Auth;
 
 
 namespace RunLoader
@@ -14,11 +15,11 @@ namespace RunLoader
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
+        
         static void Main(string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            
             if (args.Length > 0)
             {
                 switch (args[0])

@@ -743,3 +743,66 @@ namespace Entity
         #endregion
     }
 }
+namespace Auth
+{
+    public class AuthEntity
+    {
+        private static string _username;
+        private static string _password;
+        private static bool _authenticated;
+
+        public static AuthEntity Instance = new AuthEntity();
+
+        public void Reset()
+        {
+            Instance = new AuthEntity();
+        }
+
+        public AuthEntity()
+        {
+            Username = string.Empty;
+            Password = string.Empty;
+        }
+        public static string Username
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_username)) return string.Empty;
+                return _username;
+            }
+
+            set
+            {
+                _username = value;
+            }
+        }
+
+        public static string Password
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_password)) return string.Empty;
+                return _password;
+            }
+
+            set
+            {
+                _password = value;
+            }
+        }
+
+        public static bool Authenticated
+        {
+            get
+            {
+                return _authenticated;
+            }
+
+            set
+            {
+                _authenticated = value;
+            }
+        }
+
+    }
+}

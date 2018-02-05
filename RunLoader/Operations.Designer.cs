@@ -82,7 +82,7 @@
             // newSigninToolStripMenuItem
             // 
             this.newSigninToolStripMenuItem.Name = "newSigninToolStripMenuItem";
-            this.newSigninToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.newSigninToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.newSigninToolStripMenuItem.Text = "&New/Sign-in";
             this.newSigninToolStripMenuItem.Click += new System.EventHandler(this.newSigninToolStripMenuItem_Click);
             // 
