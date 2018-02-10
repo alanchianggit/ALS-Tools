@@ -358,18 +358,26 @@ namespace Entity
         }
     }
 
-    public class EventEntity
+    public class EventEntity:IDisposable,INotifyPropertyChanged
     {
         protected string _LogName;
         protected DateTime _TimeCreated;
-        protected string _Source;
+        protected string _ProductionID;
         protected string _ID;
         protected string _Level;
         protected string _User;
-        protected string _Terminal;
+        //protected string _Terminal;
         protected string _Details;
 
+        public event PropertyChangedEventHandler PropertyChanged;
 
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
         private DateTime GetDateWithoutMilliseconds(DateTime d)
         {
             return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
@@ -378,7 +386,7 @@ namespace Entity
 
         public EventEntity()
         {
-            this.TimeCreated = DateTime.Now;
+            //this.TimeCreated = DateTime.Now;
         }
 
         public EventEntity(string argLog, string argDetails)
@@ -386,6 +394,19 @@ namespace Entity
             this.LogName = argLog;
             this.Details = argDetails;
         }
+
+        //event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+        //{
+        //    add
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    remove
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+        //}
 
         public string LogName
         {
@@ -396,6 +417,7 @@ namespace Entity
             set
             {
                 _LogName = value;
+                OnPropertyChanged("LogName");
             }
         }
 
@@ -409,18 +431,20 @@ namespace Entity
             set
             {
                 _TimeCreated = GetDateWithoutMilliseconds(value);
+                OnPropertyChanged("TimeCreated");
             }
         }
 
-        public string Source
+        public string ProductionID
         {
             get
             {
-                return _Source;
+                return _ProductionID;
             }
             set
             {
-                _Source = value;
+                _ProductionID = value;
+                OnPropertyChanged("Source");
             }
         }
 
@@ -433,6 +457,7 @@ namespace Entity
             set
             {
                 _ID = value;
+                OnPropertyChanged("ID");
             }
         }
 
@@ -445,6 +470,7 @@ namespace Entity
             set
             {
                 _Level = value;
+                OnPropertyChanged("Level");
             }
         }
 
@@ -457,6 +483,7 @@ namespace Entity
             set
             {
                 _User = value;
+                OnPropertyChanged("User");
             }
         }
 
@@ -464,11 +491,7 @@ namespace Entity
         {
             get
             {
-                return _Terminal;
-            }
-            set
-            {
-                _Terminal = value;
+                return Environment.GetEnvironmentVariable("computername");
             }
         }
 
@@ -481,8 +504,44 @@ namespace Entity
             set
             {
                 _Details = value;
+                OnPropertyChanged("Details");
             }
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~EventEntity() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        void IDisposable.Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 
     public class ProductionEntity : IDisposable, INotifyPropertyChanged

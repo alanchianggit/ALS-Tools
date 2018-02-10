@@ -26,7 +26,7 @@ namespace Auth
         public frmAuth()
         {
             InitializeComponent();
-            
+            AuthEntity.Authenticated = true;
 
         }
 
@@ -53,7 +53,9 @@ namespace Auth
 
         private void btn_SignIn_Click(object sender, EventArgs e)
         {
-
+            //Some signin validation logic
+            AuthEntity.Authenticated = true;
+            
         }
     }
 }

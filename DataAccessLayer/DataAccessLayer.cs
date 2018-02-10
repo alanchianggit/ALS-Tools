@@ -16,7 +16,7 @@ namespace AuthDAL
 {
     public class Auth_DAL:IDisposable
     {
-        bool signedin;
+        
         public Auth_DAL()
         {
             
@@ -862,6 +862,16 @@ namespace DAL
     }
     public class EventsDAL : DataFactory, IDisposable
     {
+        public EventsDAL()
+        {
+            if (DataFactory.ActiveConn == null)
+            {
+                DataFactory.CreateConnection();
+            }
+            ExceptionFields.Clear();
+            FieldValues.Clear();
+            FieldNames.Clear();
+        }
 
         public void Add(EventEntity obj)
         {
@@ -912,8 +922,22 @@ namespace DAL
             }
             return boolExist;
         }
+        public IDbDataAdapter AdaptData(string prodID)
+        {
+            string strSQL = string.Format("SELECT * FROM [tbl_Events] WHERE [ProductionID]='{0}'", prodID);
+            IDbCommand dbcmd = CreateCommand(strSQL);
+            IDbDataAdapter da = CreateAdapter(dbcmd);
+            return da;
+        }
 
-        
+        public DataTable GetDataTable(EventEntity obj)
+        {
+            DataTable dt = new DataTable();
+            string strSQL = string.Format("SELECT * FROM [tbl_Events] WHERE [ProductionID]='{0}'", obj.ProductionID);
+            dt = QueryTable(strSQL);
+            return dt;
+
+        }
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls

@@ -103,32 +103,46 @@ namespace RunLoader
         Form frm;
         private void eventsWindowsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string strType = frm != null ? strType = frm.GetType().ToString() : strType=string.Empty;
-            if (!strType.Contains("Events") || (frm == null || frm.IsDisposed))
+            if (AuthEntity.Authenticated)
             {
-                frm= new frm_Event();
-                frm = RunLoader.frm_Event.GetForm;
+                string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
+                if (!strType.Contains("Event") || (frm == null || frm.IsDisposed))
+                {
+                    frm = new frm_Event();
+                    frm = frm_Event.GetForm;
+                }
+                else
+                {
+                    frm.WindowState = FormWindowState.Normal;
+                }
+                ShowChildForm(frm);
             }
             else
             {
-                frm.WindowState = FormWindowState.Normal;
+                MessageBox.Show("Need to sign-in first.");
             }
-            ShowChildForm(frm);
         }
 
         private void productionManagementToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
-            if (!strType.Contains("Production") || (frm == null || frm.IsDisposed))
+            if (AuthEntity.Authenticated)
             {
-                frm = new Production();
-                frm = RunLoader.Production.GetForm;
+                string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
+                if (!strType.Contains("Production") || (frm == null || frm.IsDisposed))
+                {
+                    frm = new Production();
+                    frm = RunLoader.Production.GetForm;
+                }
+                else
+                {
+                    frm.WindowState = FormWindowState.Normal;
+                }
+                ShowChildForm(frm);
             }
             else
             {
-                frm.WindowState = FormWindowState.Normal;
+                MessageBox.Show("Need to sign-in first.");
             }
-            ShowChildForm(frm);
         }
 
         private void newSigninToolStripMenuItem_Click(object sender, EventArgs e)

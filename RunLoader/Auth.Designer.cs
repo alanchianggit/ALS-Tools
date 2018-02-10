@@ -91,7 +91,7 @@
             this.Controls.Add(this.Label_Password);
             this.Controls.Add(this.txt_Username);
             this.Controls.Add(this.label_username);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "frmAuth";
             this.Text = "Auth";
             this.Load += new System.EventHandler(this.Auth_Load);

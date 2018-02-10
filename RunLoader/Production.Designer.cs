@@ -396,7 +396,7 @@
             this.Controls.Add(this.btn_Update);
             this.Controls.Add(this.btn_Create);
             this.Controls.Add(this.tableLayoutPanel1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Production";
             this.Text = "Production";
             this.tableLayoutPanel1.ResumeLayout(false);
