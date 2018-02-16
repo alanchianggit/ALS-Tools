@@ -10,13 +10,14 @@ using System.Windows.Forms;
 using Entity;
 using Auth;
 using BusinessLayer;
+using System.Reflection;
 
 namespace RunLoader
 {
     public partial class frm_Event : Form
     {
-        public LogEvent currEvent;   
-
+        private LogEvent currEvent;
+        private DataSet dataset;
         public frm_Event()
         {
             InitializeComponent();
@@ -25,37 +26,34 @@ namespace RunLoader
             //currEvent.ProductionID = "test";
             Databinding();
         }
-        
+
         private void Databinding()
         {
-            //DataBinding
-            //this.txt_Details.DataBindings.Clear();
-            //this.txt_Time.DataBindings.Clear();
-            //this.cmb_Log.DataBindings.Clear();
-            //this.txt_ProductionID.DataBindings.Clear();
-            //this.cmb_ID.DataBindings.Clear();
+
 
             this.txt_Details.DataBindings.Add("Text", currEvent, "Details", true, DataSourceUpdateMode.OnPropertyChanged);
             this.txt_Time.DataBindings.Add("Text", currEvent, "TimeCreated", true, DataSourceUpdateMode.OnPropertyChanged);
             this.cmb_Log.DataBindings.Add("Text", currEvent, "LogName", true, DataSourceUpdateMode.OnPropertyChanged);
             this.txt_ProductionID.DataBindings.Add("Text", currEvent, "ProductionID", true, DataSourceUpdateMode.OnPropertyChanged);
             this.cmb_ID.DataBindings.Add("Text", currEvent, "ID", true, DataSourceUpdateMode.OnPropertyChanged);
-            
-            
+
+
         }
-        
+
         private void GetEvents()
         {
             currEvent.ProductionID = this.txt_ProductionID.Text;
             IDbDataAdapter da;
-            using (EventLogic elogic = new EventLogic())
+            using (EventLogic el = new EventLogic())
             {
-                da = elogic.GetAdapter(currEvent);
-                DataSet ds = new DataSet();
-                da.Fill(ds);
-                this.dgv_Events.DataSource = ds.Tables[0];
+                da = el.GetEventsAdapter(currEvent);
+                dataset = new DataSet();
+                da.Fill(dataset);
+                this.dgv_Events.DataSource = dataset.Tables[0];
+                
+
             }
-            
+
         }
 
         private static frm_Event inst;
@@ -71,7 +69,7 @@ namespace RunLoader
 
         private void btn_Add_Click(object sender, EventArgs e)
         {
-            currEvent.Add();
+            currEvent.AddOrSubmit();
             GetEvents();
         }
 
@@ -79,5 +77,29 @@ namespace RunLoader
         {
             GetEvents();
         }
+
+        private void DisplayEvent(object sender, DataGridViewCellEventArgs e)
+        {
+            if (this.dgv_Events.SelectedRows.Count == 1 )
+            {
+                
+                using (EventLogic el = new EventLogic())
+                {
+                    DataGridViewRow dgr = this.dgv_Events.SelectedRows[0];
+                    LogEvent selectedevent = el.ConvertToEvent(dgr);
+                    foreach (PropertyInfo pi in selectedevent.GetType().GetProperties())
+                    {
+                        pi.SetValue(currEvent, pi.GetValue(selectedevent));
+                    }
+
+                    
+                    dataset = new DataSet();
+                    IDbDataAdapter da = el.GetBackupAdapter(currEvent);
+                    da.Fill(dataset);
+                    this.dgv_AuditTrail.DataSource = dataset.Tables[0];
+                }
+            }
+        }
+        
     }
 }

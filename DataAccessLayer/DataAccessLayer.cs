@@ -14,12 +14,12 @@ using System.Linq;
 
 namespace AuthDAL
 {
-    public class Auth_DAL:IDisposable
+    public class Auth_DAL : IDisposable
     {
-        
+
         public Auth_DAL()
         {
-            
+
         }
 
         public void Signin()
@@ -166,27 +166,42 @@ namespace DAL
 
             return dt;
         }
-
-        public static void RunNonQuery(IDbCommand cmd, string strSQL)
+        public static void RunNonQuery(List<IDbCommand> cmds)
         {
             if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
+            IDbTransaction trans = ActiveConn.BeginTransaction();
             try
             {
-                cmd.CommandText = strSQL;
-                cmd.ExecuteNonQuery();
+                foreach (IDbCommand cmd in cmds)
+                {
+                    cmd.Transaction = trans;
+                    cmd.ExecuteNonQuery();
 
-                DataFactory.ActiveConn.Close();
+                }
+                trans.Commit();
+
+
             }
             catch (Exception ex)
             {
-                DataFactory.ActiveConn.Close();
+                trans.Rollback();
                 Console.WriteLine(ex.Message);
             }
+            DataFactory.ActiveConn.Close();
+        }
+
+        public static void RunNonQuery(IDbCommand cmd, string strSQL)
+        {
+            List<IDbCommand> cmds = new List<IDbCommand>();
+            cmd.CommandText = strSQL;
+            cmds.Add(cmd);
+            RunNonQuery(cmds);
         }
 
         public static IDbCommand ExtractParameters(object obj, List<string> excepfields)
         {
-
+            FieldValues.Clear();
+            FieldNames.Clear();
             // get properties from entity class
 
             PropertyInfo[] PIs = obj.GetType().GetProperties();
@@ -212,9 +227,12 @@ namespace DAL
                                 if ((DateTime)pi.GetValue(obj) == DateTime.MinValue)
                                 {
                                     pm.Value = DBNull.Value;
+                                    pm.DbType = DbType.DateTime;
+                                    break;
                                 }
                                 else
                                 {
+                                    pm.DbType = DbType.DateTime;
                                     pm.Value = pi.GetValue(obj);
                                 }
                             }
@@ -229,9 +247,11 @@ namespace DAL
                                 if ((int)pi.GetValue(obj) == int.MinValue || (int)pi.GetValue(obj) == 0)
                                 {
                                     pm.Value = DBNull.Value;
+                                    pm.DbType = DbType.Int32;
                                 }
                                 else
                                 {
+                                    pm.DbType = DbType.Int32;
                                     pm.Value = pi.GetValue(obj);
                                 }
                             }
@@ -242,6 +262,7 @@ namespace DAL
                             break;
                         default:
                             pm.Value = pi.GetValue(obj);
+                            pm.DbType = DbType.String;
                             break;
                     }
 
@@ -421,7 +442,7 @@ namespace DAL
         }
     }
 
-   
+
 
 
     public class FileDataDAL : IDisposable
@@ -641,7 +662,8 @@ namespace DAL
 
     public class ProductionDAL : DataFactory, IDisposable
     {
-        private string _strUpdate
+        private const string tablename = "[tbl_Production]";
+        private string UpdateClause
         {
             get
             {
@@ -669,11 +691,6 @@ namespace DAL
             FieldValues.Clear();
             FieldNames.Clear();
         }
-        //public void RetrieveProductionData(ProductionEntity pe)
-        //{
-        //    pe = RetrieveProductionData(pe.ProductionName);
-        //}
-
 
         public ProductionEntity RetrieveProductionData(ProductionEntity pe)
         {
@@ -713,7 +730,7 @@ namespace DAL
         private DataTable GetDataTable(ProductionEntity prod)
         {
             DataTable dt = new DataTable();
-            string strSQL = string.Format("SELECT * FROM [tbl_Production] WHERE [ProductionName]='{0}'", prod.ProductionName);
+            string strSQL = string.Format("SELECT * FROM {0} WHERE [ProductionName]='{1}'", tablename, prod.ProductionName);
             dt = QueryTable(strSQL);
             return dt;
 
@@ -721,18 +738,21 @@ namespace DAL
 
         public void Add(ProductionEntity obj)
         {
+            List<IDbCommand> cmds = new List<IDbCommand>();
             if (!CheckExistence(obj))
             {
                 ExceptionFields.Clear();
                 ExceptionFields.Add("ID");
                 IDbCommand cmd = ExtractParameters(obj, ExceptionFields);
-                string strSQL = string.Format("INSERT INTO [tbl_Production] ({0}) VALUES ({1});", string.Join(",", FieldNames.ToArray()), string.Join(",", FieldValues.ToArray()));
-                RunNonQuery(cmd, strSQL);
+                cmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});", tablename, string.Join(",", FieldNames.ToArray()), string.Join(",", FieldValues.ToArray()));
+                cmds.Add(cmd);
+                RunNonQuery(cmds);
             }
         }
 
         public void Update(ProductionEntity obj)
         {
+            List<IDbCommand> cmds = new List<IDbCommand>();
             if (CheckExistence(obj))
             {
                 ExceptionFields.Clear();
@@ -741,10 +761,9 @@ namespace DAL
 
                 IDbCommand cmd = ExtractParameters(obj, ExceptionFields);
 
-
-                string strSQL = string.Format("{0} WHERE ProductionName='{1}'",_strUpdate, obj.ProductionName);
-
-                RunNonQuery(cmd, strSQL);
+                cmd.CommandText = string.Format("{0} WHERE ProductionName='{1}'", UpdateClause, obj.ProductionName);
+                cmds.Add(cmd);
+                RunNonQuery(cmds);
             }
         }
 
@@ -813,15 +832,15 @@ namespace DAL
             return boolExist;
         }
 
-        
-        
+
+
         public DataTable GetAvailableLogs()
         {
             DataTable dt = new DataTable();
             dt = QueryTable(string.Format("SELECT [ID],[LogID] FROM [tbl_AvailableLogs] WHERE [Department]='ICP-MS'"));
             return dt;
         }
-     
+
         public DataTable GetProductionIDs()
         {
             DataTable dt = new DataTable();
@@ -843,7 +862,7 @@ namespace DAL
 
             string strSQL = string.Format("SELECT [ProductionName] FROM [tbl_Production] WHERE [ProductionName] IN (SELECT [ProductionName] FROM [tbl_Production]){0} ORDER BY [ProductionName]", EqpFilter);
             dt = QueryTable(strSQL);
-            
+
             return dt;
         }
 
@@ -862,6 +881,7 @@ namespace DAL
     }
     public class EventsDAL : DataFactory, IDisposable
     {
+        private const string tablename = "[tbl_Events]";
         public EventsDAL()
         {
             if (DataFactory.ActiveConn == null)
@@ -875,15 +895,70 @@ namespace DAL
 
         public void Add(EventEntity obj)
         {
+            List<IDbCommand> cmds = new List<IDbCommand>();
             if (!CheckExistence(obj))
             {
                 ExceptionFields.Clear();
                 ExceptionFields.Add("ID");
                 IDbCommand cmd = ExtractParameters(obj, ExceptionFields);
-                
-                string strSQL = string.Format("INSERT INTO [tbl_Events] ({0}) VALUES ({1});", string.Join(",", FieldNames.ToArray()), string.Join(",", FieldValues.ToArray()));
-                RunNonQuery(cmd, strSQL);
+
+                cmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});", tablename, string.Join(",", FieldNames.ToArray()), string.Join(",", FieldValues.ToArray()));
+                cmds.Add(cmd);
+                RunNonQuery(cmds);
             }
+        }
+        private string UpdateClause
+        {
+            get
+            {
+                //need to build update statement
+                string strSQL = string.Format("UPDATE {0} SET ", tablename);
+                for (int i = 0; i <= FieldNames.Count - 1; i++)
+                {
+                    if (i > 0)
+                    {
+                        strSQL += ",";
+                    }
+                    strSQL += string.Format("{0}={1}", FieldNames[i], FieldValues[i]);
+                }
+
+                return strSQL;
+            }
+        }
+
+        private IDbCommand BackupCMD(EventEntity obj)
+        {
+
+            ExceptionFields.Clear();
+            IDbCommand cmd = ExtractParameters(obj, ExceptionFields);
+
+            cmd.CommandText = string.Format("INSERT INTO {0} SELECT * FROM {1} WHERE [ID]={2}", "[tbl_EventsBackup]", tablename, obj.ID);
+            return cmd;
+        }
+
+        public void Update(EventEntity obj)
+        {
+            List<IDbCommand> cmds = new List<IDbCommand>();
+            string strSQL = string.Empty;
+            if (CheckExistence(obj))
+            {
+                
+
+                IDbCommand cmdbackup = BackupCMD(obj);
+                cmds.Add(cmdbackup);
+
+                ExceptionFields.Clear();
+                ExceptionFields.Add("ID");
+
+                IDbCommand cmd = ExtractParameters(obj, ExceptionFields);
+
+                cmd.CommandText = string.Format("{0} WHERE [ID]={1}", UpdateClause, obj.ID);
+                cmds.Add(cmd);
+
+
+                
+            }
+            RunNonQuery(cmds);
         }
 
         public bool CheckExistence(EventEntity obj)
@@ -893,17 +968,13 @@ namespace DAL
             using (IDbCommand cmdcheck = DataFactory.CreateCommand(string.Empty))
             {
                 IDbDataParameter pmchk = cmdcheck.CreateParameter();
-                pmchk = cmdcheck.CreateParameter();
-                pmchk.ParameterName = "@LogName";
-                pmchk.Value = obj.LogName;
-                cmdcheck.Parameters.Add(pmchk);
 
                 pmchk = cmdcheck.CreateParameter();
-                pmchk.ParameterName = "@TimeCreated";
-                pmchk.Value = obj.TimeCreated;
+                pmchk.ParameterName = "@ID";
+                pmchk.Value = obj.ID;
                 cmdcheck.Parameters.Add(pmchk);
 
-                string strCheckExist = string.Format("SELECT [ID] FROM [tbl_Events] WHERE [LogName] = {0} AND [TimeCreated] = {1}", "@LogName", "@TimeCreated");
+                string strCheckExist = string.Format("SELECT [ID] FROM {0} WHERE [ID] = {1}", tablename, "@ID");
                 cmdcheck.CommandText = strCheckExist;
                 var result = cmdcheck.ExecuteScalar();
 
@@ -922,18 +993,28 @@ namespace DAL
             }
             return boolExist;
         }
-        public IDbDataAdapter AdaptData(string prodID)
+        public IDbDataAdapter AdaptEventData(EventEntity obj)
         {
-            string strSQL = string.Format("SELECT * FROM [tbl_Events] WHERE [ProductionID]='{0}'", prodID);
+            string strSQL = string.Format("SELECT * FROM {0} WHERE [ProductionID]='{1}'", tablename, obj.ProductionID);
             IDbCommand dbcmd = CreateCommand(strSQL);
             IDbDataAdapter da = CreateAdapter(dbcmd);
             return da;
         }
 
+        public IDbDataAdapter AdaptBackupData(EventEntity obj)
+        {
+            
+                string strSQL = string.Format("SELECT * FROM {0} WHERE [ID]={1}", "[tbl_EventsBackup]", obj.ID);
+                IDbCommand dbcmd = CreateCommand(strSQL);
+                IDbDataAdapter da = CreateAdapter(dbcmd);
+                return da;
+            
+        }
+
         public DataTable GetDataTable(EventEntity obj)
         {
             DataTable dt = new DataTable();
-            string strSQL = string.Format("SELECT * FROM [tbl_Events] WHERE [ProductionID]='{0}'", obj.ProductionID);
+            string strSQL = string.Format("SELECT * FROM {0} WHERE [ProductionID]='{1}'", tablename, obj.ProductionID);
             dt = QueryTable(strSQL);
             return dt;
 

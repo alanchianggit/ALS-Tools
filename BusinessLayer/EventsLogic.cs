@@ -6,21 +6,35 @@ using System.Threading.Tasks;
 using Entity;
 using DAL;
 using System.Data;
+using System.Reflection;
+
 
 namespace BusinessLayer
 {
     public class EventLogic:IDisposable
     {
-        public IDbDataAdapter GetAdapter(EventEntity obj)
+        public IDbDataAdapter GetEventsAdapter(EventEntity obj)
         {
 
             IDbDataAdapter da;
             using (EventsDAL eDAL = new EventsDAL())
             {
-                da = eDAL.AdaptData(obj.ProductionID);
+                da = eDAL.AdaptEventData(obj);
             }
             return da;
         }
+
+        public IDbDataAdapter GetBackupAdapter(EventEntity obj)
+        {
+
+            IDbDataAdapter da;
+            using (EventsDAL eDAL = new EventsDAL())
+            {
+                da = eDAL.AdaptBackupData(obj);
+            }
+            return da;
+        }
+
         public DataTable GetDataTable(EventEntity obj)
         {
             DataTable dt = new DataTable();
@@ -30,6 +44,35 @@ namespace BusinessLayer
             }
 
                 return dt;
+        }
+
+        public LogEvent ConvertToEvent(System.Windows.Forms.DataGridViewRow dr)
+        {
+            LogEvent le = new LogEvent();
+            System.Windows.Forms.DataGridViewCellCollection dc = dr.Cells;
+            foreach (PropertyInfo pi in le.GetType().GetProperties())
+            {
+                switch (pi.PropertyType.ToString())
+                {
+                    case "System.String":
+                        pi.SetValue(le, dc[pi.Name].Value.ToString());
+                        break;
+                    case "System.Int32":
+                        int intresult;
+                        int.TryParse(dc[pi.Name].Value.ToString(), out intresult);
+                        pi.SetValue(le, intresult);
+                        break;
+                    case "System.DateTime":
+                        DateTime datetimeresult;
+                        DateTime.TryParse(dc[pi.Name].Value.ToString(), out datetimeresult);
+                        pi.SetValue(le, datetimeresult);
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+            return le;
         }
 
         #region IDisposable Support
@@ -65,6 +108,7 @@ namespace BusinessLayer
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
         }
+        
         #endregion
     }
 
@@ -73,12 +117,19 @@ namespace BusinessLayer
         
         public LogEvent() { }
 
-        public void Add()
+        public void AddOrSubmit()
         {
-
             using (EventsDAL eDAL = new EventsDAL())
             {
-                eDAL.Add(this);
+                if (this.ID == 0 || this.ID.ToString() == string.Empty)
+                {
+                    eDAL.Add(this);
+                }
+                else
+                {
+                    eDAL.Update(this);
+                }
+                
             }
         }
 

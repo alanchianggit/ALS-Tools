@@ -358,12 +358,12 @@ namespace Entity
         }
     }
 
-    public class EventEntity:IDisposable,INotifyPropertyChanged
+    public class EventEntity : IDisposable, INotifyPropertyChanged
     {
         protected string _LogName;
         protected DateTime _TimeCreated;
         protected string _ProductionID;
-        protected string _ID;
+        protected int _ID;
         protected string _Level;
         protected string _User;
         //protected string _Terminal;
@@ -448,7 +448,7 @@ namespace Entity
             }
         }
 
-        public string ID
+        public int ID
         {
             get
             {
@@ -492,6 +492,10 @@ namespace Entity
             get
             {
                 return Environment.GetEnvironmentVariable("computername");
+            }
+            set
+            {
+                return;
             }
         }
 
@@ -767,7 +771,7 @@ namespace Entity
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
-        
+
 
         protected virtual void Dispose(bool disposing)
         {

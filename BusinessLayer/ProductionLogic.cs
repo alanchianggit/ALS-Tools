@@ -12,7 +12,7 @@ using System.ComponentModel;
 
 namespace BusinessLayer
 {
-    public class Productions : ProductionEntity, IDisposable, IProductionLogic
+    public class Productions : ProductionEntity, IDisposable, IFormLogic
     {
         #region Properties
         protected DataTable _datatable;
@@ -169,7 +169,7 @@ namespace BusinessLayer
         }
     }
 
-    public interface IProductionLogic
+    public interface IFormLogic
     {
         void UpdateProperty(object sender);
     }
