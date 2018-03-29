@@ -36,8 +36,9 @@ namespace RunLoader
         public Operations()
         {
             InitializeComponent();
-            DataFactory.Instance.Reset();
+            DataLayer.Instance.Reset();
             AuthEntity.Instance.Reset();
+            newSigninToolStripMenuItem.PerformClick();
             //newSigninToolStripMenuItem.PerformClick();
             //if (Connected)
             //{

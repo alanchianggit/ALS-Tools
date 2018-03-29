@@ -61,7 +61,7 @@ namespace RunLoader
                     try
                     {
                         //Test connection and store in datafactory
-                        IDbConnection conn = DataFactory.CreateConnection(this.txt_FileLocation.Text);
+                        IDbConnection conn = DataLayer.CreateConnection(this.txt_FileLocation.Text);
                         FirstConnect = false;
 
                     }
@@ -75,7 +75,7 @@ namespace RunLoader
                 {
                     try
                     {
-                        DataFactory.ActiveConn.Open();
+                        DataLayer.ActiveConn.Open();
                     }
                     catch (Exception ex)
                     {

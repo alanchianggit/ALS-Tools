@@ -28,132 +28,93 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.btn_Add = new System.Windows.Forms.Button();
-            this.txt_Details = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.cmb_Log = new System.Windows.Forms.ComboBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.txt_Time = new System.Windows.Forms.TextBox();
-            this.Label_EventID = new System.Windows.Forms.Label();
-            this.cmb_ID = new System.Windows.Forms.ComboBox();
-            this.Label_ProductionID = new System.Windows.Forms.Label();
-            this.txt_ProductionID = new System.Windows.Forms.TextBox();
+            this.Label_ProductionIDFilter = new System.Windows.Forms.Label();
+            this.txt_ProductionIDFilter = new System.Windows.Forms.TextBox();
             this.dgv_Events = new System.Windows.Forms.DataGridView();
             this.dgv_AuditTrail = new System.Windows.Forms.DataGridView();
+            this.txt_SearchPhrase = new System.Windows.Forms.TextBox();
+            this.Label_SearchPhrase = new System.Windows.Forms.Label();
+            this.cmb_InstrumentFilter = new System.Windows.Forms.ComboBox();
+            this.Label_InstFilter = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Events)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_AuditTrail)).BeginInit();
             this.SuspendLayout();
             // 
-            // btn_Add
+            // Label_ProductionIDFilter
             // 
-            this.btn_Add.BackColor = System.Drawing.SystemColors.Control;
-            this.btn_Add.Location = new System.Drawing.Point(217, 533);
-            this.btn_Add.Name = "btn_Add";
-            this.btn_Add.Size = new System.Drawing.Size(111, 46);
-            this.btn_Add.TabIndex = 0;
-            this.btn_Add.Text = "Add/Submit";
-            this.btn_Add.UseVisualStyleBackColor = false;
-            this.btn_Add.Click += new System.EventHandler(this.btn_Add_Click);
+            this.Label_ProductionIDFilter.AutoSize = true;
+            this.Label_ProductionIDFilter.Location = new System.Drawing.Point(235, 35);
+            this.Label_ProductionIDFilter.Name = "Label_ProductionIDFilter";
+            this.Label_ProductionIDFilter.Size = new System.Drawing.Size(97, 13);
+            this.Label_ProductionIDFilter.TabIndex = 4;
+            this.Label_ProductionIDFilter.Text = "Production ID Filter";
             // 
-            // txt_Details
+            // txt_ProductionIDFilter
             // 
-            this.txt_Details.BackColor = System.Drawing.SystemColors.AppWorkspace;
-            this.txt_Details.Location = new System.Drawing.Point(12, 360);
-            this.txt_Details.Multiline = true;
-            this.txt_Details.Name = "txt_Details";
-            this.txt_Details.Size = new System.Drawing.Size(903, 39);
-            this.txt_Details.TabIndex = 2;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 323);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(25, 13);
-            this.label1.TabIndex = 4;
-            this.label1.Text = "Log";
-            // 
-            // cmb_Log
-            // 
-            this.cmb_Log.FormattingEnabled = true;
-            this.cmb_Log.Location = new System.Drawing.Point(40, 320);
-            this.cmb_Log.Name = "cmb_Log";
-            this.cmb_Log.Size = new System.Drawing.Size(121, 21);
-            this.cmb_Log.TabIndex = 5;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 296);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(30, 13);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "Time";
-            // 
-            // txt_Time
-            // 
-            this.txt_Time.Location = new System.Drawing.Point(40, 294);
-            this.txt_Time.Name = "txt_Time";
-            this.txt_Time.Size = new System.Drawing.Size(121, 20);
-            this.txt_Time.TabIndex = 6;
-            // 
-            // Label_EventID
-            // 
-            this.Label_EventID.AutoSize = true;
-            this.Label_EventID.Location = new System.Drawing.Point(175, 323);
-            this.Label_EventID.Name = "Label_EventID";
-            this.Label_EventID.Size = new System.Drawing.Size(49, 13);
-            this.Label_EventID.TabIndex = 4;
-            this.Label_EventID.Text = "Event ID";
-            // 
-            // cmb_ID
-            // 
-            this.cmb_ID.FormattingEnabled = true;
-            this.cmb_ID.Location = new System.Drawing.Point(253, 319);
-            this.cmb_ID.Name = "cmb_ID";
-            this.cmb_ID.Size = new System.Drawing.Size(121, 21);
-            this.cmb_ID.TabIndex = 5;
-            // 
-            // Label_ProductionID
-            // 
-            this.Label_ProductionID.AutoSize = true;
-            this.Label_ProductionID.Location = new System.Drawing.Point(175, 296);
-            this.Label_ProductionID.Name = "Label_ProductionID";
-            this.Label_ProductionID.Size = new System.Drawing.Size(72, 13);
-            this.Label_ProductionID.TabIndex = 4;
-            this.Label_ProductionID.Text = "Production ID";
-            // 
-            // txt_ProductionID
-            // 
-            this.txt_ProductionID.Location = new System.Drawing.Point(253, 293);
-            this.txt_ProductionID.Name = "txt_ProductionID";
-            this.txt_ProductionID.Size = new System.Drawing.Size(121, 20);
-            this.txt_ProductionID.TabIndex = 6;
-            this.txt_ProductionID.TextChanged += new System.EventHandler(this.txt_ProductionID_TextChanged);
+            this.txt_ProductionIDFilter.Location = new System.Drawing.Point(342, 31);
+            this.txt_ProductionIDFilter.Name = "txt_ProductionIDFilter";
+            this.txt_ProductionIDFilter.Size = new System.Drawing.Size(121, 20);
+            this.txt_ProductionIDFilter.TabIndex = 6;
+            this.txt_ProductionIDFilter.TextChanged += new System.EventHandler(this.txt_ProductionID_TextChanged);
             // 
             // dgv_Events
             // 
-            this.dgv_Events.AllowUserToAddRows = false;
             this.dgv_Events.AllowUserToDeleteRows = false;
             this.dgv_Events.AllowUserToOrderColumns = true;
-            this.dgv_Events.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv_Events.Location = new System.Drawing.Point(12, 22);
-            this.dgv_Events.Name = "dgv_Events";
-            this.dgv_Events.ReadOnly = true;
-            this.dgv_Events.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgv_Events.Size = new System.Drawing.Size(903, 110);
-            this.dgv_Events.TabIndex = 7;
-            this.dgv_Events.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DisplayEvent);
             this.dgv_Events.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.dgv_Events.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv_Events.Location = new System.Drawing.Point(12, 57);
+            this.dgv_Events.Name = "dgv_Events";
+            this.dgv_Events.Size = new System.Drawing.Size(612, 244);
+            this.dgv_Events.TabIndex = 7;
+            this.dgv_Events.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Events_CellClick);
+            this.dgv_Events.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Events_CellEndEdit);
+            this.dgv_Events.CellValidating += new System.Windows.Forms.DataGridViewCellValidatingEventHandler(this.dgv_Events_CellValidating);
             // 
             // dgv_AuditTrail
             // 
-            this.dgv_AuditTrail.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv_AuditTrail.Location = new System.Drawing.Point(12, 405);
-            this.dgv_AuditTrail.Name = "dgv_AuditTrail";
-            this.dgv_AuditTrail.Size = new System.Drawing.Size(903, 111);
-            this.dgv_AuditTrail.TabIndex = 8;
             this.dgv_AuditTrail.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.dgv_AuditTrail.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv_AuditTrail.Location = new System.Drawing.Point(12, 425);
+            this.dgv_AuditTrail.Name = "dgv_AuditTrail";
+            this.dgv_AuditTrail.Size = new System.Drawing.Size(612, 111);
+            this.dgv_AuditTrail.TabIndex = 8;
+            // 
+            // txt_SearchPhrase
+            // 
+            this.txt_SearchPhrase.Location = new System.Drawing.Point(524, 31);
+            this.txt_SearchPhrase.Name = "txt_SearchPhrase";
+            this.txt_SearchPhrase.Size = new System.Drawing.Size(345, 20);
+            this.txt_SearchPhrase.TabIndex = 9;
+            this.txt_SearchPhrase.TextChanged += new System.EventHandler(this.txt_SearchPhrase_TextChanged);
+            // 
+            // Label_SearchPhrase
+            // 
+            this.Label_SearchPhrase.AutoSize = true;
+            this.Label_SearchPhrase.Location = new System.Drawing.Point(473, 35);
+            this.Label_SearchPhrase.Name = "Label_SearchPhrase";
+            this.Label_SearchPhrase.Size = new System.Drawing.Size(41, 13);
+            this.Label_SearchPhrase.TabIndex = 10;
+            this.Label_SearchPhrase.Text = "Search";
+            // 
+            // cmb_InstrumentFilter
+            // 
+            this.cmb_InstrumentFilter.FormattingEnabled = true;
+            this.cmb_InstrumentFilter.Location = new System.Drawing.Point(104, 31);
+            this.cmb_InstrumentFilter.Name = "cmb_InstrumentFilter";
+            this.cmb_InstrumentFilter.Size = new System.Drawing.Size(121, 21);
+            this.cmb_InstrumentFilter.TabIndex = 11;
+            this.cmb_InstrumentFilter.SelectedIndexChanged += new System.EventHandler(this.cmb_InstrumentFilter_SelectedIndexChanged);
+            this.cmb_InstrumentFilter.TextChanged += new System.EventHandler(this.cmb_InstrumentFilter_SelectedIndexChanged);
+            // 
+            // Label_InstFilter
+            // 
+            this.Label_InstFilter.AutoSize = true;
+            this.Label_InstFilter.Location = new System.Drawing.Point(13, 35);
+            this.Label_InstFilter.Name = "Label_InstFilter";
+            this.Label_InstFilter.Size = new System.Drawing.Size(81, 13);
+            this.Label_InstFilter.TabIndex = 12;
+            this.Label_InstFilter.Text = "Instrument Filter";
             // 
             // frm_Event
             // 
@@ -161,18 +122,14 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.ClientSize = new System.Drawing.Size(1244, 634);
+            this.Controls.Add(this.Label_InstFilter);
+            this.Controls.Add(this.cmb_InstrumentFilter);
+            this.Controls.Add(this.Label_SearchPhrase);
+            this.Controls.Add(this.txt_SearchPhrase);
             this.Controls.Add(this.dgv_AuditTrail);
             this.Controls.Add(this.dgv_Events);
-            this.Controls.Add(this.txt_ProductionID);
-            this.Controls.Add(this.txt_Time);
-            this.Controls.Add(this.Label_ProductionID);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.cmb_ID);
-            this.Controls.Add(this.Label_EventID);
-            this.Controls.Add(this.cmb_Log);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.txt_Details);
-            this.Controls.Add(this.btn_Add);
+            this.Controls.Add(this.txt_ProductionIDFilter);
+            this.Controls.Add(this.Label_ProductionIDFilter);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "frm_Event";
             this.Text = "Events";
@@ -184,18 +141,13 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.Button btn_Add;
-        private System.Windows.Forms.TextBox txt_Details;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ComboBox cmb_Log;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox txt_Time;
-        private System.Windows.Forms.Label Label_EventID;
-        private System.Windows.Forms.ComboBox cmb_ID;
-        private System.Windows.Forms.Label Label_ProductionID;
-        private System.Windows.Forms.TextBox txt_ProductionID;
+        private System.Windows.Forms.Label Label_ProductionIDFilter;
+        private System.Windows.Forms.TextBox txt_ProductionIDFilter;
         private System.Windows.Forms.DataGridView dgv_Events;
         private System.Windows.Forms.DataGridView dgv_AuditTrail;
+        private System.Windows.Forms.TextBox txt_SearchPhrase;
+        private System.Windows.Forms.Label Label_SearchPhrase;
+        private System.Windows.Forms.ComboBox cmb_InstrumentFilter;
+        private System.Windows.Forms.Label Label_InstFilter;
     }
 }

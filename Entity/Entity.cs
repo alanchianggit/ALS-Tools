@@ -363,7 +363,7 @@ namespace Entity
         protected string _LogName;
         protected DateTime _TimeCreated;
         protected string _ProductionID;
-        protected int _ID;
+        protected int _EventID;
         protected string _Level;
         protected string _User;
         //protected string _Terminal;
@@ -448,15 +448,15 @@ namespace Entity
             }
         }
 
-        public int ID
+        public int EventID
         {
             get
             {
-                return _ID;
+                return _EventID;
             }
             set
             {
-                _ID = value;
+                _EventID = value;
                 OnPropertyChanged("ID");
             }
         }

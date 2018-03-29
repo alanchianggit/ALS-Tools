@@ -24,7 +24,7 @@ namespace RunLoader
             OutputCheckedNodes.Clear();
             ListofFileNames.Clear();
             //DataFactory.Instance.Reset();
-            DataFactory.Instance.Dispose();
+            DataLayer.Instance.Dispose();
             
 
             base.Dispose(disposing);

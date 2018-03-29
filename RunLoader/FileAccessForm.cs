@@ -98,7 +98,7 @@ namespace RunLoader
                     try
                     {
                         //Test connection and store in datafactory
-                        IDbConnection conn = DataFactory.CreateConnection(this.txt_FileLocation.Text);
+                        IDbConnection conn = DataLayer.CreateConnection(this.txt_FileLocation.Text);
                         UpdateStatusConsole(string.Format("Connection established with {0}", this.txt_FileLocation.Text));
                         FirstConnect = false;
 
@@ -113,7 +113,7 @@ namespace RunLoader
                 {
                     try
                     {
-                        DataFactory.ActiveConn.Open();
+                        DataLayer.ActiveConn.Open();
                     }
                     catch (Exception ex)
                     {
@@ -121,7 +121,7 @@ namespace RunLoader
                     }
                 }
 
-                if (DataFactory.ActiveConn.State == ConnectionState.Open)
+                if (DataLayer.ActiveConn.State == ConnectionState.Open)
                 {
 
                     this.btn_ConnectDB.Text = "Connected";
@@ -155,7 +155,7 @@ namespace RunLoader
 
         private void btn_LoadFileTable_Click(object sender, EventArgs e)
         {
-            if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State != ConnectionState.Open)
+            if (DataLayer.ActiveConn != null && DataLayer.ActiveConn.State != ConnectionState.Open)
             {
                 //UpdateStatusConsole("Connection is not open. Attempting to re-open Connection now.");
                 btn_Connect_Click(sender, e);

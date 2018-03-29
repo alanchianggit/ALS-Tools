@@ -11,31 +11,109 @@ using System.Reflection;
 
 namespace BusinessLayer
 {
-    public class EventLogic:IDisposable
+    public static class EventLogic
     {
-        public IDbDataAdapter GetEventsAdapter(EventEntity obj)
+
+        private static IDbDataAdapter _eventadapter;
+        private static IDbTransaction _eventtrans;
+
+
+        public static IDbDataAdapter Eventadapter
+        {
+            get
+            {
+                return _eventadapter;
+            }
+
+            set
+            {
+                _eventadapter = value;
+            }
+        }
+
+        public static IDbTransaction EventTrans
+        {
+            get
+            {
+                return _eventtrans;
+            }
+
+            set
+            {
+                _eventtrans = value;
+            }
+        }
+
+        public static IDbDataAdapter GetEventAdapter()
+        {
+            IDbDataAdapter da;
+
+            if (Eventadapter == null)
+            {
+
+                using (evDAL eDAL = new evDAL())
+                {
+
+                    da = eDAL.AdaptEventData();
+
+                }
+
+                Eventadapter = da;
+                return da;
+            }
+            else
+            {
+                return Eventadapter;
+            }
+        }
+        public static void AttachTransaction(List<IDbDataAdapter> objs)
+        {
+            if (DataLayer.Instance.trans != null) { DataLayer.Instance.trans = null; }
+
+            DataLayer.Instance.trans = DataLayer.ActiveConn.BeginTransaction();
+            foreach (IDbDataAdapter obj in objs)
+            {
+                AttachTransaction(obj);
+            }
+        }
+        public static void AttachTransaction(IDbDataAdapter obj)
+        {
+
+            //if (DataLayer.Instance.trans != null) { DataLayer.Instance.trans = null; }
+
+            //DataLayer.Instance.trans = DataLayer.ActiveConn.BeginTransaction();
+            if (obj.InsertCommand != null) { obj.InsertCommand.Transaction = DataLayer.Instance.trans; }
+            if (obj.DeleteCommand != null) { obj.DeleteCommand.Transaction = DataLayer.Instance.trans; }
+            if (obj.UpdateCommand != null) { obj.UpdateCommand.Transaction = DataLayer.Instance.trans; }
+
+        }
+
+        public static void TryCommit()
+        {
+            try
+            {
+                DataLayer.Instance.trans.Commit();
+                //DataLayer.Instance.trans.Rollback();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                DataLayer.Instance.trans.Rollback();
+            }
+        }
+
+        public static IDbDataAdapter GetBackupAdapter()
         {
 
             IDbDataAdapter da;
-            using (EventsDAL eDAL = new EventsDAL())
+            using (evDAL eDAL = new evDAL())
             {
-                da = eDAL.AdaptEventData(obj);
+                da = eDAL.AdaptBackupData();
             }
             return da;
         }
 
-        public IDbDataAdapter GetBackupAdapter(EventEntity obj)
-        {
-
-            IDbDataAdapter da;
-            using (EventsDAL eDAL = new EventsDAL())
-            {
-                da = eDAL.AdaptBackupData(obj);
-            }
-            return da;
-        }
-
-        public DataTable GetDataTable(EventEntity obj)
+        public static DataTable GetDataTable(EventEntity obj)
         {
             DataTable dt = new DataTable();
             using (EventsDAL eDAL = new EventsDAL())
@@ -43,10 +121,22 @@ namespace BusinessLayer
                 dt = eDAL.GetDataTable(obj);
             }
 
-                return dt;
+            return dt;
         }
 
-        public LogEvent ConvertToEvent(System.Windows.Forms.DataGridViewRow dr)
+        public static DataTable GetLogIDs()
+        {
+
+            DataTable da;
+            using (evDAL eDAL = new evDAL())
+            {
+                da = eDAL.ReadAvailableLogs();
+
+            }
+            return da;
+        }
+
+        public static LogEvent ConvertToEvent(System.Windows.Forms.DataGridViewRow dr)
         {
             LogEvent le = new LogEvent();
             System.Windows.Forms.DataGridViewCellCollection dc = dr.Cells;
@@ -75,53 +165,18 @@ namespace BusinessLayer
             return le;
         }
 
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects).
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-
-                disposedValue = true;
-            }
-        }
-
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~EventLogic() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        // This code added to correctly implement the disposable pattern.
-        void IDisposable.Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
-        }
-        
-        #endregion
     }
 
-    public class LogEvent: EventEntity, IDisposable
+    public class LogEvent : EventEntity, IDisposable
     {
-        
+
         public LogEvent() { }
 
         public void AddOrSubmit()
         {
             using (EventsDAL eDAL = new EventsDAL())
             {
-                if (this.ID == 0 || this.ID.ToString() == string.Empty)
+                if (this.EventID == 0 || this.EventID.ToString() == string.Empty)
                 {
                     eDAL.Add(this);
                 }
@@ -129,11 +184,11 @@ namespace BusinessLayer
                 {
                     eDAL.Update(this);
                 }
-                
+
             }
         }
 
-        
+
 
 
         #region IDisposable Support

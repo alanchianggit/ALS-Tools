@@ -11,6 +11,7 @@ using System.Data.SQLite;
 using Entity;
 using System.Reflection;
 using System.Linq;
+using System.Data.Odbc;
 
 namespace AuthDAL
 {
@@ -89,7 +90,7 @@ namespace DAL
         // define a common parameter type set
     }
 
-    public class DataFactory : IDisposable
+    public class DataLayer : IDisposable
     {
         //create new Lists for colum names and parameters
         public static List<string> FieldNames = new List<string>();
@@ -98,13 +99,26 @@ namespace DAL
         public List<string> ExceptionFields = new List<string>();
 
         private const string defaultDB = @"C:\Users\Alan\Documents\BackEnd1.accdb";
-        public static DataFactory Instance = new DataFactory();
+        public static DataLayer Instance = new DataLayer();
+        public IDbConnection AlternateConn;
+
+        public  IDbTransaction trans;
+        //{
+        //    get
+        //    {
+        //        IDbConnection conn = Instance.CreateConnection(dbtype, defaultDB);
+        //        if (DataFactory.Instance.AlternateConn!= null && DataFactory.Instance.AlternateConn.State != ConnectionState.Open) { DataFactory.Instance.AlternateConn.Open(); }
+        //        return conn;
+        //    }
+        //}
+
         public void Reset()
         {
-            Instance = new DataFactory();
+            Instance = new DataLayer();
         }
 
-        public DataFactory()
+
+        public DataLayer()
         {
             //CreateConnection(defaultDB);
         }
@@ -116,10 +130,7 @@ namespace DAL
 
         private static Dictionary<object, IDbConnection> conns = new Dictionary<object, IDbConnection>();
 
-        //private static DataFactory()  {
 
-
-        //}
         //Create Connection based on file extension type: e.g. *.db for SQLite, *.MDB or *.ACCDB for M$ Access
         public static IDbConnection CreateConnection()
         {
@@ -130,7 +141,9 @@ namespace DAL
             //find database type based on file type
             dbtype = (DatabaseType)dbfiletype;
             //create connection using database type
-            return DataFactory.CreateConnection(dbtype, defaultDB);
+            IDbConnection conn = DataLayer.Instance.CreateConnection(dbtype, defaultDB);
+            //return DataFactory.CreateConnection(dbtype, defaultDB);
+            return conn;
 
         }
         public static IDbConnection CreateConnection(string DBDataSource)
@@ -142,21 +155,23 @@ namespace DAL
             //find database type based on file type
             dbtype = (DatabaseType)dbfiletype;
             //create connection using database type
-            return DataFactory.CreateConnection(dbtype, DBDataSource);
+            IDbConnection conn = DataLayer.Instance.CreateConnection(dbtype, DBDataSource);
+            return conn;
 
         }
 
         public static DataTable QueryTable(string strSQL)
         {
-            DataTable dt = new DataTable();
-            if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
+            DataSet ds = new DataSet();
+
+            if (DataLayer.ActiveConn != null && DataLayer.ActiveConn.State != ConnectionState.Open) { DataLayer.ActiveConn.Open(); }
             try
             {
-                IDbCommand cmd = DataFactory.CreateCommand(strSQL);
-                using (DbDataAdapter da = DataFactory.CreateAdapter(cmd))
-                {
-                    da.Fill(dt);
-                }
+                IDbCommand cmd = DataLayer.CreateCommand(strSQL);
+                IDbDataAdapter da = DataLayer.CreateAdapter(cmd);
+
+                da.Fill(ds);
+
                 cmd.Dispose();
             }
             catch (Exception ex)
@@ -164,11 +179,11 @@ namespace DAL
                 Console.WriteLine(ex.Message);
             }
 
-            return dt;
+            return ds.Tables[0];
         }
         public static void RunNonQuery(List<IDbCommand> cmds)
         {
-            if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
+            if (DataLayer.ActiveConn.State != ConnectionState.Open) { DataLayer.ActiveConn.Open(); }
             IDbTransaction trans = ActiveConn.BeginTransaction();
             try
             {
@@ -187,7 +202,7 @@ namespace DAL
                 trans.Rollback();
                 Console.WriteLine(ex.Message);
             }
-            DataFactory.ActiveConn.Close();
+            DataLayer.ActiveConn.Close();
         }
 
         public static void RunNonQuery(IDbCommand cmd, string strSQL)
@@ -198,26 +213,30 @@ namespace DAL
             RunNonQuery(cmds);
         }
 
-        public static IDbCommand ExtractParameters(object obj, List<string> excepfields)
+        public static IDbCommand ExtractParameters(object obj, List<string> excepfields, bool extractnulls, string paramchar)
         {
+            //if (string.IsNullOrEmpty(paramchar)) { paramchar = "@"; };
             FieldValues.Clear();
             FieldNames.Clear();
             // get properties from entity class
 
             PropertyInfo[] PIs = obj.GetType().GetProperties();
             //Create table of data according to properties so it can be adapted to connection
-            IDbCommand cmd = DataFactory.CreateCommand(string.Empty);
+            IDbCommand cmd = DataLayer.CreateCommand(string.Empty);
 
 
             //Iterate through each prorperty to coerce a parameter
             foreach (PropertyInfo pi in PIs)
             {
-                if (!excepfields.Contains(pi.Name) && pi.GetValue(obj) != null)
+
+                if (!excepfields.Contains(pi.Name))
                 {
+                    if (!extractnulls) { break; }
+
                     //Create new parameter object
                     IDbDataParameter pm = cmd.CreateParameter();
                     //Set Parameter name from property name
-                    pm.ParameterName = string.Format("@{0}", pi.Name.ToString());
+                    pm.ParameterName = string.Format("{1}{0}", pi.Name.ToString(), paramchar);
                     //Set value from property of object
                     switch (pi.PropertyType.ToString())
                     {
@@ -228,12 +247,14 @@ namespace DAL
                                 {
                                     pm.Value = DBNull.Value;
                                     pm.DbType = DbType.DateTime;
+                                    pm.SourceColumn = pi.Name;
                                     break;
                                 }
                                 else
                                 {
                                     pm.DbType = DbType.DateTime;
                                     pm.Value = pi.GetValue(obj);
+                                    pm.SourceColumn = pi.Name;
                                 }
                             }
                             catch (Exception ex)
@@ -248,11 +269,13 @@ namespace DAL
                                 {
                                     pm.Value = DBNull.Value;
                                     pm.DbType = DbType.Int32;
+                                    pm.SourceColumn = pi.Name;
                                 }
                                 else
                                 {
                                     pm.DbType = DbType.Int32;
                                     pm.Value = pi.GetValue(obj);
+                                    pm.SourceColumn = pi.Name;
                                 }
                             }
                             catch (Exception ex)
@@ -263,6 +286,7 @@ namespace DAL
                         default:
                             pm.Value = pi.GetValue(obj);
                             pm.DbType = DbType.String;
+                            pm.SourceColumn = pi.Name;
                             break;
                     }
 
@@ -271,6 +295,8 @@ namespace DAL
                     //Add to list for generating string
                     FieldValues.Add(pm.ParameterName);
                     FieldNames.Add("[" + pi.Name.ToString() + "]");
+                    //FieldNames.Sort();
+                    //FieldValues.Sort();
                     //clean up
                     pm = null;
                     PIs = null;
@@ -279,7 +305,18 @@ namespace DAL
             return cmd;
         }
 
-        public static IDbConnection CreateConnection(DatabaseType dbtype, string DBDataSource)
+        public static IDbCommand ExtractParameters(object obj, List<string> excepfields)
+        {
+            IDbCommand cmd = ExtractParameters(obj, excepfields, true, "@");
+            return cmd;
+        }
+        public static IDbCommand ExtractParameters(object obj, List<string> excepfields, bool extractnulls)
+        {
+            IDbCommand cmd = ExtractParameters(obj, excepfields, extractnulls, string.Empty);
+            return cmd;
+        }
+
+        public IDbConnection CreateConnection(DatabaseType dbtype, string DBDataSource)
         {
             //Set connection string
             ActiveConnectionString = BuildString(DBDataSource, dbtype);
@@ -301,7 +338,10 @@ namespace DAL
             if (ActiveConnectionString != Conn.ConnectionString) { Conn.ConnectionString = ActiveConnectionString; }
             //Open connection
             Conn.Open();
-            return ActiveConn = Conn;
+            ActiveConn = Conn;
+
+            return Conn;
+
         }
 
         private static string BuildString(string DBDataSource, DatabaseType dbtype)
@@ -360,9 +400,9 @@ namespace DAL
                     break;
                 default:
                     {
-                        OleDbConnectionStringBuilder bs = new OleDbConnectionStringBuilder();
-                        bs.DataSource = DBDataSource;
-                        bs.OleDbServices = -1;
+                        OdbcConnectionStringBuilder bs = new OdbcConnectionStringBuilder();
+                        bs.Add("Dbq", DBDataSource);
+
 
                         ActiveConnectionString = bs.ConnectionString;
                     }
@@ -375,37 +415,65 @@ namespace DAL
         public static IDbCommand CreateCommand(string CommandText)
         {
             IDbCommand cmd;
-            switch (DataFactory.dbtype)
+            switch (DataLayer.dbtype)
             {
                 case DatabaseType.AccessACCDB:
                 case DatabaseType.AccessMDB:
-                    cmd = new OleDbCommand(CommandText, (OleDbConnection)DataFactory.ActiveConn);
+                    cmd = new OleDbCommand(CommandText, (OleDbConnection)DataLayer.ActiveConn);
                     break;
 
                 case DatabaseType.SQLServer:
-                    cmd = new SqlCommand(CommandText, (SqlConnection)DataFactory.ActiveConn);
+                    cmd = new SqlCommand(CommandText, (SqlConnection)DataLayer.ActiveConn);
                     break;
 
                 case DatabaseType.Oracle:
-                    cmd = new OracleCommand(CommandText, (OracleConnection)DataFactory.ActiveConn);
+                    cmd = new OracleCommand(CommandText, (OracleConnection)DataLayer.ActiveConn);
                     break;
                 case DatabaseType.SQLite:
-                    cmd = new SQLiteCommand(CommandText, (SQLiteConnection)DataFactory.ActiveConn);
+                    cmd = new SQLiteCommand(CommandText, (SQLiteConnection)DataLayer.ActiveConn);
                     break;
                 default:
-                    cmd = new OleDbCommand(CommandText, (OleDbConnection)DataFactory.ActiveConn);
+                    cmd = new OdbcCommand(CommandText, (OdbcConnection)DataLayer.ActiveConn);
                     break;
             }
 
             return cmd;
         }
 
+        public static IDbDataAdapter CreateAdapter()
+        {
+            IDbDataAdapter da;
 
-        public static DbDataAdapter CreateAdapter(IDbCommand cmd)
+            switch (DataLayer.dbtype)
+            {
+                case DatabaseType.AccessACCDB:
+                case DatabaseType.AccessMDB:
+                    da = new OleDbDataAdapter();
+                    break;
+
+                case DatabaseType.SQLServer:
+                    da = new SqlDataAdapter();
+                    break;
+
+                case DatabaseType.Oracle:
+                    da = new OracleDataAdapter();
+                    break;
+                case DatabaseType.SQLite:
+                    da = new SQLiteDataAdapter();
+                    break;
+                default:
+                    da = new OdbcDataAdapter();
+                    break;
+            }
+
+            return da;
+        }
+
+        public static IDbDataAdapter CreateAdapter(IDbCommand cmd)
         {
             DbDataAdapter da;
 
-            switch (DataFactory.dbtype)
+            switch (DataLayer.dbtype)
             {
                 case DatabaseType.AccessACCDB:
                 case DatabaseType.AccessMDB:
@@ -423,7 +491,7 @@ namespace DAL
                     da = new SQLiteDataAdapter((SQLiteCommand)cmd);
                     break;
                 default:
-                    da = new OleDbDataAdapter((OleDbCommand)cmd);
+                    da = new OdbcDataAdapter((OdbcCommand)cmd);
                     break;
             }
 
@@ -455,9 +523,9 @@ namespace DAL
 
         public FileDataDAL()
         {
-            if (DataFactory.ActiveConn != null)
+            if (DataLayer.ActiveConn != null)
             {
-                DataFactory.CreateConnection();
+                DataLayer.CreateConnection();
             }
 
         }
@@ -465,15 +533,16 @@ namespace DAL
         private DataTable GetDatatable()
         {
             string strSQL = "SELECT * FROM tbl_Files";
-            if (DataFactory.ActiveConn != null && DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
+            if (DataLayer.ActiveConn != null && DataLayer.ActiveConn.State != ConnectionState.Open) { DataLayer.ActiveConn.Open(); }
             try
             {
-                IDbCommand cmd = DataFactory.CreateCommand(strSQL);
-                using (DbDataAdapter da = DataFactory.CreateAdapter(cmd))
-                {
-                    da.Fill(this.Datatable);
-                }
+                IDbCommand cmd = DataLayer.CreateCommand(strSQL);
+                IDbDataAdapter da = DataLayer.CreateAdapter(cmd);
+                DataSet ds = new DataSet();
+                da.Fill(ds);
+
                 cmd.Dispose();
+                Datatable = ds.Tables[0];
             }
             catch (Exception ex)
             {
@@ -487,7 +556,7 @@ namespace DAL
         {
             string fn = string.Empty;
             string strSQL = "SELECT tbl_Files.FileName FROM tbl_Method INNER JOIN tbl_Files ON tbl_Method.FileName = tbl_Files.FileName WHERE(((tbl_Method.Method) = @Method));";
-            using (IDbCommand cmd = DataFactory.CreateCommand(strSQL))
+            using (IDbCommand cmd = DataLayer.CreateCommand(strSQL))
             {
                 IDbDataParameter pm = cmd.CreateParameter();
                 pm.ParameterName = "@Method";
@@ -544,11 +613,11 @@ namespace DAL
 
         public void Add(FileEntity obj)
         {
-            if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
+            if (DataLayer.ActiveConn.State != ConnectionState.Open) { DataLayer.ActiveConn.Open(); }
             try
             {
 
-                using (IDbCommand cmdcheck = DataFactory.CreateCommand(string.Empty))
+                using (IDbCommand cmdcheck = DataLayer.CreateCommand(string.Empty))
                 {
                     IDbDataParameter pmchk = cmdcheck.CreateParameter();
                     pmchk.ParameterName = "@FileName";
@@ -572,7 +641,7 @@ namespace DAL
                         PropertyInfo[] PIs = obj.GetType().GetProperties();
 
                         //Create table of data according to properties so it can be adapted to connection
-                        IDbCommand cmdInsert = DataFactory.CreateCommand(string.Empty);
+                        IDbCommand cmdInsert = DataLayer.CreateCommand(string.Empty);
 
                         //create new Lists for colum names and parameters
                         List<string> InsertColumnNames = new List<string>();
@@ -609,7 +678,7 @@ namespace DAL
                     pmchk = null;
                     strCheckExist = string.Empty;
                     obj = null;
-                    DataFactory.ActiveConn.Close();
+                    DataLayer.ActiveConn.Close();
                 }
             }
             catch (Exception ex)
@@ -632,7 +701,7 @@ namespace DAL
                     listFE = null;
                     Datatable.Dispose();
                     //((IDisposable)Datatable).Dispose();
-                    DataFactory.ActiveConn.Close();
+                    DataLayer.ActiveConn.Close();
                     // TODO: dispose managed state (managed objects).
                 }
 
@@ -660,7 +729,7 @@ namespace DAL
         #endregion
     }
 
-    public class ProductionDAL : DataFactory, IDisposable
+    public class ProductionDAL : DataLayer, IDisposable
     {
         private const string tablename = "[tbl_Production]";
         private string UpdateClause
@@ -683,9 +752,9 @@ namespace DAL
         }
         public ProductionDAL()
         {
-            if (DataFactory.ActiveConn == null)
+            if (DataLayer.ActiveConn == null)
             {
-                DataFactory.CreateConnection();
+                DataLayer.CreateConnection();
             }
             ExceptionFields.Clear();
             FieldValues.Clear();
@@ -807,8 +876,8 @@ namespace DAL
         public bool CheckExistence(ProductionEntity obj)
         {
             bool boolExist;
-            if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
-            using (IDbCommand cmdcheck = DataFactory.CreateCommand(string.Empty))
+            if (DataLayer.ActiveConn.State != ConnectionState.Open) { DataLayer.ActiveConn.Open(); }
+            using (IDbCommand cmdcheck = DataLayer.CreateCommand(string.Empty))
             {
                 IDbDataParameter pmchk = cmdcheck.CreateParameter();
                 pmchk.ParameterName = "@ProductionName";
@@ -827,7 +896,7 @@ namespace DAL
                 pmchk = null;
                 strCheckExist = string.Empty;
                 obj = null;
-                DataFactory.ActiveConn.Close();
+                DataLayer.ActiveConn.Close();
             }
             return boolExist;
         }
@@ -879,14 +948,14 @@ namespace DAL
             return dt;
         }
     }
-    public class EventsDAL : DataFactory, IDisposable
+    public class EventsDAL : DataLayer, IDisposable
     {
         private const string tablename = "[tbl_Events]";
         public EventsDAL()
         {
-            if (DataFactory.ActiveConn == null)
+            if (DataLayer.ActiveConn == null)
             {
-                DataFactory.CreateConnection();
+                DataLayer.CreateConnection();
             }
             ExceptionFields.Clear();
             FieldValues.Clear();
@@ -899,7 +968,7 @@ namespace DAL
             if (!CheckExistence(obj))
             {
                 ExceptionFields.Clear();
-                ExceptionFields.Add("ID");
+                ExceptionFields.Add("EventID");
                 IDbCommand cmd = ExtractParameters(obj, ExceptionFields);
 
                 cmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});", tablename, string.Join(",", FieldNames.ToArray()), string.Join(",", FieldValues.ToArray()));
@@ -932,7 +1001,7 @@ namespace DAL
             ExceptionFields.Clear();
             IDbCommand cmd = ExtractParameters(obj, ExceptionFields);
 
-            cmd.CommandText = string.Format("INSERT INTO {0} SELECT * FROM {1} WHERE [ID]={2}", "[tbl_EventsBackup]", tablename, obj.ID);
+            cmd.CommandText = string.Format("INSERT INTO {0} SELECT * FROM {1} WHERE [EventID]={2}", "[tbl_EventsBackup]", tablename, obj.EventID);
             return cmd;
         }
 
@@ -942,21 +1011,21 @@ namespace DAL
             string strSQL = string.Empty;
             if (CheckExistence(obj))
             {
-                
+
 
                 IDbCommand cmdbackup = BackupCMD(obj);
                 cmds.Add(cmdbackup);
 
                 ExceptionFields.Clear();
-                ExceptionFields.Add("ID");
+                ExceptionFields.Add("EventID");
 
                 IDbCommand cmd = ExtractParameters(obj, ExceptionFields);
 
-                cmd.CommandText = string.Format("{0} WHERE [ID]={1}", UpdateClause, obj.ID);
+                cmd.CommandText = string.Format("{0} WHERE [EventID]={1}", UpdateClause, obj.EventID);
                 cmds.Add(cmd);
 
 
-                
+
             }
             RunNonQuery(cmds);
         }
@@ -964,17 +1033,17 @@ namespace DAL
         public bool CheckExistence(EventEntity obj)
         {
             bool boolExist;
-            if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
-            using (IDbCommand cmdcheck = DataFactory.CreateCommand(string.Empty))
+            if (DataLayer.ActiveConn.State != ConnectionState.Open) { DataLayer.ActiveConn.Open(); }
+            using (IDbCommand cmdcheck = DataLayer.CreateCommand(string.Empty))
             {
                 IDbDataParameter pmchk = cmdcheck.CreateParameter();
 
                 pmchk = cmdcheck.CreateParameter();
-                pmchk.ParameterName = "@ID";
-                pmchk.Value = obj.ID;
+                pmchk.ParameterName = "@EventID";
+                pmchk.Value = obj.EventID;
                 cmdcheck.Parameters.Add(pmchk);
 
-                string strCheckExist = string.Format("SELECT [ID] FROM {0} WHERE [ID] = {1}", tablename, "@ID");
+                string strCheckExist = string.Format("SELECT [EventID] FROM {0} WHERE [ID] = {1}", tablename, "@EventID");
                 cmdcheck.CommandText = strCheckExist;
                 var result = cmdcheck.ExecuteScalar();
 
@@ -987,12 +1056,36 @@ namespace DAL
                 pmchk = null;
                 strCheckExist = string.Empty;
                 obj = null;
-                DataFactory.ActiveConn.Close();
+                DataLayer.ActiveConn.Close();
 
 
             }
             return boolExist;
         }
+        //public IDbDataAdapter AdaptEventData()
+        //{
+
+        //    string strSQL = string.Format("SELECT * FROM {0} WHERE [ProductionID]='{1}'", tablename, obj.ProductionID);
+        //    IDbCommand selectcmd = CreateCommand(strSQL);
+        //    IDbDataAdapter da = CreateAdapter();
+
+
+        //    ExceptionFields.Clear();
+        //    ExceptionFields.Add("ID");
+        //    IDbCommand insertcmd = ExtractParameters(obj, ExceptionFields);
+        //    insertcmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});", tablename, string.Join(",", FieldNames.ToArray()), string.Join(",", FieldValues.ToArray()));
+
+        //    ExceptionFields.Clear();
+        //    ExceptionFields.Add("ID");
+
+        //    IDbCommand updatecmd = ExtractParameters(obj, ExceptionFields);
+
+        //    updatecmd.CommandText = string.Format("{0} WHERE [ID]={1}", UpdateClause, obj.ID);
+        //    da.UpdateCommand = updatecmd;
+        //    da.SelectCommand = selectcmd;
+        //    da.InsertCommand = insertcmd;
+        //    return da;
+        //}
         public IDbDataAdapter AdaptEventData(EventEntity obj)
         {
             string strSQL = string.Format("SELECT * FROM {0} WHERE [ProductionID]='{1}'", tablename, obj.ProductionID);
@@ -1003,12 +1096,22 @@ namespace DAL
 
         public IDbDataAdapter AdaptBackupData(EventEntity obj)
         {
-            
-                string strSQL = string.Format("SELECT * FROM {0} WHERE [ID]={1}", "[tbl_EventsBackup]", obj.ID);
-                IDbCommand dbcmd = CreateCommand(strSQL);
-                IDbDataAdapter da = CreateAdapter(dbcmd);
-                return da;
-            
+
+            string strSQL = string.Format("SELECT * FROM {0} WHERE [ID]={1}", "[tbl_EventsBackup]", obj.EventID);
+            IDbCommand dbcmd = CreateCommand(strSQL);
+            IDbDataAdapter da = CreateAdapter(dbcmd);
+            return da;
+
+        }
+
+        public IDbDataAdapter AdaptLogIDData()
+        {
+
+            string strSQL = string.Format("SELECT [LogID] FROM {0}", "[tbl_AvailableLogs]");
+            IDbCommand dbcmd = CreateCommand(strSQL);
+            IDbDataAdapter da = CreateAdapter(dbcmd);
+            return da;
+
         }
 
         public DataTable GetDataTable(EventEntity obj)
@@ -1030,6 +1133,295 @@ namespace DAL
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~EventsDAL() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        void IDisposable.Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
+    }
+
+
+    public class evDAL : DataLayer, IDisposable
+    {
+        private const string tablename = "[tbl_Events]";
+        public static new evDAL Instance = new evDAL();
+        public new void Reset()
+        {
+            Instance = new evDAL();
+        }
+
+        public evDAL()
+        {
+            if (DataLayer.ActiveConn == null)
+            {
+                DataLayer.CreateConnection();
+            }
+            
+            ExceptionFields.Clear();
+            FieldValues.Clear();
+            FieldNames.Clear();
+
+        }
+
+
+
+
+
+        //public void Add(EventEntity obj)
+        //{
+        //    List<IDbCommand> cmds = new List<IDbCommand>();
+        //    if (!CheckExistence(obj))
+        //    {
+        //        ExceptionFields.Clear();
+        //        ExceptionFields.Add("EventID");
+        //        IDbCommand cmd = ExtractParameters(obj, ExceptionFields);
+
+        //        cmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});", tablename, string.Join(",", FieldNames.ToArray()), string.Join(",", FieldValues.ToArray()));
+        //        cmds.Add(cmd);
+        //        RunNonQuery(cmds);
+        //    }
+        //}
+        private string UpdateClause
+        {
+            get
+            {
+                string strSQL = string.Format("UPDATE {0} SET ", tablename);
+                for (int i = 0; i <= FieldNames.Count - 1; i++)
+                {
+                    if (i > 0)
+                    {
+                        strSQL += ",";
+                    }
+                    strSQL += string.Format("{0}={1}", FieldNames[i], FieldValues[i]);
+                }
+
+                return strSQL;
+            }
+        }
+
+        //private IDbCommand BackupCMD(EventEntity obj)
+        //{
+
+        //    ExceptionFields.Clear();
+        //    IDbCommand cmd = ExtractParameters(obj, ExceptionFields);
+
+        //    cmd.CommandText = string.Format("INSERT INTO {0} SELECT * FROM {1} WHERE [EventID]={2}", "[tbl_EventsBackup]", tablename, obj.EventID);
+        //    return cmd;
+        //}
+
+        //public void Update(EventEntity obj)
+        //{
+        //    List<IDbCommand> cmds = new List<IDbCommand>();
+        //    string strSQL = string.Empty;
+        //    if (CheckExistence(obj))
+        //    {
+
+
+        //        IDbCommand cmdbackup = BackupCMD(obj);
+        //        cmds.Add(cmdbackup);
+
+        //        ExceptionFields.Clear();
+        //        ExceptionFields.Add("EventID");
+
+        //        IDbCommand cmd = ExtractParameters(obj, ExceptionFields);
+
+        //        cmd.CommandText = string.Format("{0} WHERE [EventID]={1}", UpdateClause, obj.EventID);
+        //        cmds.Add(cmd);
+
+
+
+        //    }
+        //    RunNonQuery(cmds);
+        //}
+
+        //public bool CheckExistence(EventEntity obj)
+        //{
+        //    bool boolExist;
+        //    if (DataFactory.ActiveConn.State != ConnectionState.Open) { DataFactory.ActiveConn.Open(); }
+        //    using (IDbCommand cmdcheck = DataFactory.CreateCommand(string.Empty))
+        //    {
+        //        IDbDataParameter pmchk = cmdcheck.CreateParameter();
+
+        //        pmchk = cmdcheck.CreateParameter();
+        //        pmchk.ParameterName = "@EventID";
+        //        pmchk.Value = obj.EventID;
+        //        cmdcheck.Parameters.Add(pmchk);
+
+        //        string strCheckExist = string.Format("SELECT [ID] FROM {0} WHERE [EventID] = {1}", tablename, "@EventID");
+        //        cmdcheck.CommandText = strCheckExist;
+        //        var result = cmdcheck.ExecuteScalar();
+
+        //        if (result != null) { boolExist = true; }
+        //        else { boolExist = false; }
+
+        //        //Clean up
+
+        //        cmdcheck.Dispose();
+        //        pmchk = null;
+        //        strCheckExist = string.Empty;
+        //        obj = null;
+        //        DataFactory.ActiveConn.Close();
+
+
+        //    }
+        //    return boolExist;
+        //}
+        public IDbDataAdapter AdaptEventData()
+        {
+            EventEntity obj = new EventEntity();
+            IDbDataAdapter da = CreateAdapter();
+
+
+            #region EventsAdapter Select
+            ExceptionFields.Clear();
+            ExceptionFields.Add("EventID");
+            IDbCommand selectcmd = ExtractParameters(obj, ExceptionFields, true, "@");
+            selectcmd.CommandText = string.Format("SELECT [EventID], {1} FROM {0}", tablename, string.Join(",", FieldNames.ToArray()));
+            selectcmd.CommandType = CommandType.Text;
+            #endregion
+
+
+            #region EventsAdapter Insert
+
+            ExceptionFields.Clear();
+            ExceptionFields.Add("EventID");
+            IDbCommand insertcmd = ExtractParameters(obj, ExceptionFields, true, "@");
+            insertcmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});", tablename, string.Join(",", FieldNames.ToArray()), string.Join(",", FieldValues.ToArray()));
+            insertcmd.CommandType = CommandType.Text;
+            #endregion
+
+            #region EventsAdapter Update
+            ExceptionFields.Clear();
+            ExceptionFields.Add("EventID");
+
+            IDbCommand updatecmd = ExtractParameters(obj, ExceptionFields, true, "@");
+
+            updatecmd.CommandText = string.Format("{0} WHERE [EventID]=@EventID", UpdateClause);
+            IDbDataParameter param = updatecmd.CreateParameter();
+            param.ParameterName = "@EventID";
+            param.SourceColumn = "EventID";
+            updatecmd.Parameters.Add(param);
+            
+            #endregion
+
+
+            #region EventsAdapter Delete
+            ExceptionFields.Clear();
+            ExceptionFields.Add("EventID");
+
+            //IDbCommand deletecmd = ExtractParameters(obj, ExceptionFields, true, "@");
+
+            string strSQL = string.Format("DELETE * FROM {0} WHERE [EventID]=@EventID", tablename);
+            IDbCommand deletecmd = CreateCommand(strSQL);
+            IDbDataParameter delparam = deletecmd.CreateParameter();
+            delparam.ParameterName = "@EventID";
+            delparam.SourceColumn = "EventID";
+            deletecmd.Parameters.Add(delparam);
+            #endregion
+
+            da.DeleteCommand = deletecmd;
+            da.UpdateCommand = updatecmd;
+            da.SelectCommand = selectcmd;
+            da.InsertCommand = insertcmd;
+            return da;
+        }
+
+        public IDbDataAdapter AdaptBackupData()
+        {
+            EventEntity obj = new EventEntity();
+            IDbDataAdapter da = CreateAdapter();
+
+            #region BackupAdapter Select
+            ExceptionFields.Clear();
+            ExceptionFields.Add("BackupID");
+
+            //IDbCommand selectcmd = ExtractParameters(obj, ExceptionFields, true, "@");
+
+            IDbCommand selectcmd = ExtractParameters(obj, ExceptionFields, true, "@");
+            selectcmd.CommandText = string.Format("SELECT [BackupID], {1} FROM {0}", "[tbl_EventsBackup]", string.Join(",", FieldNames.ToArray()));
+            selectcmd.CommandType = CommandType.Text;
+            da.SelectCommand = selectcmd;
+
+            #endregion
+
+            #region BackupAdapter Insert
+            ExceptionFields.Clear();
+            ExceptionFields.Add("BackupID");
+            IDbCommand insertcmd = ExtractParameters(obj, ExceptionFields, true, "@");
+            insertcmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});", "[tbl_EventsBackup]", string.Join(",", FieldNames.ToArray()), string.Join(",", FieldValues.ToArray()));
+            insertcmd.CommandType = CommandType.Text;
+
+            da.InsertCommand = insertcmd;
+
+            #endregion
+           
+
+            return da;
+        }
+
+        public DataTable ReadAvailableLogs()
+        {
+            DataTable dt = new DataTable("AvailableLogs");
+            DataRow dr = dt.NewRow();
+            for (int i = 0;i<dt.Columns.Count;i++)
+            {
+                dr[i] = null;
+            }
+            dt.Rows.Add(dr);
+            dr.EndEdit();
+
+            string strSQL = string.Format("SELECT [LogID],[Department] FROM {0} ORDER BY [LogID]", "[tbl_AvailableLogs]");
+            IDbCommand dbcmd = CreateCommand(strSQL);
+            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
+            {
+                reader.Read();
+                dt.Load(reader, LoadOption.PreserveChanges);
+            }
+
+            
+            return dt;
+
+        }
+
+        //public DataTable GetDataTable(EventEntity obj)
+        //{
+        //    DataTable dt = new DataTable();
+        //    string strSQL = string.Format("SELECT * FROM {0} WHERE [ProductionID]='{1}'", tablename, obj.ProductionID);
+        //    dt = QueryTable(strSQL);
+        //    return dt;
+
+        //}
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
