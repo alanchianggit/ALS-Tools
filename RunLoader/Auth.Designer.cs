@@ -38,7 +38,7 @@
             // label_username
             // 
             this.label_username.AutoSize = true;
-            this.label_username.Location = new System.Drawing.Point(36, 61);
+            this.label_username.Location = new System.Drawing.Point(12, 9);
             this.label_username.Name = "label_username";
             this.label_username.Size = new System.Drawing.Size(55, 13);
             this.label_username.TabIndex = 0;
@@ -46,7 +46,7 @@
             // 
             // txt_Username
             // 
-            this.txt_Username.Location = new System.Drawing.Point(142, 61);
+            this.txt_Username.Location = new System.Drawing.Point(118, 9);
             this.txt_Username.Name = "txt_Username";
             this.txt_Username.Size = new System.Drawing.Size(100, 20);
             this.txt_Username.TabIndex = 1;
@@ -55,7 +55,7 @@
             // Label_Password
             // 
             this.Label_Password.AutoSize = true;
-            this.Label_Password.Location = new System.Drawing.Point(36, 87);
+            this.Label_Password.Location = new System.Drawing.Point(12, 35);
             this.Label_Password.Name = "Label_Password";
             this.Label_Password.Size = new System.Drawing.Size(53, 13);
             this.Label_Password.TabIndex = 0;
@@ -63,7 +63,7 @@
             // 
             // txt_Password
             // 
-            this.txt_Password.Location = new System.Drawing.Point(142, 87);
+            this.txt_Password.Location = new System.Drawing.Point(118, 35);
             this.txt_Password.Name = "txt_Password";
             this.txt_Password.PasswordChar = '*';
             this.txt_Password.Size = new System.Drawing.Size(100, 20);
@@ -72,9 +72,9 @@
             // 
             // btn_SignIn
             // 
-            this.btn_SignIn.Location = new System.Drawing.Point(142, 123);
+            this.btn_SignIn.Location = new System.Drawing.Point(15, 68);
             this.btn_SignIn.Name = "btn_SignIn";
-            this.btn_SignIn.Size = new System.Drawing.Size(75, 23);
+            this.btn_SignIn.Size = new System.Drawing.Size(203, 23);
             this.btn_SignIn.TabIndex = 2;
             this.btn_SignIn.Text = "Sign in";
             this.btn_SignIn.UseVisualStyleBackColor = true;
@@ -84,14 +84,14 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.SteelBlue;
-            this.ClientSize = new System.Drawing.Size(362, 158);
+            this.BackColor = System.Drawing.Color.LightSlateGray;
+            this.ClientSize = new System.Drawing.Size(228, 103);
             this.Controls.Add(this.btn_SignIn);
             this.Controls.Add(this.txt_Password);
             this.Controls.Add(this.Label_Password);
             this.Controls.Add(this.txt_Username);
             this.Controls.Add(this.label_username);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "frmAuth";
             this.Text = "Auth";
             this.Load += new System.EventHandler(this.Auth_Load);

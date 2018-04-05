@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DAL;
+using DAL.Factory;
 using Auth;
 
 namespace RunLoader
@@ -24,7 +24,7 @@ namespace RunLoader
         //}
 
         private static Operations inst;
-        public static Operations GetForm
+        public static Operations Instance
         {
             get
             {
@@ -77,21 +77,10 @@ namespace RunLoader
             
         }
 
-        //Signin si;
-        
-        //private void newSigninToolStripMenuItem_Click(object sender, EventArgs e)
-        //{
-        //    if (si==null || si.IsDisposed)
-        //    {
-        //        si = new Signin();
-        //        si = Signin.GetForm;
-        //    }
-        //    else
-        //    {
-        //        si.WindowState = FormWindowState.Normal;
-        //    }
-        //    ShowChildForm(si);
-        //}
+        public void ClickEvent()
+        {
+            eventsWindowsToolStripMenuItem.PerformClick();
+        }
 
         private void ShowChildForm(Form fm)
         {
@@ -159,6 +148,11 @@ namespace RunLoader
                 frm.WindowState = FormWindowState.Normal;
             }
             ShowChildForm(frm);
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }

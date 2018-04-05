@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Entity;
 using Auth;
-using BusinessLayer;
+using BusinessLayer.Events;
 using System.Reflection;
 
 
@@ -17,38 +17,22 @@ namespace RunLoader
 {
     public partial class frm_Event : Form
     {
-        private LogEvent currEvent;
+        //private LogEvent currEvent;
         private BindingSource EventBS = new BindingSource();
         private BindingSource AuditTrailBS = new BindingSource();
         private IDbDataAdapter daEvents;
         private IDbDataAdapter daAuditTrail;
         private DataTable dtLogs;
         private DataSet MasterDS = new DataSet("Master");
-
+        Point mouseDownPoint = Point.Empty;
 
         public frm_Event()
         {
             InitializeComponent();
-
-            currEvent = new LogEvent();
-            currEvent.User = AuthEntity.Username;
             GetData();
-            
         }
 
-        //private void UpdateComboBoxes()
-        //{
 
-        //    using (DataSet ds = new DataSet())
-        //    {
-        //        EventLogic.GetLogIDs().Fill(ds);
-        //        this.cmb_Log.DataSource = ds.Tables[0];
-        //        this.cmb_Log.DisplayMember = "LogID";
-        //        this.cmb_Log.ValueMember = "LogID";
-        //    }
-
-
-        //}
 
         private void GetData()
         {
@@ -66,6 +50,8 @@ namespace RunLoader
                 EventBS.DataSource = MasterDS;
                 EventBS.DataMember = "tbl_Events";
                 this.dgv_Events.DataSource = EventBS;
+                this.dgv_Events.Columns["EventID"].ReadOnly = true;
+                //this.dgv_Events.ClearSelection();
             }
             using (DataSet AuditDS = new DataSet())
             {
@@ -75,13 +61,14 @@ namespace RunLoader
                 AuditTrailBS.DataSource = MasterDS;
                 AuditTrailBS.DataMember = "tbl_EventsBackup";
                 this.dgv_AuditTrail.DataSource = AuditTrailBS;
+                this.dgv_AuditTrail.Columns["BackupID"].ReadOnly = true;
             }
             using (DataTable dt = new DataTable())
             {
-                
+
                 this.cmb_InstrumentFilter.DataSource = dtLogs;
                 this.cmb_InstrumentFilter.ValueMember = "LogID";
-                
+                this.cmb_InstrumentFilter.SelectedIndex = -1;
             }
         }
 
@@ -106,18 +93,44 @@ namespace RunLoader
 
         }
 
+        private void DisplayAuditTrail(object sender)
+        {
+            DataGridView obj = sender as DataGridView;
+            DataGridViewCell e = obj.CurrentCell;
+            if (obj.SelectedCells.Count == 1)
+            {
+                DisplayAuditTrail(sender, e);
+            }
+        }
+        private void DisplayAuditTrail(object sender, DataGridViewCell e)
+        {
+
+
+            if (e.RowIndex != -1)
+            {
+                DataGridView dgv = sender as DataGridView;
+                int eventid = int.MaxValue;
+                int.TryParse(dgv[dgv.Columns["EventID"].Index, e.RowIndex].Value.ToString(), out eventid);
+                string filter = string.Format("[EventID] = {0}", eventid);
+                AuditTrailBS.Filter = filter;
+            }
+        }
+
         private void DisplayAuditTrail(object sender, DataGridViewCellEventArgs e)
         {
-            DataGridView dgv = sender as DataGridView;
-            int eventid = int.MaxValue;
-            int.TryParse(dgv[dgv.Columns["EventID"].Index, e.RowIndex].Value.ToString(), out eventid);
-            string filter = string.Format("[EventID] = {0}", eventid);
-            AuditTrailBS.Filter = filter;
+            DataGridView obj = sender as DataGridView;
+            DataGridViewCell cell = obj.CurrentCell;
+
+            if (cell.RowIndex != -1)
+            {
+                DisplayAuditTrail(sender, cell);
+            }
         }
 
         private void dgv_Events_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            UpdateEvent(e);
+            DataGridView dgv = sender as DataGridView;
+            UpdateDataSet(dgv,e);
             GetData();
             DisplayAuditTrail(sender, e);
         }
@@ -127,26 +140,27 @@ namespace RunLoader
             return dt.Rows.Count <= index;
         }
 
-        private void UpdateEvent(DataGridViewCellEventArgs e)
+        private void UpdateDataSet(DataGridView dgv, DataGridViewCellEventArgs e)
         {
 
-            this.dgv_Events.EndEdit();
-
-            if (e.RowIndex > MasterDS.Tables["tbl_Events"].Rows.Count - 1)
+            dgv.EndEdit();
+            BindingSource bs = (BindingSource)dgv.DataSource;
+            string tablename = bs.DataMember.ToString();
+            if (e.RowIndex > MasterDS.Tables[tablename].Rows.Count - 1)
             {
-                DataRow dr = MasterDS.Tables["tbl_Events"].NewRow();
-                dr[e.ColumnIndex] = this.dgv_Events[e.ColumnIndex, e.RowIndex].Value;
-                MasterDS.Tables["tbl_Events"].Rows.Add(dr);
+                DataRow dr = MasterDS.Tables[tablename].NewRow();
+                dr[e.ColumnIndex] = dgv[e.ColumnIndex, e.RowIndex].Value;
+                MasterDS.Tables[tablename].Rows.Add(dr);
 
-                this.dgv_Events.Rows.RemoveAt(e.RowIndex);
-                this.dgv_Events.EndEdit();
+                dgv.Rows.RemoveAt(e.RowIndex);
+                dgv.EndEdit();
             }
 
             try
             {
-                if (!HasRowAt(MasterDS.Tables["tbl_Events"], e.RowIndex))
+                if (!HasRowAt(MasterDS.Tables[tablename], e.RowIndex))
                 {
-                    MasterDS.Tables["tbl_Events"].Rows[e.RowIndex].EndEdit();
+                    MasterDS.Tables[tablename].Rows[e.RowIndex].EndEdit();
 
                     //Audit trail if update succeeds
 
@@ -158,7 +172,6 @@ namespace RunLoader
                         dr[MasterDS.Tables["tbl_Events"].Columns[i].ColumnName] = MasterDS.Tables["tbl_Events"].Rows[e.RowIndex][i];
                     }
 
-                    //MasterDS.Tables["tbl_EventsBackup"].Rows.Add(dr);
                     dt.Rows.Add(dr);
                 }
             }
@@ -192,19 +205,57 @@ namespace RunLoader
         private void dgv_Events_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
         {
 
+            DataGridView dgv = sender as DataGridView;
+            //Validate data type
+            DataGridViewCell dgc = dgv[e.ColumnIndex, e.RowIndex];
+            if (dgc.ValueType == typeof(DateTime))
+            {
+                DateTime result = new DateTime();
+                if (!DateTime.TryParse(e.FormattedValue.ToString(), out result))
+                {
+                    if (e.FormattedValue.ToString() == string.Empty) { dgc.Value = DBNull.Value; }
+                    else
+                    {
+                        e.Cancel = true;
+                        dgc.ErrorText = "Not a valid Format.";
+                    }
+                }
+            }
+            else if (dgc.ValueType == typeof(int))
+            {
+                int result = new int();
+                if (!int.TryParse(e.FormattedValue.ToString(), out result))
+                {
+                    if (e.FormattedValue.ToString() == string.Empty) { dgc.Value = DBNull.Value; }
+                    else
+                    {
+                        e.Cancel = true;
+                        dgc.ErrorText = "Not a valid Format.";
+                    }
+
+                }
+            }
+            else
+            {
+                e.Cancel = false;
+            }
         }
 
         private void cmb_InstrumentFilter_SelectedIndexChanged(object sender, EventArgs e)
         {
             ComboBox txtbox = sender as ComboBox;
-
+            string value = null;
             if (txtbox.SelectedIndex >= 0)
             {
-                string filter = string.Format("[LogName] Like '%{0}%'", txtbox.SelectedValue.ToString());
-                EventBS.Filter = filter;
+                value = txtbox.SelectedValue.ToString();
             }
+            else
+            {
+                value = txtbox.Text;
+            }
+            string filter = string.Format("[LogName] Like '%{0}%'", value);
+            EventBS.Filter = filter;
 
-            
         }
 
         private void txt_SearchPhrase_TextChanged(object sender, EventArgs e)
@@ -240,6 +291,34 @@ namespace RunLoader
             DisplayAuditTrail(sender, e);
         }
 
+        
+        private void frmMsDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                mouseDownPoint = new Point(e.X, e.Y);
+                //Extension.GetMDIChildLocation(this.MdiParent, this.Location);
+            }
 
+        }
+
+
+        private void frmMsMove(object sender, MouseEventArgs e)
+        {
+            if (mouseDownPoint.IsEmpty)
+                return;
+            Form f = sender as Form;
+            f.Location = new Point(f.Location.X + (e.X - mouseDownPoint.X), f.Location.Y + (e.Y - mouseDownPoint.Y));
+        }
+
+        private void frmMsUp(object sender, MouseEventArgs e)
+        {
+            mouseDownPoint = Point.Empty;
+        }
+
+        private void dgv_Events_SelectionChanged(object sender, EventArgs e)
+        {
+            DisplayAuditTrail(sender);
+        }
     }
 }

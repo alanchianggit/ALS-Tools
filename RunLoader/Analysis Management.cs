@@ -15,7 +15,7 @@ using System.Xml.Schema;
 using Entity;
 using BusinessLayer;
 using System.IO.Compression;
-using DAL;
+using DAL.Factory;
 
 
 namespace RunLoader

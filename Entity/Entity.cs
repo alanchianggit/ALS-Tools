@@ -555,7 +555,7 @@ namespace Entity
         protected DateTime? _endTime;
         protected string _starter;
         protected string _ender;
-        protected int _ID;
+        protected int _ProductionID;
         protected string _type;
         protected int _quantity;
         protected string _method;
@@ -679,18 +679,18 @@ namespace Entity
             }
         }
 
-        public int ID
+        public int ProductionID
         {
             get
             {
-                return _ID;
+                return _ProductionID;
             }
 
             set
             {
-                if (value == ID) return;
-                _ID = value;
-                OnPropertyChanged("ID");
+                if (value == ProductionID) return;
+                _ProductionID = value;
+                OnPropertyChanged("ProductionID");
             }
         }
 

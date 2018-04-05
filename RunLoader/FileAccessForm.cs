@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Data;
 using System.Windows.Forms;
-using DAL;
+using DAL.Files;
+using DAL.Factory;
 using Entity;
 using BusinessLayer;
 using System.Collections.Generic;

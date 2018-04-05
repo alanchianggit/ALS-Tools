@@ -40,6 +40,8 @@
             this.eventsWindowsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.productionManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.analysisManagementToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.windowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -66,7 +68,9 @@
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newSessionToolStripMenuItem,
-            this.openFileAccessFormToolStripMenuItem});
+            this.openFileAccessFormToolStripMenuItem,
+            this.toolStripSeparator2,
+            this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "&File";
@@ -76,13 +80,13 @@
             this.newSessionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newSigninToolStripMenuItem});
             this.newSessionToolStripMenuItem.Name = "newSessionToolStripMenuItem";
-            this.newSessionToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.newSessionToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
             this.newSessionToolStripMenuItem.Text = "&Session";
             // 
             // newSigninToolStripMenuItem
             // 
             this.newSigninToolStripMenuItem.Name = "newSigninToolStripMenuItem";
-            this.newSigninToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.newSigninToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.newSigninToolStripMenuItem.Text = "&New/Sign-in";
             this.newSigninToolStripMenuItem.Click += new System.EventHandler(this.newSigninToolStripMenuItem_Click);
             // 
@@ -97,7 +101,7 @@
             this.productionManagementToolStripMenuItem,
             this.analysisManagementToolStripMenuItem});
             this.openFileAccessFormToolStripMenuItem.Name = "openFileAccessFormToolStripMenuItem";
-            this.openFileAccessFormToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openFileAccessFormToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
             this.openFileAccessFormToolStripMenuItem.Text = "&Open";
             // 
             // archiverToolStripMenuItem
@@ -146,6 +150,18 @@
             this.analysisManagementToolStripMenuItem.Text = "&Analysis Management";
             this.analysisManagementToolStripMenuItem.Click += new System.EventHandler(this.analysisManagementToolStripMenuItem_Click);
             // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(110, 6);
+            // 
+            // exitToolStripMenuItem
+            // 
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
+            this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            // 
             // windowToolStripMenuItem
             // 
             this.windowToolStripMenuItem.Name = "windowToolStripMenuItem";
@@ -190,6 +206,7 @@
             this.ClientSize = new System.Drawing.Size(1481, 853);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.IsMdiContainer = true;
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Operations";
@@ -222,5 +239,7 @@
         private System.Windows.Forms.ToolStripMenuItem eventsWindowsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem productionManagementToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dataCheckerToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
     }
 }
