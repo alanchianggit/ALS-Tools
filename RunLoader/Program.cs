@@ -7,7 +7,7 @@ using DAL;
 using Auth;
 
 
-namespace RunLoader
+namespace ALSTools
 {
     static class Program
     {

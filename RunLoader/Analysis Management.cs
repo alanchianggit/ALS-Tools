@@ -18,7 +18,7 @@ using System.IO.Compression;
 using DAL.Factory;
 
 
-namespace RunLoader
+namespace ALSTools
 {
     public partial class Analysis_Management : Form
     {

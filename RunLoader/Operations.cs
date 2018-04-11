@@ -10,19 +10,11 @@ using System.Windows.Forms;
 using DAL.Factory;
 using Auth;
 
-namespace RunLoader
+namespace ALSTools
 {
     public partial class Operations : Form
     {
         
-        //public bool Connected
-        //{
-        //    get
-        //    {
-        //        return si.Connected;
-        //    }
-        //}
-
         private static Operations inst;
         public static Operations Instance
         {
@@ -39,15 +31,8 @@ namespace RunLoader
             DataLayer.Instance.Reset();
             AuthEntity.Instance.Reset();
             newSigninToolStripMenuItem.PerformClick();
-            //newSigninToolStripMenuItem.PerformClick();
-            //if (Connected)
-            //{
-            //    toolStripStatusLabel1.Text = "Connected";
-            //}
-            //else
-            //{
-            //    toolStripStatusLabel1.Text = "Not connected";
-            //}
+            Size newsize = new Size(1800, 1000);
+            this.Size = newsize;
         }
 
         private void fileAccessFormToolStripMenuItem_Click(object sender, EventArgs e)
@@ -121,7 +106,7 @@ namespace RunLoader
                 if (!strType.Contains("Production") || (frm == null || frm.IsDisposed))
                 {
                     frm = new Production();
-                    frm = RunLoader.Production.GetForm;
+                    frm = ALSTools.Production.GetForm;
                 }
                 else
                 {

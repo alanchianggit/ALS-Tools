@@ -15,41 +15,23 @@ using DAL.Productions;
 
 
 
-namespace RunLoader
+namespace ALSTools
 {
     public partial class Production : Form
     {
-        private string oldvalue;
-        //public Productions currProd;
 
         private BindingSource EventBS = new BindingSource();
         private BindingSource ProductionBS = new BindingSource();
-        //private IDbDataAdapter daEvents;
         private IDbDataAdapter daProductions;
         private DataSet MasterDS = new DataSet("Master");
+
+        Point mouseDownPoint = Point.Empty;
 
         public Production()
         {
             InitializeComponent();
 
             GetData();
-            //currProd = new Productions();
-            //UpdateLogs();
-            //UpdateProductionIDs();
-            //UpdateMethodList();
-
-
-
-
-            //DataBinding
-            //this.txt_Ender.DataBindings.Add("Text", currProd, "Ender", true, DataSourceUpdateMode.OnPropertyChanged);
-            //this.txt_StartTime.DataBindings.Add("Text", currProd, "StartTime", true, DataSourceUpdateMode.OnPropertyChanged);
-            //this.txt_EndTime.DataBindings.Add("Text", currProd, "EndTime", true, DataSourceUpdateMode.OnPropertyChanged);
-            //this.cmb_EqpName.DataBindings.Add("Text", currProd, "EqpName", true, DataSourceUpdateMode.OnPropertyChanged);
-            //this.txt_Starter.DataBindings.Add("Text", currProd, "Starter", true, DataSourceUpdateMode.OnPropertyChanged);
-            //this.cmb_Method.DataBindings.Add("Text", currProd, "Method", true, DataSourceUpdateMode.OnPropertyChanged);
-            //this.txt_Quantity.DataBindings.Add("Text", currProd, "Quantity", true, DataSourceUpdateMode.OnPropertyChanged);
-            //this.cmb_Type.DataBindings.Add("Text", currProd, "Type", true, DataSourceUpdateMode.OnPropertyChanged);
         }
 
         private static Production inst;
@@ -102,171 +84,12 @@ namespace RunLoader
             //}
         }
 
-        //private void ControlTextChanged(object sender, EventArgs e)
-        //{
-        //    //currProd.UpdateProperty(sender);
-        //    //if (sender == this.cmb_ProductionName)
-        //    //{
-        //    //    currProd.GetProduction();
-        //    //}
-        //}
 
-        //private void btn_Create_Click(object sender, EventArgs e)
-        //{
-        //    //currProd.CreateNew();
-        //    //UpdateProductionIDs();
-
-        //}
-
-
-        //private void btn_Clear_Click(object sender, EventArgs e)
-        //{
-        //    //currProd.GetProduction();
-        //    //if (currProd.ID == int.MinValue)
-        //    //{
-        //    //    ClearFields();
-        //    //}
-        //}
-
-        //private void ClearFields()
-        //{
-        //    foreach (Control ctrl in tableLayoutPanel1.Controls)
-        //    {
-        //        switch (ctrl.Name.Substring(0, 4))
-        //        {
-        //            case "cmb_":
-        //            case "txt_":
-        //                ctrl.ResetText();
-        //                break;
-        //            case "date":
-        //                ctrl.Text = DateTime.MinValue.ToString();
-        //                break;
-        //            default:
-        //                break;
-        //        }
-        //    }
-        //}
-
-        //private void btn_Update_Click(object sender, EventArgs e)
-        //{
-        //    //currProd.UpdateDB();
-
-        //}
-
-        //private void UpdateLogs()
-        //{
-        //    using (ProductionDAL pdal = new ProductionDAL())
-        //    {
-        //        DataTable dt = pdal.GetAvailableLogs();
-        //        this.cmb_EqpName.DataSource = dt;
-        //        this.cmb_EqpName.DisplayMember = "LogID";
-        //        this.cmb_EqpName.ValueMember = "LogID";
-
-        //        DataTable dt1 = new DataTable();
-        //        dt1 = dt.Copy();
-        //        this.cmb_EqpFilter.DataSource = dt1;
-        //        this.cmb_EqpFilter.DisplayMember = "LogID";
-        //        this.cmb_EqpFilter.ValueMember = "LogID";
-        //    }
-
-        //    this.cmb_EqpFilter.Text = string.Empty;
-
-        //}
-
-
-
-        //private void UpdateProductionIDs()
-        //{
-        //    List<string> _prods = new List<string>();
-        //    using (ProductionDAL pdal = new ProductionDAL())
-        //    {
-        //        DataTable dt = new DataTable();
-        //        if (this.cmb_EqpFilter.Text == string.Empty)
-        //        {
-        //            dt = pdal.GetProductionIDs();
-        //        }
-        //        else
-        //        {
-        //            dt = pdal.GetProductionIDs(cmb_EqpFilter.Text);
-
-        //        }
-        //        this.cmb_ProductionName.DataSource = dt;
-        //        this.cmb_ProductionName.DisplayMember = "ProductionName";
-        //        this.cmb_ProductionName.ValueMember = "ProductionName";
-        //    }
-        //}
-
-        //private void UpdateMethodList()
-        //{
-        //    using (ProductionDAL pdal = new ProductionDAL())
-        //    {
-        //        DataTable dt = new DataTable();
-        //        dt = pdal.GetMethods();
-        //        this.cmb_Method.DataSource = dt;
-        //        this.cmb_Method.DisplayMember = "Method";
-        //        this.cmb_Method.ValueMember = "Method";
-        //    }
-        //}
-
-        //private void cmb_EqpFilter_TextChanged(object sender, EventArgs e)
-        //{
-        //    UpdateProductionIDs();
-        //}
-
-
-        //private void btn_AddEvent_Click(object sender, EventArgs e)
-        //{
-        //    //List<EventEntity> le = currProd.Events;
-        //}
-
-        //private void cmb_ProductionName_Leave(object sender, EventArgs e)
-        //{
-        //    //currProd.GetProduction();
-        //}
-
-        //private void TimePicker(object sender, EventArgs e)
-        //{
-        //    TextBox txtb = (TextBox)sender;
-        //    txtb.Text = DateTime.Now.ToString();
-        //}
-
-        //private void txtDateTimeLeave(object sender, EventArgs e)
-        //{
-        //    DateTime datetime;
-        //    TextBox txt = (TextBox)sender;
-        //    if (DateTime.TryParse(txt.Text, out datetime))
-        //    {
-        //        switch (txt.Name)
-        //        {
-        //            case "txt_StartTime":
-        //                //currProd.StartTime = datetime;
-        //                break;
-        //            case "txt_EndTime":
-        //                //currProd.EndTime = datetime;
-        //                break;
-        //            default:
-        //                break;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        txt.Text = oldvalue;
-        //    }
-        //}
-
-        //private void txtEnter(object sender, EventArgs e)
-        //{
-        //    TextBox txt = (TextBox)sender;
-        //    oldvalue = txt.Text;
-        //}
-
-        Point mouseDownPoint = Point.Empty;
         private void frmMsDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
                 mouseDownPoint = new Point(e.X, e.Y);
-                //Extension.GetMDIChildLocation(this.MdiParent, this.Location);
             }
 
         }
@@ -287,79 +110,96 @@ namespace RunLoader
 
         private void dgv_Production_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            
+
             DataGridView obj = sender as DataGridView;
+            frm_Event frm = GetEventForm();
+            TextBox ctrl = frm.Controls["txt_productionIDFilter"] as TextBox;
+
+            bool newrow = obj.Rows[e.RowIndex].IsNewRow;
+            if (!newrow)
+            {
+                ctrl.Text = obj["ProductionName", e.RowIndex].Value.ToString();
+            }
+        }
+
+        private frm_Event GetEventForm()
+        {
+            //Interact with Events form
+            //Show events under that production
             if (this.MdiParent.MdiChildren.OfType<frm_Event>().Count() == 0)
             {
                 Operations.Instance.ClickEvent();
             }
-            //otherForm = new frm_Event();
             frm_Event otherForm;
             otherForm = this.MdiParent.MdiChildren.OfType<frm_Event>().Single();
+            otherForm.Show();
 
-            foreach (Control ctrl in otherForm.Controls)
-            {
-                if (ctrl.Name.Equals("txt_ProductionIDFilter"))
-                {
-
-                    ctrl.Text = obj["ProductionName", e.RowIndex].Value.ToString() ;
-                }
-            }
+            return otherForm;
         }
+
 
         private void dgv_Production_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
+
             DataGridView obj = sender as DataGridView;
-            UpdateDataSet(obj, e);
+            ModifiedType mt = UpdateDataSet(obj, e);
             GetData();
-            //DisplayAuditTrail(sender, e);
+
+            
+            frm_Event frm = GetEventForm();
+
+            if (mt.Equals(ModifiedType.Insert))
+            {
+                //Create events about production
+                frm.AddGeneralEvent(string.Format("New production: {0}", obj["ProductionID", e.RowIndex].Value));
+            }
+            else if (mt.Equals(ModifiedType.Update))
+            {
+                frm.AddGeneralEvent(string.Format("Modified production {0}", obj["ProductionID", e.RowIndex].Value));
+            }
+        }
+        public enum ModifiedType
+        {
+            Insert,
+            Update
         }
 
-        private void UpdateDataSet(DataGridView dgv, DataGridViewCellEventArgs e)
+        private ModifiedType UpdateDataSet(DataGridView dgv, DataGridViewCellEventArgs e)
         {
-
-            dgv.EndEdit();
-            BindingSource bs = (BindingSource)dgv.DataSource;
-            string tablename = bs.DataMember.ToString();
-            if (e.RowIndex > MasterDS.Tables[tablename].Rows.Count - 1)
-            {
-                DataRow dr = MasterDS.Tables[tablename].NewRow();
-                dr[e.ColumnIndex] = dgv[e.ColumnIndex, e.RowIndex].Value;
-                MasterDS.Tables[tablename].Rows.Add(dr);
-
-                dgv.Rows.RemoveAt(e.RowIndex);
-                dgv.EndEdit();
-            }
 
             try
             {
+                dgv.EndEdit();
+                BindingSource bs = (BindingSource)dgv.DataSource;
+                string tablename = bs.DataMember.ToString();
+                if (e.RowIndex > MasterDS.Tables[tablename].Rows.Count - 1)
+                {
+                    //Insert row into dataset, add and update database
+                    DataRow dr = MasterDS.Tables[tablename].NewRow();
+                    dr[e.ColumnIndex] = dgv[e.ColumnIndex, e.RowIndex].Value;
+                    MasterDS.Tables[tablename].Rows.Add(dr);
+
+                    dgv.Rows.RemoveAt(e.RowIndex);
+                    dgv.EndEdit();
+                    return ModifiedType.Insert;
+                }
+
                 if (!HasRowAt(MasterDS.Tables[tablename], e.RowIndex))
                 {
                     MasterDS.Tables[tablename].Rows[e.RowIndex].EndEdit();
-
-                    ////Audit trail if update succeeds
-
-                    //DataTable dt = MasterDS.Tables["tbl_EventsBackup"];
-                    //DataRow dr = dt.NewRow();
-                    ////Import row values from old table to new
-                    //for (int i = 0; i < MasterDS.Tables["tbl_Events"].Columns.Count; i++)
-                    //{
-                    //    dr[MasterDS.Tables["tbl_Events"].Columns[i].ColumnName] = MasterDS.Tables["tbl_Events"].Rows[e.RowIndex][i];
-                    //}
-
-                    //dt.Rows.Add(dr);
                 }
+
+                return ModifiedType.Update;
             }
             catch (Exception excep)
             {
                 MessageBox.Show(excep.Message.ToString());
+                return ModifiedType.Update;
             }
             finally
             {
-                //adapter - DB interaction
                 List<IDbDataAdapter> adapters = new List<IDbDataAdapter>();
                 adapters.Add(daProductions);
-                //adapters.Add(daAuditTrail);
 
                 ProductionLogic.AttachTransaction(adapters);
                 for (int i = 0; i < MasterDS.Tables.Count; i++)
@@ -373,6 +213,7 @@ namespace RunLoader
                 }
 
                 ProductionLogic.TryCommit();
+
             }
 
         }

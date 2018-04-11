@@ -13,7 +13,7 @@ using BusinessLayer.Events;
 using System.Reflection;
 
 
-namespace RunLoader
+namespace ALSTools
 {
     public partial class frm_Event : Form
     {
@@ -32,8 +32,6 @@ namespace RunLoader
             GetData();
         }
 
-
-
         private void GetData()
         {
             dtLogs = EventLogic.GetLogIDs();
@@ -51,17 +49,20 @@ namespace RunLoader
                 EventBS.DataMember = "tbl_Events";
                 this.dgv_Events.DataSource = EventBS;
                 this.dgv_Events.Columns["EventID"].ReadOnly = true;
-                //this.dgv_Events.ClearSelection();
             }
+            //New
             using (DataSet AuditDS = new DataSet())
             {
                 daAuditTrail.Fill(AuditDS);
                 MasterDS.Merge(AuditDS.Tables["Table"], true, MissingSchemaAction.Add);
-                MasterDS.Tables["Table"].TableName = "tbl_EventsBackup";
+                MasterDS.Tables["Table"].TableName = "tbl_Backup";
                 AuditTrailBS.DataSource = MasterDS;
-                AuditTrailBS.DataMember = "tbl_EventsBackup";
+                AuditTrailBS.DataMember = "tbl_Backup";
                 this.dgv_AuditTrail.DataSource = AuditTrailBS;
+                this.dgv_AuditTrail.Columns["TableName"].Visible = false;   
                 this.dgv_AuditTrail.Columns["BackupID"].ReadOnly = true;
+                this.dgv_AuditTrail.Columns["AffectedID"].Visible = false;
+                
             }
             using (DataTable dt = new DataTable())
             {
@@ -86,11 +87,67 @@ namespace RunLoader
 
         private void txt_ProductionID_TextChanged(object sender, EventArgs e)
         {
-            TextBox txtbox = /*(TextBox)*/sender as TextBox;
+            TextBox txtbox = sender as TextBox;
             string filter = string.Format("[ProductionID] Like '%{0}%'", txtbox.Text.ToString());
 
             EventBS.Filter = filter;
 
+        }
+
+        public void AddGeneralEvent(string str)
+        {
+            try
+            {
+                DataTable dt = MasterDS.Tables["tbl_Events"];
+                DataRow dr = dt.NewRow();
+                dr["Details"] = str;
+                dr["LogName"] = "General";
+                dt.Rows.Add(dr);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                TryCommitDB();
+            }
+            GetData();
+        }
+
+        private DateTime GetDateWithoutMilliseconds(DateTime d)
+        {
+            return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
+        }
+
+        private bool TryCommitDB()
+        {
+            try
+            {
+                //adapter - DB interaction
+                List<IDbDataAdapter> adapters = new List<IDbDataAdapter>();
+                adapters.Add(daEvents);
+                adapters.Add(daAuditTrail);
+
+                EventLogic.AttachTransaction(adapters);
+                for (int i = 0; i < MasterDS.Tables.Count; i++)
+                {
+                    using (DataSet DS = new DataSet())
+                    {
+                        DS.Merge(MasterDS.Tables[i], true, MissingSchemaAction.Add);
+                        DS.Tables[0].TableName = "Table";
+                        adapters[i].Update(DS);
+                    }
+                }
+
+                EventLogic.TryCommit();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
         }
 
         private void DisplayAuditTrail(object sender)
@@ -105,13 +162,13 @@ namespace RunLoader
         private void DisplayAuditTrail(object sender, DataGridViewCell e)
         {
 
-
+            //NEW Backup
             if (e.RowIndex != -1)
             {
                 DataGridView dgv = sender as DataGridView;
-                int eventid = int.MaxValue;
-                int.TryParse(dgv[dgv.Columns["EventID"].Index, e.RowIndex].Value.ToString(), out eventid);
-                string filter = string.Format("[EventID] = {0}", eventid);
+                //Can't find backupid from new event row to exisiting row
+                string backupid =    dgv[dgv.Columns["ProductionID"].Index, e.RowIndex].Value.ToString();
+                string filter = string.Format("[AffectedID] = '{0}'", backupid);
                 AuditTrailBS.Filter = filter;
             }
         }
@@ -145,34 +202,60 @@ namespace RunLoader
 
             dgv.EndEdit();
             BindingSource bs = (BindingSource)dgv.DataSource;
+            
             string tablename = bs.DataMember.ToString();
-            if (e.RowIndex > MasterDS.Tables[tablename].Rows.Count - 1)
-            {
-                DataRow dr = MasterDS.Tables[tablename].NewRow();
-                dr[e.ColumnIndex] = dgv[e.ColumnIndex, e.RowIndex].Value;
-                MasterDS.Tables[tablename].Rows.Add(dr);
 
-                dgv.Rows.RemoveAt(e.RowIndex);
-                dgv.EndEdit();
-            }
 
             try
             {
+                //if modified cell's row is greater (newer) than current dataset
+                if (e.RowIndex > MasterDS.Tables[tablename].Rows.Count - 1)
+                //if(HasRowAt(MasterDS.Tables[tablename],e.RowIndex))
+                {
+                    //Create new row
+                    DataRow dr = MasterDS.Tables[tablename].NewRow();
+                    //Get old value from datagridview and put into row's cell
+                    dr[e.ColumnIndex] = dgv[e.ColumnIndex, e.RowIndex].Value;
+                    dr.SetField("TimeCreated", DateTime.Now);
+                    // Add row to current dataset
+                    MasterDS.Tables[tablename].Rows.Add(dr);
+                    //Remove datagridview row
+                    dgv.Rows.RemoveAt(e.RowIndex);
+                    //End edit
+                    dgv.EndEdit();
+                }
+
                 if (!HasRowAt(MasterDS.Tables[tablename], e.RowIndex))
                 {
                     MasterDS.Tables[tablename].Rows[e.RowIndex].EndEdit();
 
                     //Audit trail if update succeeds
-
-                    DataTable dt = MasterDS.Tables["tbl_EventsBackup"];
-                    DataRow dr = dt.NewRow();
-                    //Import row values from old table to new
-                    for (int i = 0; i < MasterDS.Tables["tbl_Events"].Columns.Count; i++)
+                    DataTable dt = MasterDS.Tables[tablename].GetChanges();
+                    foreach (DataRow dr in dt.Rows)
                     {
-                        dr[MasterDS.Tables["tbl_Events"].Columns[i].ColumnName] = MasterDS.Tables["tbl_Events"].Rows[e.RowIndex][i];
-                    }
+                        for (int i = 0; i<dt.Columns.Count;i++)
+                        {
+                            if (dr.HasVersion(DataRowVersion.Original))
+                            {
 
-                    dt.Rows.Add(dr);
+                                //compare current and original versions
+                                if (!dr[i, DataRowVersion.Current].Equals(dr[i, DataRowVersion.Original]))
+                                {
+                                    DataTable dtbackup = MasterDS.Tables["tbl_Backup"];
+                                    DataRow drbackup = dtbackup.NewRow();
+                                    //Import row values from old table to new
+                                    drbackup["TimeLogged"] = GetDateWithoutMilliseconds(DateTime.Now);
+                                    drbackup["TableName"] = tablename;
+                                    drbackup["ColumnName"] = dt.Columns[i].ColumnName;
+                                    drbackup["OldValue"] = dr[i, DataRowVersion.Original].ToString();
+                                    drbackup["NewValue"] = dr[i, DataRowVersion.Current].ToString();
+                                    drbackup["AffectedID"] = dr["ProductionID"].ToString();
+                                    dtbackup.Rows.Add(drbackup);
+                                } 
+                            }
+                        }
+                    }
+                   
                 }
             }
             catch (Exception excep)
@@ -181,23 +264,7 @@ namespace RunLoader
             }
             finally
             {
-                //adapter - DB interaction
-                List<IDbDataAdapter> adapters = new List<IDbDataAdapter>();
-                adapters.Add(daEvents);
-                adapters.Add(daAuditTrail);
-
-                EventLogic.AttachTransaction(adapters);
-                for (int i = 0; i < MasterDS.Tables.Count; i++)
-                {
-                    using (DataSet DS = new DataSet())
-                    {
-                        DS.Merge(MasterDS.Tables[i], true, MissingSchemaAction.Add);
-                        DS.Tables[0].TableName = "Table";
-                        adapters[i].Update(DS);
-                    }
-                }
-
-                EventLogic.TryCommit();
+                TryCommitDB();
             }
 
         }
@@ -253,8 +320,16 @@ namespace RunLoader
             {
                 value = txtbox.Text;
             }
-            string filter = string.Format("[LogName] Like '%{0}%'", value);
-            EventBS.Filter = filter;
+
+            if (value.Length > 0)
+            {
+                string filter = string.Format("[LogName] Like '%{0}%'", value);
+                EventBS.Filter = filter;
+            }
+            else
+            {
+                EventBS.Filter = string.Empty;
+            }
 
         }
 
@@ -297,7 +372,6 @@ namespace RunLoader
             if (e.Button == MouseButtons.Left)
             {
                 mouseDownPoint = new Point(e.X, e.Y);
-                //Extension.GetMDIChildLocation(this.MdiParent, this.Location);
             }
 
         }
@@ -319,6 +393,11 @@ namespace RunLoader
         private void dgv_Events_SelectionChanged(object sender, EventArgs e)
         {
             DisplayAuditTrail(sender);
+        }
+
+        private void frm_Event_DoubleClick(object sender, EventArgs e)
+        {
+            this.Hide();
         }
     }
 }

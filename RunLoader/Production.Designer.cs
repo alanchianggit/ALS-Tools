@@ -1,4 +1,4 @@
-﻿namespace RunLoader
+﻿namespace ALSTools
 {
     partial class Production
     {
@@ -53,7 +53,7 @@
             this.dgv_Production.Location = new System.Drawing.Point(12, 52);
             this.dgv_Production.Name = "dgv_Production";
             this.dgv_Production.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-            this.dgv_Production.Size = new System.Drawing.Size(736, 322);
+            this.dgv_Production.Size = new System.Drawing.Size(990, 322);
             this.dgv_Production.TabIndex = 0;
             this.dgv_Production.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Production_CellClick);
             this.dgv_Production.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Production_CellEndEdit);
@@ -63,7 +63,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(44)))), ((int)(((byte)(51)))));
-            this.ClientSize = new System.Drawing.Size(760, 386);
+            this.ClientSize = new System.Drawing.Size(1014, 386);
             this.Controls.Add(this.dgv_Production);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "Production";

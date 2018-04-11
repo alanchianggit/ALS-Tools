@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RunLoader.Properties {
+namespace ALSTools.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

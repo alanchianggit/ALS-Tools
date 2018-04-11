@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace RunLoader
+namespace ALSTools
 {
     public partial class frm_MainMenu : Form
     {

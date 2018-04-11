@@ -358,7 +358,7 @@ namespace Entity
         }
     }
 
-    public class EventEntity : IDisposable, INotifyPropertyChanged
+    public class EventEntity : IDisposable
     {
         protected string _LogName;
         protected DateTime _TimeCreated;
@@ -417,7 +417,7 @@ namespace Entity
             set
             {
                 _LogName = value;
-                OnPropertyChanged("LogName");
+                //OnPropertyChanged("LogName");
             }
         }
 
@@ -431,7 +431,7 @@ namespace Entity
             set
             {
                 _TimeCreated = GetDateWithoutMilliseconds(value);
-                OnPropertyChanged("TimeCreated");
+                //OnPropertyChanged("TimeCreated");
             }
         }
 
@@ -444,7 +444,7 @@ namespace Entity
             set
             {
                 _ProductionID = value;
-                OnPropertyChanged("Source");
+                //OnPropertyChanged("Source");
             }
         }
 
@@ -457,7 +457,7 @@ namespace Entity
             set
             {
                 _EventID = value;
-                OnPropertyChanged("ID");
+                //OnPropertyChanged("ID");
             }
         }
 
@@ -470,7 +470,7 @@ namespace Entity
             set
             {
                 _Level = value;
-                OnPropertyChanged("Level");
+                //OnPropertyChanged("Level");
             }
         }
 
@@ -483,7 +483,7 @@ namespace Entity
             set
             {
                 _User = value;
-                OnPropertyChanged("User");
+                //OnPropertyChanged("User");
             }
         }
 
@@ -508,7 +508,7 @@ namespace Entity
             set
             {
                 _Details = value;
-                OnPropertyChanged("Details");
+                //OnPropertyChanged("Details");
             }
         }
 
@@ -547,6 +547,154 @@ namespace Entity
         }
         #endregion
     }
+
+    public class BackupEntity : IDisposable
+    {
+        protected int backupid;
+        protected DateTime timelogged;
+        protected string table_name;
+        protected string column_name;
+        protected string oldvalue;
+        protected string newvalue;
+        protected string affectedid;
+
+
+        private DateTime GetDateWithoutMilliseconds(DateTime d)
+        {
+            return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
+        }
+
+        public BackupEntity()
+        {
+
+        }
+
+        public int BackupID
+        {
+            get
+            {
+                return backupid;
+            }
+
+            set
+            {
+                backupid = value;
+            }
+        }
+
+        public DateTime TimeLogged
+        {
+            get
+            {
+                return timelogged;
+            }
+            set
+            {
+                timelogged = GetDateWithoutMilliseconds(value);
+            }
+        }
+        public string TableName
+        {
+            get
+            {
+                return table_name;
+            }
+
+            set
+            {
+                table_name = value;
+            }
+        }
+
+        public string ColumnName
+        {
+            get
+            {
+                return column_name;
+            }
+
+            set
+            {
+                column_name = value;
+            }
+        }
+
+        public string Oldvalue
+        {
+            get
+            {
+                return oldvalue;
+            }
+
+            set
+            {
+                oldvalue = value;
+            }
+        }
+
+        public string Newvalue
+        {
+            get
+            {
+                return newvalue;
+            }
+
+            set
+            {
+                newvalue = value;
+            }
+        }
+
+        public string AffectedID
+        {
+            get
+            {
+                return affectedid;
+            }
+
+            set
+            {
+                affectedid = value;
+            }
+        }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~BackupEntity() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        void IDisposable.Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
+    }
+
+
 
     public class ProductionEntity : IDisposable, INotifyPropertyChanged
     {

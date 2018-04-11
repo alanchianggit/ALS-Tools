@@ -80,10 +80,6 @@ namespace BusinessLayer.Events
         }
         public static void AttachTransaction(IDbDataAdapter obj)
         {
-
-            //if (DataLayer.Instance.trans != null) { DataLayer.Instance.trans = null; }
-
-            //DataLayer.Instance.trans = DataLayer.ActiveConn.BeginTransaction();
             if (obj.InsertCommand != null) { obj.InsertCommand.Transaction = DataLayer.Instance.trans; }
             if (obj.DeleteCommand != null) { obj.DeleteCommand.Transaction = DataLayer.Instance.trans; }
             if (obj.UpdateCommand != null) { obj.UpdateCommand.Transaction = DataLayer.Instance.trans; }
@@ -95,12 +91,23 @@ namespace BusinessLayer.Events
             try
             {
                 DataLayer.Instance.trans.Commit();
-                //DataLayer.Instance.trans.Rollback();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 DataLayer.Instance.trans.Rollback();
+            }
+        }
+
+        public static void RollbackTrans()
+        {
+            try
+            {
+                DataLayer.Instance.trans.Rollback();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 

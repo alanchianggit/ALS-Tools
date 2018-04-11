@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Linq;
 using System.Data.Odbc;
 
+
 namespace AuthDAL
 {
     public class Auth_DAL : IDisposable
@@ -93,6 +94,7 @@ namespace DAL.Factory
     public class DataLayer : IDisposable
     {
         //create new Lists for colum names and parameters
+        //public static List<string> FieldNames = new List<string>();
         public static List<string> FieldNames = new List<string>();
         public static List<string> FieldValues = new List<string>();
         //create exception fields list
@@ -728,11 +730,11 @@ namespace DAL.Productions
 {
     using DAL.Factory;
 
-    public class ProductionDAL :/* DataLayer,*/ IDisposable
+    public class ProductionDAL :IDisposable
     {
 
-        public static new ProductionDAL Instance = new ProductionDAL();
-        public new void Reset()
+        public static ProductionDAL Instance = new ProductionDAL();
+        public void Reset()
         {
             Instance = new ProductionDAL();
         }
@@ -810,15 +812,15 @@ namespace DAL.Productions
 
             #region ProductionAdapter Delete
             DataLayer.ExceptionFields.Clear();
-            DataLayer.ExceptionFields.Add("EventID");
+            DataLayer.ExceptionFields.Add("ProductionID");
 
             //IDbCommand deletecmd = ExtractParameters(obj, ExceptionFields, true, "@");
 
-            string strSQL = string.Format("DELETE * FROM {0} WHERE [EventID]=@EventID", tablename);
+            string strSQL = string.Format("DELETE * FROM {0} WHERE [ProductionID]=@ProductionID", tablename);
             IDbCommand deletecmd = DataLayer.CreateCommand(strSQL);
             IDbDataParameter delparam = deletecmd.CreateParameter();
-            delparam.ParameterName = "@EventID";
-            delparam.SourceColumn = "EventID";
+            delparam.ParameterName = "@ProductionID";
+            delparam.SourceColumn = "ProductionID";
             deletecmd.Parameters.Add(delparam);
             #endregion
 
@@ -1233,6 +1235,7 @@ namespace DAL.Productions
     //}
 }
 
+
 namespace DAL.Events
 {
     using DAL.Factory;
@@ -1241,8 +1244,8 @@ namespace DAL.Events
     public class EventDAL: IDisposable
     {
         private const string tablename = "[tbl_Events]";
-        public static new EventDAL Instance = new EventDAL();
-        public new void Reset()
+        public static EventDAL Instance = new EventDAL();
+        public void Reset()
         {
             Instance = new EventDAL();
         }
@@ -1339,17 +1342,14 @@ namespace DAL.Events
 
         public IDbDataAdapter AdaptEventBackup()
         {
-            EventEntity obj = new EventEntity();
+            BackupEntity obj = new BackupEntity();
             IDbDataAdapter da = DataLayer.CreateAdapter();
 
             #region BackupAdapter Select
             DataLayer.ExceptionFields.Clear();
             DataLayer.ExceptionFields.Add("BackupID");
-
-            //IDbCommand selectcmd = ExtractParameters(obj, ExceptionFields, true, "@");
-
             IDbCommand selectcmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
-            selectcmd.CommandText = string.Format("SELECT [BackupID], {1} FROM {0}", "[tbl_EventsBackup]", string.Join(",", DataLayer.FieldNames.ToArray()));
+            selectcmd.CommandText = string.Format("SELECT [BackupID], {1} FROM {0}", "[tbl_Backup]", string.Join(",", DataLayer.FieldNames.ToArray()));
             selectcmd.CommandType = CommandType.Text;
             da.SelectCommand = selectcmd;
 
@@ -1359,7 +1359,7 @@ namespace DAL.Events
             DataLayer.ExceptionFields.Clear();
             DataLayer.ExceptionFields.Add("BackupID");
             IDbCommand insertcmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
-            insertcmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});", "[tbl_EventsBackup]", string.Join(",", DataLayer.FieldNames.ToArray()), string.Join(",", DataLayer.FieldValues.ToArray()));
+            insertcmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});", "[tbl_Backup]", string.Join(",", DataLayer.FieldNames.ToArray()), string.Join(",", DataLayer.FieldValues.ToArray()));
             insertcmd.CommandType = CommandType.Text;
 
             da.InsertCommand = insertcmd;
@@ -1429,5 +1429,7 @@ namespace DAL.Events
         }
         #endregion
     }
+
+    
 }
 

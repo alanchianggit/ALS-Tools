@@ -1,4 +1,4 @@
-﻿namespace RunLoader
+﻿namespace ALSTools
 {
     partial class frm_Event
     {
@@ -66,8 +66,6 @@
             // 
             this.dgv_Events.AllowUserToDeleteRows = false;
             this.dgv_Events.AllowUserToOrderColumns = true;
-            this.dgv_Events.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.dgv_Events.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dgv_Events.BackgroundColor = System.Drawing.SystemColors.ControlDarkDark;
             this.dgv_Events.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
@@ -84,7 +82,7 @@
             this.dgv_Events.Location = new System.Drawing.Point(12, 63);
             this.dgv_Events.Name = "dgv_Events";
             this.dgv_Events.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-            this.dgv_Events.Size = new System.Drawing.Size(775, 244);
+            this.dgv_Events.Size = new System.Drawing.Size(775, 262);
             this.dgv_Events.TabIndex = 7;
             this.dgv_Events.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Events_CellClick);
             this.dgv_Events.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Events_CellEndEdit);
@@ -93,8 +91,6 @@
             // 
             // dgv_AuditTrail
             // 
-            this.dgv_AuditTrail.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.dgv_AuditTrail.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dgv_AuditTrail.BackgroundColor = System.Drawing.SystemColors.ControlDarkDark;
             this.dgv_AuditTrail.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
@@ -109,17 +105,18 @@
             this.dgv_AuditTrail.DefaultCellStyle = dataGridViewCellStyle2;
             this.dgv_AuditTrail.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             this.dgv_AuditTrail.GridColor = System.Drawing.SystemColors.ButtonShadow;
-            this.dgv_AuditTrail.Location = new System.Drawing.Point(12, 313);
+            this.dgv_AuditTrail.Location = new System.Drawing.Point(793, 63);
             this.dgv_AuditTrail.Name = "dgv_AuditTrail";
             this.dgv_AuditTrail.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-            this.dgv_AuditTrail.Size = new System.Drawing.Size(775, 236);
+            this.dgv_AuditTrail.Size = new System.Drawing.Size(440, 262);
             this.dgv_AuditTrail.TabIndex = 8;
+            this.dgv_AuditTrail.DoubleClick += new System.EventHandler(this.frm_Event_DoubleClick);
             // 
             // txt_SearchPhrase
             // 
             this.txt_SearchPhrase.Location = new System.Drawing.Point(63, 37);
             this.txt_SearchPhrase.Name = "txt_SearchPhrase";
-            this.txt_SearchPhrase.Size = new System.Drawing.Size(724, 20);
+            this.txt_SearchPhrase.Size = new System.Drawing.Size(1170, 20);
             this.txt_SearchPhrase.TabIndex = 9;
             this.txt_SearchPhrase.TextChanged += new System.EventHandler(this.txt_SearchPhrase_TextChanged);
             // 
@@ -158,7 +155,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.ClientSize = new System.Drawing.Size(793, 561);
+            this.ClientSize = new System.Drawing.Size(1245, 337);
             this.Controls.Add(this.Label_InstFilter);
             this.Controls.Add(this.cmb_InstrumentFilter);
             this.Controls.Add(this.Label_SearchPhrase);
@@ -170,6 +167,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "frm_Event";
             this.Text = "Events";
+            this.DoubleClick += new System.EventHandler(this.frm_Event_DoubleClick);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.frmMsDown);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.frmMsMove);
             this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.frmMsUp);

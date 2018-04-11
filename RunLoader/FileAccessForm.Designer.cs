@@ -1,7 +1,7 @@
 ﻿using System;
 using DAL.Factory;
 
-namespace RunLoader
+namespace ALSTools
 {
     partial class FileAccessForm
     {

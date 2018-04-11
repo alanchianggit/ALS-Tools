@@ -1,4 +1,4 @@
-﻿namespace RunLoader
+﻿namespace ALSTools
 {
     partial class frm_MainMenu
     {
