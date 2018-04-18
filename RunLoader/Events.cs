@@ -11,58 +11,74 @@ using Entity;
 using Auth;
 using BusinessLayer.Events;
 using System.Reflection;
+using LogicExtensions;
+
 
 
 namespace ALSTools
 {
+    //using LogicExtensions;
     public partial class frm_Event : Form
     {
         //private LogEvent currEvent;
         private BindingSource EventBS = new BindingSource();
         private BindingSource AuditTrailBS = new BindingSource();
-        private IDbDataAdapter daEvents;
-        private IDbDataAdapter daAuditTrail;
+        private static List<IDbDataAdapter> das = new List<IDbDataAdapter>();
+        private static IDbDataAdapter daEvents;
+        private static IDbDataAdapter daAuditTrail;
         private DataTable dtLogs;
-        private DataSet MasterDS = new DataSet("Master");
+        //private DataSet MasterDS = new DataSet("Master");
+        private DataSet MasterDS = EventLogic.MasterDS;
         Point mouseDownPoint = Point.Empty;
 
         public frm_Event()
         {
             InitializeComponent();
+            das.Clear();
+            das.Add(daEvents);
+            das.Add(daAuditTrail);
             GetData();
+
         }
 
         private void GetData()
         {
             dtLogs = EventLogic.GetLogIDs();
-            daEvents = EventLogic.GetEventAdapter();
-            daAuditTrail = EventLogic.GetBackupAdapter();
+            if (daEvents == null)
+            {
+                daEvents = EventLogic.GetEventAdapter();
+            }
+            if (daAuditTrail == null)
+            {
+                daAuditTrail = EventLogic.GetBackupAdapter();
+            }
 
-            if (MasterDS.Tables.Count != 0) { MasterDS = new DataSet(); }
+            //if (MasterDS.Tables.Count != 0) { MasterDS.Tables.Clear(); }
 
             using (DataSet EventDS = new DataSet())
             {
+                if (MasterDS.Tables.Contains(EventLogic.TableName)) { MasterDS.Tables.Remove(EventLogic.TableName); }
                 daEvents.Fill(EventDS);
                 MasterDS.Merge(EventDS.Tables["Table"], true, MissingSchemaAction.Add);
-                MasterDS.Tables["Table"].TableName = "tbl_Events";
+                MasterDS.Tables["Table"].TableName = EventLogic.TableName;
                 EventBS.DataSource = MasterDS;
-                EventBS.DataMember = "tbl_Events";
+                EventBS.DataMember = EventLogic.TableName;
                 this.dgv_Events.DataSource = EventBS;
                 this.dgv_Events.Columns["EventID"].ReadOnly = true;
             }
-            //New
             using (DataSet AuditDS = new DataSet())
             {
+                if (MasterDS.Tables.Contains("tbl_Backup")) { MasterDS.Tables.Remove("tbl_Backup"); }
                 daAuditTrail.Fill(AuditDS);
+
                 MasterDS.Merge(AuditDS.Tables["Table"], true, MissingSchemaAction.Add);
                 MasterDS.Tables["Table"].TableName = "tbl_Backup";
                 AuditTrailBS.DataSource = MasterDS;
                 AuditTrailBS.DataMember = "tbl_Backup";
                 this.dgv_AuditTrail.DataSource = AuditTrailBS;
-                this.dgv_AuditTrail.Columns["TableName"].Visible = false;   
-                this.dgv_AuditTrail.Columns["BackupID"].ReadOnly = true;
+                this.dgv_AuditTrail.Columns["TableName"].Visible = false;
+                this.dgv_AuditTrail.ReadOnly = true;
                 this.dgv_AuditTrail.Columns["AffectedID"].Visible = false;
-                
             }
             using (DataTable dt = new DataTable())
             {
@@ -85,23 +101,23 @@ namespace ALSTools
         }
 
 
-        private void txt_ProductionID_TextChanged(object sender, EventArgs e)
-        {
-            TextBox txtbox = sender as TextBox;
-            string filter = string.Format("[ProductionID] Like '%{0}%'", txtbox.Text.ToString());
 
-            EventBS.Filter = filter;
-
-        }
 
         public void AddGeneralEvent(string str)
         {
+            AddGeneralEvent(str, string.Empty);
+        }
+
+        public void AddGeneralEvent(string str, string ProdID)
+        {
             try
             {
-                DataTable dt = MasterDS.Tables["tbl_Events"];
+                DataTable dt = MasterDS.Tables[EventLogic.TableName];
                 DataRow dr = dt.NewRow();
+                dr["ProductionID"] = ProdID;
                 dr["Details"] = str;
                 dr["LogName"] = "General";
+                dr["TimeCreated"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
                 dt.Rows.Add(dr);
             }
             catch (Exception ex)
@@ -113,30 +129,22 @@ namespace ALSTools
                 TryCommitDB();
             }
             GetData();
+
         }
 
-        private DateTime GetDateWithoutMilliseconds(DateTime d)
-        {
-            return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
-        }
 
         private bool TryCommitDB()
         {
             try
             {
-                //adapter - DB interaction
-                List<IDbDataAdapter> adapters = new List<IDbDataAdapter>();
-                adapters.Add(daEvents);
-                adapters.Add(daAuditTrail);
-
-                EventLogic.AttachTransaction(adapters);
+                EventLogic.AttachTransaction(das);
                 for (int i = 0; i < MasterDS.Tables.Count; i++)
                 {
                     using (DataSet DS = new DataSet())
                     {
                         DS.Merge(MasterDS.Tables[i], true, MissingSchemaAction.Add);
                         DS.Tables[0].TableName = "Table";
-                        adapters[i].Update(DS);
+                        das[i].Update(DS);
                     }
                 }
 
@@ -162,14 +170,17 @@ namespace ALSTools
         private void DisplayAuditTrail(object sender, DataGridViewCell e)
         {
 
-            //NEW Backup
             if (e.RowIndex != -1)
             {
                 DataGridView dgv = sender as DataGridView;
                 //Can't find backupid from new event row to exisiting row
-                string backupid =    dgv[dgv.Columns["ProductionID"].Index, e.RowIndex].Value.ToString();
+                string backupid = dgv[dgv.Columns["EventID"].Index, e.RowIndex].Value.ToString();
                 string filter = string.Format("[AffectedID] = '{0}'", backupid);
                 AuditTrailBS.Filter = filter;
+            }
+            else
+            {
+                AuditTrailBS.RemoveFilter();
             }
         }
 
@@ -187,7 +198,7 @@ namespace ALSTools
         private void dgv_Events_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             DataGridView dgv = sender as DataGridView;
-            UpdateDataSet(dgv,e);
+            UpdateDataSet(dgv, e);
             GetData();
             DisplayAuditTrail(sender, e);
         }
@@ -199,72 +210,104 @@ namespace ALSTools
 
         private void UpdateDataSet(DataGridView dgv, DataGridViewCellEventArgs e)
         {
-
-            dgv.EndEdit();
-            BindingSource bs = (BindingSource)dgv.DataSource;
-            
-            string tablename = bs.DataMember.ToString();
-
-
             try
             {
+                //dgv.EndEdit();
+
+
+                BindingSource bs = (BindingSource)dgv.DataSource;
+                
+
+                string tablename = bs.DataMember.ToString();
+
                 //if modified cell's row is greater (newer) than current dataset
-                if (e.RowIndex > MasterDS.Tables[tablename].Rows.Count - 1)
-                //if(HasRowAt(MasterDS.Tables[tablename],e.RowIndex))
+
+                DataRowView obj = (DataRowView)bs.Current;
+                if (obj.IsNew)
+                //if (e.RowIndex > MasterDS.Tables[tablename].Rows.Count - 1)
                 {
                     //Create new row
                     DataRow dr = MasterDS.Tables[tablename].NewRow();
                     //Get old value from datagridview and put into row's cell
                     dr[e.ColumnIndex] = dgv[e.ColumnIndex, e.RowIndex].Value;
-                    dr.SetField("TimeCreated", DateTime.Now);
+                    dr["TimeCreated"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
                     // Add row to current dataset
                     MasterDS.Tables[tablename].Rows.Add(dr);
                     //Remove datagridview row
                     dgv.Rows.RemoveAt(e.RowIndex);
+
                     //End edit
                     dgv.EndEdit();
+                    //dgv.Refresh();
+
                 }
 
-                if (!HasRowAt(MasterDS.Tables[tablename], e.RowIndex))
-                {
-                    MasterDS.Tables[tablename].Rows[e.RowIndex].EndEdit();
+                //triggering updates eventhough new row, 
+                //if (!HasRowAt(MasterDS.Tables[tablename], e.RowIndex))
+                //{
+                ////Create Timestamp if timecreated is empty
+                //if (MasterDS.Tables[tablename].Rows[e.RowIndex]["TimeCreated"].ToString() == string.Empty)
+                //{
+                //    MasterDS.Tables[tablename].Rows[e.RowIndex]["TimeCreated"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
+                //}
 
-                    //Audit trail if update succeeds
-                    DataTable dt = MasterDS.Tables[tablename].GetChanges();
-                    foreach (DataRow dr in dt.Rows)
+                //MasterDS.Tables[tablename].Rows[e.RowIndex].EndEdit();
+
+                //if (obj["TimeCreated"].ToString() == string.Empty)
+                //{
+                //    obj.BeginEdit();
+                //    obj["TimeCreated"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
+                //    obj.EndEdit();
+                //}
+
+                //bs.EndEdit();
+
+                MasterDS.Tables[tablename].Rows[e.RowIndex].EndEdit();
+                //Audit trail if update succeeds
+                //dt = null when txt_productionid is valid
+                DataTable dt = MasterDS.Tables[tablename].GetChanges();
+                    //DataSet ds = (DataSet)bs.DataSource;
+                    //DataTable dt = ds.Tables[tablename].GetChanges();
+                    if (dt != null)
                     {
-                        for (int i = 0; i<dt.Columns.Count;i++)
+                        foreach (DataRow drc in dt.Rows)
                         {
-                            if (dr.HasVersion(DataRowVersion.Original))
+                            for (int i = 0; i < dt.Columns.Count; i++)
                             {
-
-                                //compare current and original versions
-                                if (!dr[i, DataRowVersion.Current].Equals(dr[i, DataRowVersion.Original]))
+                                if (drc.HasVersion(DataRowVersion.Original))
                                 {
-                                    DataTable dtbackup = MasterDS.Tables["tbl_Backup"];
-                                    DataRow drbackup = dtbackup.NewRow();
-                                    //Import row values from old table to new
-                                    drbackup["TimeLogged"] = GetDateWithoutMilliseconds(DateTime.Now);
-                                    drbackup["TableName"] = tablename;
-                                    drbackup["ColumnName"] = dt.Columns[i].ColumnName;
-                                    drbackup["OldValue"] = dr[i, DataRowVersion.Original].ToString();
-                                    drbackup["NewValue"] = dr[i, DataRowVersion.Current].ToString();
-                                    drbackup["AffectedID"] = dr["ProductionID"].ToString();
-                                    dtbackup.Rows.Add(drbackup);
-                                } 
+
+                                    //compare current and original versions
+                                    if (!drc[i, DataRowVersion.Current].Equals(drc[i, DataRowVersion.Original]))
+                                    {
+                                        string tname = AuditTrailBS.DataMember.ToString();
+                                        DataTable dtbackup = MasterDS.Tables[tname];
+                                        DataRow drbackup = dtbackup.NewRow();
+                                        //Import row values from old table to new
+                                        drbackup["TimeLogged"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
+                                        drbackup["TableName"] = tablename;
+                                        drbackup["ColumnName"] = dt.Columns[i].ColumnName;
+                                        drbackup["OldValue"] = drc[i, DataRowVersion.Original].ToString();
+                                        drbackup["NewValue"] = drc[i, DataRowVersion.Current].ToString();
+                                        drbackup["AffectedID"] = drc["EventID"].ToString();
+                                        dtbackup.Rows.Add(drbackup);
+                                    }
+                                }
                             }
                         }
                     }
-                   
-                }
+                //}
             }
             catch (Exception excep)
             {
-                MessageBox.Show(excep.Message.ToString());
+                MessageBox.Show(excep.Message);
             }
             finally
             {
+                
+
                 TryCommitDB();
+                
             }
 
         }
@@ -307,31 +350,55 @@ namespace ALSTools
                 e.Cancel = false;
             }
         }
+        private void txt_ProductionID_TextChanged(object sender, EventArgs e)
+        {
+            TextBox txtbox = sender as TextBox;
+            string strFilter = null;
+            if (!txtbox.Text.ToString().Equals(string.Empty))
+            {
+                strFilter = string.Format("[ProductionID] Like '%{0}%'", txtbox.Text.ToString());
+            }
+            FilterEvents(strFilter);
+        }
 
         private void cmb_InstrumentFilter_SelectedIndexChanged(object sender, EventArgs e)
         {
             ComboBox txtbox = sender as ComboBox;
             string value = null;
-            if (txtbox.SelectedIndex >= 0)
+            if (txtbox.SelectedText.Length > 0)
             {
                 value = txtbox.SelectedValue.ToString();
             }
             else
             {
-                value = txtbox.Text;
+                value = txtbox.SelectedText;
+            }
+            if (value != string.Empty)
+            {
+                string strFilter = string.Format("[LogName] Like '%{0}%'", value);
+                FilterEvents(strFilter);
             }
 
-            if (value.Length > 0)
+
+        }
+
+        private void FilterEvents(string value)
+        {
+            if (value == null)
             {
-                string filter = string.Format("[LogName] Like '%{0}%'", value);
-                EventBS.Filter = filter;
+                return;
+            }
+            else if (value.Length > 0)
+            {
+                EventBS.Filter = value;
             }
             else
             {
-                EventBS.Filter = string.Empty;
+                EventBS.RemoveFilter();
             }
 
         }
+
 
         private void txt_SearchPhrase_TextChanged(object sender, EventArgs e)
         {
@@ -339,24 +406,25 @@ namespace ALSTools
             {
                 TextBox txtbox = sender as TextBox;
                 PropertyInfo[] pis = obj.GetType().GetProperties();
-                string filter = string.Empty;
+                string strFilter = string.Empty;
 
                 foreach (PropertyInfo pi in pis)
                 {
                     switch (pi.PropertyType.ToString())
                     {
                         case "System.String":
-                            filter += string.Format("[{0}] LIKE '%{1}%'", pi.Name, txtbox.Text.ToString());
+                            strFilter += string.Format("[{0}] LIKE '%{1}%'", pi.Name, txtbox.Text.ToString());
                             if (pis[pis.Length - 1].Name != pi.Name)
                             {
-                                filter += " OR ";
+                                strFilter += " OR ";
                             }
                             break;
                         default:
                             break;
                     }
                 }
-                EventBS.Filter = filter;
+
+                FilterEvents(strFilter);
 
             }
         }
@@ -366,7 +434,7 @@ namespace ALSTools
             DisplayAuditTrail(sender, e);
         }
 
-        
+
         private void frmMsDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)

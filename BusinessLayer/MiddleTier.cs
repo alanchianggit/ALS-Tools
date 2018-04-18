@@ -6,6 +6,18 @@ using System;
 using Microsoft.Win32.SafeHandles;
 using System.Reflection;
 
+namespace LogicExtensions
+{
+    public static class DateTimeExtension
+    {
+
+        public static DateTime GetDateWithoutMilliseconds(this DateTime d)
+        {
+            return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
+        }
+    }
+}
+
 namespace BusinessLayer
 {
     public class MethodFile : FileEntity, IDisposable
@@ -182,3 +194,10 @@ namespace BusinessLayer
 }
 
 
+namespace BusinessLayer
+{
+    public class BaseLogic
+    {
+        public static DataSet MasterDS = new DataSet("Master");
+    }
+}

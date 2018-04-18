@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace Entity
 {
     public class FileEntity : IDisposable
@@ -369,15 +370,7 @@ namespace Entity
         //protected string _Terminal;
         protected string _Details;
 
-        public event PropertyChangedEventHandler PropertyChanged;
 
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
         private DateTime GetDateWithoutMilliseconds(DateTime d)
         {
             return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
@@ -386,7 +379,6 @@ namespace Entity
 
         public EventEntity()
         {
-            //this.TimeCreated = DateTime.Now;
         }
 
         public EventEntity(string argLog, string argDetails)
@@ -394,19 +386,7 @@ namespace Entity
             this.LogName = argLog;
             this.Details = argDetails;
         }
-
-        //event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
-        //{
-        //    add
-        //    {
-        //        throw new NotImplementedException();
-        //    }
-
-        //    remove
-        //    {
-        //        throw new NotImplementedException();
-        //    }
-        //}
+        
 
         public string LogName
         {
@@ -417,7 +397,6 @@ namespace Entity
             set
             {
                 _LogName = value;
-                //OnPropertyChanged("LogName");
             }
         }
 
@@ -431,7 +410,6 @@ namespace Entity
             set
             {
                 _TimeCreated = GetDateWithoutMilliseconds(value);
-                //OnPropertyChanged("TimeCreated");
             }
         }
 
@@ -444,7 +422,6 @@ namespace Entity
             set
             {
                 _ProductionID = value;
-                //OnPropertyChanged("Source");
             }
         }
 
@@ -457,7 +434,6 @@ namespace Entity
             set
             {
                 _EventID = value;
-                //OnPropertyChanged("ID");
             }
         }
 
@@ -470,7 +446,6 @@ namespace Entity
             set
             {
                 _Level = value;
-                //OnPropertyChanged("Level");
             }
         }
 
@@ -483,7 +458,6 @@ namespace Entity
             set
             {
                 _User = value;
-                //OnPropertyChanged("User");
             }
         }
 
@@ -508,7 +482,6 @@ namespace Entity
             set
             {
                 _Details = value;
-                //OnPropertyChanged("Details");
             }
         }
 
@@ -695,7 +668,7 @@ namespace Entity
     }
 
 
-
+    
     public class ProductionEntity : IDisposable, INotifyPropertyChanged
     {
         protected string _name;

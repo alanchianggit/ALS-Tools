@@ -47,6 +47,7 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.xMLControlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -80,7 +81,7 @@
             this.newSessionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newSigninToolStripMenuItem});
             this.newSessionToolStripMenuItem.Name = "newSessionToolStripMenuItem";
-            this.newSessionToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
+            this.newSessionToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.newSessionToolStripMenuItem.Text = "&Session";
             // 
             // newSigninToolStripMenuItem
@@ -99,9 +100,10 @@
             this.toolStripSeparator1,
             this.eventsWindowsToolStripMenuItem,
             this.productionManagementToolStripMenuItem,
-            this.analysisManagementToolStripMenuItem});
+            this.analysisManagementToolStripMenuItem,
+            this.xMLControlToolStripMenuItem});
             this.openFileAccessFormToolStripMenuItem.Name = "openFileAccessFormToolStripMenuItem";
-            this.openFileAccessFormToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
+            this.openFileAccessFormToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.openFileAccessFormToolStripMenuItem.Text = "&Open";
             // 
             // archiverToolStripMenuItem
@@ -153,12 +155,12 @@
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(110, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -197,6 +199,13 @@
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(118, 17);
             this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
+            // 
+            // xMLControlToolStripMenuItem
+            // 
+            this.xMLControlToolStripMenuItem.Name = "xMLControlToolStripMenuItem";
+            this.xMLControlToolStripMenuItem.Size = new System.Drawing.Size(207, 22);
+            this.xMLControlToolStripMenuItem.Text = "XML Control";
+            this.xMLControlToolStripMenuItem.Click += new System.EventHandler(this.xMLControlToolStripMenuItem_Click);
             // 
             // Operations
             // 
@@ -241,5 +250,6 @@
         private System.Windows.Forms.ToolStripMenuItem dataCheckerToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem xMLControlToolStripMenuItem;
     }
 }

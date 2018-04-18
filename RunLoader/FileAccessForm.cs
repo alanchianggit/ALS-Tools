@@ -7,6 +7,7 @@ using Entity;
 using BusinessLayer;
 using System.Collections.Generic;
 using System.IO;
+using LogicExtensions;
 
 namespace ALSTools
 {
@@ -309,10 +310,10 @@ namespace ALSTools
                         //Populate object
                         FE.FileName = fi.Name;
                         FE.FileContent = data;
-                        FE.DateUploaded = GetDateWithoutMilliseconds(DateTime.Now);
+                        FE.DateUploaded = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
                         FE.Type = fi.Extension;
                         FE.Size = data.Length;
-                        FE.DateModified = GetDateWithoutMilliseconds(fi.LastWriteTime);
+                        FE.DateModified = DateTimeExtension.GetDateWithoutMilliseconds(fi.LastWriteTime);
                         //Add to DB
                         FE.Add();
                         data = null;
@@ -328,11 +329,6 @@ namespace ALSTools
                     Console.WriteLine(ex.Message);
                 }
             }
-        }
-
-        private DateTime GetDateWithoutMilliseconds(DateTime d)
-        {
-            return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
         }
 
         // Updates all child tree nodes recursively.

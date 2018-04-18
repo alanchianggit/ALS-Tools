@@ -139,5 +139,20 @@ namespace ALSTools
         {
             this.Close();
         }
+
+        private void xMLControlToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
+            if (!strType.Contains("XML") || (frm == null || frm.IsDisposed))
+            {
+                frm = new XMLControl ();
+                frm = XMLControl.GetForm;
+            }
+            else
+            {
+                frm.WindowState = FormWindowState.Normal;
+            }
+            ShowChildForm(frm);
+        }
     }
 }
