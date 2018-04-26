@@ -8,9 +8,9 @@ namespace BusinessLayer.Events
     using BusinessLayer;
     using DAL.Events;
     using DAL.Factory;
-    public  class EventLogic:BaseLogic
+    public class EventLogic : BaseLogic
     {
-        private static string _tableName = EventDAL.TableName.Replace("[", string.Empty).Replace("]", string.Empty);
+        private static string _tableName;
         private static IDbDataAdapter _eventadapter;
         private static IDbTransaction _eventtrans;
 
@@ -45,12 +45,7 @@ namespace BusinessLayer.Events
         {
             get
             {
-                return _tableName;
-            }
-
-            set
-            {
-                _tableName = value;
+                return _tableName = EventDAL.TableName.Replace("[", string.Empty).Replace("]", string.Empty);
             }
         }
 
@@ -74,48 +69,6 @@ namespace BusinessLayer.Events
             else
             {
                 return Eventadapter;
-            }
-        }
-        public static void AttachTransaction(List<IDbDataAdapter> objs)
-        {
-            if (DataLayer.Instance.trans != null) { DataLayer.Instance.trans = null; }
-
-            DataLayer.Instance.trans = DataLayer.ActiveConn.BeginTransaction();
-            foreach (IDbDataAdapter obj in objs)
-            {
-                AttachTransaction(obj);
-            }
-        }
-        public static void AttachTransaction(IDbDataAdapter obj)
-        {
-            if (obj.InsertCommand != null) { obj.InsertCommand.Transaction = DataLayer.Instance.trans; }
-            if (obj.DeleteCommand != null) { obj.DeleteCommand.Transaction = DataLayer.Instance.trans; }
-            if (obj.UpdateCommand != null) { obj.UpdateCommand.Transaction = DataLayer.Instance.trans; }
-
-        }
-
-        public static void TryCommit()
-        {
-            try
-            {
-                DataLayer.Instance.trans.Commit();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                DataLayer.Instance.trans.Rollback();
-            }
-        }
-
-        public static void RollbackTrans()
-        {
-            try
-            {
-                DataLayer.Instance.trans.Rollback();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
             }
         }
 

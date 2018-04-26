@@ -5,9 +5,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+namespace LogicExtensions
+{
+    public static class DateTimeExtension
+    {
+
+        public static DateTime GetDateWithoutMilliseconds(this DateTime d)
+        {
+            return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
+        }
+    }
+}
 
 namespace Entity
 {
+    using LogicExtensions;
+
     public class FileEntity : IDisposable
     {
         protected string _FileName = string.Empty;
@@ -370,13 +383,6 @@ namespace Entity
         //protected string _Terminal;
         protected string _Details;
 
-
-        private DateTime GetDateWithoutMilliseconds(DateTime d)
-        {
-            return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
-        }
-
-
         public EventEntity()
         {
         }
@@ -409,7 +415,7 @@ namespace Entity
             }
             set
             {
-                _TimeCreated = GetDateWithoutMilliseconds(value);
+                _TimeCreated = DateTimeExtension.GetDateWithoutMilliseconds(value);
             }
         }
 
@@ -531,12 +537,6 @@ namespace Entity
         protected string newvalue;
         protected string affectedid;
 
-
-        private DateTime GetDateWithoutMilliseconds(DateTime d)
-        {
-            return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
-        }
-
         public BackupEntity()
         {
 
@@ -563,7 +563,7 @@ namespace Entity
             }
             set
             {
-                timelogged = GetDateWithoutMilliseconds(value);
+                timelogged = DateTimeExtension.GetDateWithoutMilliseconds(value);
             }
         }
         public string TableName
@@ -692,10 +692,6 @@ namespace Entity
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-        private DateTime GetDateWithoutMilliseconds(DateTime d)
-        {
-            return new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second);
-        }
 
         public DateTime StartTime
         {
@@ -721,7 +717,7 @@ namespace Entity
                 {
                     return;
                 }
-                _startTime = GetDateWithoutMilliseconds(value);
+                _startTime = DateTimeExtension.GetDateWithoutMilliseconds(value);
                 OnPropertyChanged("StartTime");
             }
         }
@@ -765,7 +761,7 @@ namespace Entity
                 {
                     return;
                 }
-                _endTime = GetDateWithoutMilliseconds(value);
+                _endTime = DateTimeExtension.GetDateWithoutMilliseconds(value);
                 OnPropertyChanged("EndTime");
             }
         }

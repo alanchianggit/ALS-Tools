@@ -106,12 +106,12 @@
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.LightBlue;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.DarkBlue;
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgv_AuditTrail.ReadOnly = true;
             this.dgv_AuditTrail.DefaultCellStyle = dataGridViewCellStyle2;
             this.dgv_AuditTrail.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             this.dgv_AuditTrail.GridColor = System.Drawing.SystemColors.ButtonShadow;
             this.dgv_AuditTrail.Location = new System.Drawing.Point(803, 63);
             this.dgv_AuditTrail.Name = "dgv_AuditTrail";
+            this.dgv_AuditTrail.ReadOnly = true;
             this.dgv_AuditTrail.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             this.dgv_AuditTrail.Size = new System.Drawing.Size(574, 209);
             this.dgv_AuditTrail.TabIndex = 8;

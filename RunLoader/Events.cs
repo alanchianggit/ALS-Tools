@@ -20,14 +20,12 @@ namespace ALSTools
     //using LogicExtensions;
     public partial class frm_Event : Form
     {
-        //private LogEvent currEvent;
         private BindingSource EventBS = new BindingSource();
         private BindingSource AuditTrailBS = new BindingSource();
         private static List<IDbDataAdapter> das = new List<IDbDataAdapter>();
         private static IDbDataAdapter daEvents;
         private static IDbDataAdapter daAuditTrail;
         private DataTable dtLogs;
-        //private DataSet MasterDS = new DataSet("Master");
         private DataSet MasterDS = EventLogic.MasterDS;
         Point mouseDownPoint = Point.Empty;
 
@@ -53,8 +51,8 @@ namespace ALSTools
                 daAuditTrail = EventLogic.GetBackupAdapter();
             }
 
-            //if (MasterDS.Tables.Count != 0) { MasterDS.Tables.Clear(); }
-
+            if (MasterDS.Tables.Count != 0) { MasterDS = new DataSet() ; }
+            //New row doesn't update in bindingsource
             using (DataSet EventDS = new DataSet())
             {
                 if (MasterDS.Tables.Contains(EventLogic.TableName)) { MasterDS.Tables.Remove(EventLogic.TableName); }
@@ -149,6 +147,7 @@ namespace ALSTools
                 }
 
                 EventLogic.TryCommit();
+                MasterDS.AcceptChanges();
                 return true;
             }
             catch (Exception ex)
@@ -210,75 +209,75 @@ namespace ALSTools
 
         private void UpdateDataSet(DataGridView dgv, DataGridViewCellEventArgs e)
         {
+            //int currrowindex = 0 ;
+            bool isNewRecord = false;
             try
             {
                 //dgv.EndEdit();
-
-
                 BindingSource bs = (BindingSource)dgv.DataSource;
-                
 
                 string tablename = bs.DataMember.ToString();
 
                 //if modified cell's row is greater (newer) than current dataset
 
                 DataRowView obj = (DataRowView)bs.Current;
+                DataRow currDR = obj.Row;
+                
                 if (obj.IsNew)
-                //if (e.RowIndex > MasterDS.Tables[tablename].Rows.Count - 1)
                 {
-                    //Create new row
-                    DataRow dr = MasterDS.Tables[tablename].NewRow();
-                    //Get old value from datagridview and put into row's cell
-                    dr[e.ColumnIndex] = dgv[e.ColumnIndex, e.RowIndex].Value;
-                    dr["TimeCreated"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
-                    // Add row to current dataset
-                    MasterDS.Tables[tablename].Rows.Add(dr);
-                    //Remove datagridview row
-                    dgv.Rows.RemoveAt(e.RowIndex);
+                    isNewRecord = true;
 
-                    //End edit
-                    dgv.EndEdit();
-                    //dgv.Refresh();
+                    if (currDR["TimeCreated"].ToString() == string.Empty)
+                    {
+                        currDR["TimeCreated"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
+                    }
 
+                    currDR.Table.Rows.Add(currDR);
+                    currDR.EndEdit();
+                }
+                else
+                {
+                    List<DataRow> toDelete = new List<DataRow>();
+                    isNewRecord = false;
+                    //currDR.Table.AcceptChanges();
+                    currDR.EndEdit();
+                    foreach(DataRow dr in currDR.Table.Rows)
+                    {
+                       
+                        if (dr.RowState == DataRowState.Added)
+                        {
+                            toDelete.Add(dr);
+                        }
+                    }
+
+                    foreach (DataRow dr in toDelete)
+                    {
+                        currDR.Table.Rows.Remove(dr);
+                    }
                 }
 
-                //triggering updates eventhough new row, 
-                //if (!HasRowAt(MasterDS.Tables[tablename], e.RowIndex))
-                //{
-                ////Create Timestamp if timecreated is empty
-                //if (MasterDS.Tables[tablename].Rows[e.RowIndex]["TimeCreated"].ToString() == string.Empty)
-                //{
-                //    MasterDS.Tables[tablename].Rows[e.RowIndex]["TimeCreated"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
-                //}
-
-                //MasterDS.Tables[tablename].Rows[e.RowIndex].EndEdit();
-
-                //if (obj["TimeCreated"].ToString() == string.Empty)
-                //{
-                //    obj.BeginEdit();
-                //    obj["TimeCreated"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
-                //    obj.EndEdit();
-                //}
-
-                //bs.EndEdit();
-
-                MasterDS.Tables[tablename].Rows[e.RowIndex].EndEdit();
+                DataTable dt = new DataTable();
+                if (isNewRecord)
+                {
+                    dt = currDR.Table.GetChanges(DataRowState.Added);
+                }
+                else
+                {
+                    dt = currDR.Table.GetChanges(DataRowState.Modified);
+                }
+                
                 //Audit trail if update succeeds
-                //dt = null when txt_productionid is valid
-                DataTable dt = MasterDS.Tables[tablename].GetChanges();
-                    //DataSet ds = (DataSet)bs.DataSource;
-                    //DataTable dt = ds.Tables[tablename].GetChanges();
                     if (dt != null)
                     {
-                        foreach (DataRow drc in dt.Rows)
+                        foreach (DataRow dr in dt.Rows)
                         {
                             for (int i = 0; i < dt.Columns.Count; i++)
                             {
-                                if (drc.HasVersion(DataRowVersion.Original))
+                                if (dr.HasVersion(DataRowVersion.Original))
                                 {
 
                                     //compare current and original versions
-                                    if (!drc[i, DataRowVersion.Current].Equals(drc[i, DataRowVersion.Original]))
+                                    if (!dr[i, DataRowVersion.Current].Equals(dr[i, DataRowVersion.Original]))
                                     {
                                         string tname = AuditTrailBS.DataMember.ToString();
                                         DataTable dtbackup = MasterDS.Tables[tname];
@@ -287,9 +286,9 @@ namespace ALSTools
                                         drbackup["TimeLogged"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
                                         drbackup["TableName"] = tablename;
                                         drbackup["ColumnName"] = dt.Columns[i].ColumnName;
-                                        drbackup["OldValue"] = drc[i, DataRowVersion.Original].ToString();
-                                        drbackup["NewValue"] = drc[i, DataRowVersion.Current].ToString();
-                                        drbackup["AffectedID"] = drc["EventID"].ToString();
+                                        drbackup["OldValue"] = dr[i, DataRowVersion.Original].ToString();
+                                        drbackup["NewValue"] = dr[i, DataRowVersion.Current].ToString();
+                                        drbackup["AffectedID"] = dr["EventID"].ToString();
                                         dtbackup.Rows.Add(drbackup);
                                     }
                                 }
@@ -466,6 +465,14 @@ namespace ALSTools
         private void frm_Event_DoubleClick(object sender, EventArgs e)
         {
             this.Hide();
+        }
+
+        private void dgv_Events_KeyDown(object sender, KeyEventArgs e)
+        {
+            //if (e.KeyCode == Keys.Enter)
+            //{
+            //    e.Handled = true;
+            //}
         }
     }
 }

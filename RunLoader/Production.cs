@@ -24,7 +24,6 @@ namespace ALSTools
         private static IDbDataAdapter daAuditTrail;
         private static IDbDataAdapter daProductions;
         private static List<IDbDataAdapter> das = new List<IDbDataAdapter>();
-        //private DataSet MasterDS = new DataSet("Master");
         private DataSet MasterDS = ProductionLogic.MasterDS;
 
         Point mouseDownPoint = Point.Empty;
@@ -55,7 +54,7 @@ namespace ALSTools
             daProductions = ProductionLogic.GetProductionAdapter();
             daAuditTrail = ProductionLogic.GetBackupAdapter();
 
-            //if (MasterDS.Tables.Count != 0) { MasterDS = new DataSet(); }
+            if (MasterDS.Tables.Count != 0) { MasterDS = new DataSet(); }
             using (DataSet ProductionDS = new DataSet())
             {
                 if (MasterDS.Tables.Contains(ProductionLogic.TableName)) { MasterDS.Tables.Remove(ProductionLogic.TableName); }
@@ -164,9 +163,6 @@ namespace ALSTools
         private void dgv_Production_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             DisplayAuditTrail(sender, e);
-
-
-            //ProductionEntity currProd = this.dgv_Production.Rows[e.RowIndex].DataBoundItem as ProductionEntity;
         }
 
         private frm_Event GetEventForm()
@@ -230,6 +226,7 @@ namespace ALSTools
 
         private ModifiedType UpdateDataSet(DataGridView dgv, DataGridViewCellEventArgs e)
         {
+            bool isNewRecord = false;
             ModifiedType modType;
             try
             {
@@ -237,31 +234,67 @@ namespace ALSTools
                 BindingSource bs = (BindingSource)dgv.DataSource;
                 string tablename = bs.DataMember.ToString();
                 DataRowView obj = (DataRowView)bs.Current;
+                DataRow currDR = obj.Row;
                 if (obj.IsNew)
                 //if (e.RowIndex > MasterDS.Tables[tablename].Rows.Count - 1)
                 {
-                    //Create new row
-                    DataRow dr = MasterDS.Tables[tablename].NewRow();
-                    //Get old value from datagridview and put into row's cell
-                    dr[e.ColumnIndex] = dgv[e.ColumnIndex, e.RowIndex].Value;
-                    // Add row to current dataset
-                    MasterDS.Tables[tablename].Rows.Add(dr);
-                    //Remove datagridview row
-                    dgv.Rows.RemoveAt(e.RowIndex);
+                    isNewRecord = true;
+                    ////Create new row
+                    //DataRow dr = MasterDS.Tables[tablename].NewRow();
+                    ////Get old value from datagridview and put into row's cell
+                    //dr[e.ColumnIndex] = dgv[e.ColumnIndex, e.RowIndex].Value;
+                    //// Add row to current dataset
+                    //MasterDS.Tables[tablename].Rows.Add(dr);
+                    ////Remove datagridview row
+                    //dgv.Rows.RemoveAt(e.RowIndex);
 
-                    //End edit
-                    dgv.EndEdit();
-                    modType = ModifiedType.Insert;
+                    ////End edit
+                    //dgv.EndEdit();
+                    //modType = ModifiedType.Insert;
 
-                    //return ModifiedType.Insert;
+                    ////return ModifiedType.Insert;
+
+                    
+                    currDR.Table.Rows.Add(currDR);
+                    currDR.EndEdit();
+                    return modType = ModifiedType.Insert;
+                }
+                else
+                {
+                    isNewRecord = false;
+                    List<DataRow> toDelete = new List<DataRow>();
+                    currDR.EndEdit();
+                    foreach (DataRow dr in currDR.Table.Rows)
+                    {
+
+                        if (dr.RowState == DataRowState.Added)
+                        {
+                            toDelete.Add(dr);
+                        }
+                    }
+
+                    foreach (DataRow dr in toDelete)
+                    {
+                        currDR.Table.Rows.Remove(dr);
+                    }
                 }
 
-                if (!HasRowAt(MasterDS.Tables[tablename], e.RowIndex))
+                DataTable dt = new DataTable();
+                if (isNewRecord)
                 {
-                    MasterDS.Tables[tablename].Rows[e.RowIndex].EndEdit();
+                    dt = currDR.Table.GetChanges(DataRowState.Added);
+                }
+                else
+                {
+                    dt = currDR.Table.GetChanges(DataRowState.Modified);
+                }
+
+                if (dt!= null)
+                {
+                    //MasterDS.Tables[tablename].Rows[e.RowIndex].EndEdit();
 
                     //Audit trail if update succeeds
-                    DataTable dt = MasterDS.Tables[tablename].GetChanges();
+                    //DataTable dt = MasterDS.Tables[tablename].GetChanges();
                     foreach (DataRow dr in dt.Rows)
                     {
                         for (int i = 0; i < dt.Columns.Count; i++)
@@ -299,7 +332,29 @@ namespace ALSTools
             }
             finally
             {
-                ProductionLogic.AttachTransaction(das);
+                //ProductionLogic.AttachTransaction(das);
+                //for (int i = 0; i < MasterDS.Tables.Count; i++)
+                //{
+                //    using (DataSet DS = new DataSet())
+                //    {
+                //        DS.Merge(MasterDS.Tables[i], true, MissingSchemaAction.Add);
+                //        DS.Tables[0].TableName = "Table";
+                //        das[i].Update(DS);
+                //    }
+                //}
+
+                //ProductionLogic.TryCommit();
+                TryCommitDB();
+            }
+            return modType;
+
+        }
+
+        private bool TryCommitDB()
+        {
+            try
+            {
+                EventLogic.AttachTransaction(das);
                 for (int i = 0; i < MasterDS.Tables.Count; i++)
                 {
                     using (DataSet DS = new DataSet())
@@ -310,11 +365,15 @@ namespace ALSTools
                     }
                 }
 
-                ProductionLogic.TryCommit();
-
+                EventLogic.TryCommit();
+                MasterDS.AcceptChanges();
+                return true;
             }
-            return modType;
-
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
         }
 
         private bool HasRowAt(DataTable dt, int index)
