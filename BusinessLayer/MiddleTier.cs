@@ -188,9 +188,10 @@ namespace BusinessLayer
 
 namespace BusinessLayer
 {
-    public class BaseLogic
+    public class BaseLogLogic
     {
         public static DataSet MasterDS = new DataSet("Master");
+        public static List<IDbDataAdapter> listDA = new List<IDbDataAdapter>();
         public static void AttachTransaction(List<IDbDataAdapter> objs)
         {
             if (DataLayer.Instance.trans != null) { DataLayer.Instance.trans = null; }
@@ -209,7 +210,36 @@ namespace BusinessLayer
             if (obj.UpdateCommand != null) { obj.UpdateCommand.Transaction = DataLayer.Instance.trans; }
 
         }
-        public static void TryCommit()
+
+        public static bool TryCommitDB()
+        {
+            try
+            {
+                AttachTransaction(listDA);
+                for (int i = 0; i < MasterDS.Tables.Count; i++)
+                {
+                    using (DataSet DS = new DataSet())
+                    {
+                        DS.Merge(MasterDS.Tables[i], true, MissingSchemaAction.Add);
+                        DS.Tables[0].TableName = "Table";
+                        listDA[i].Update(DS);
+                    }
+                }
+
+                CommitTrans();
+                MasterDS.AcceptChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RollbackTrans();
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
+
+        public static void CommitTrans()
         {
             try
             {
@@ -222,7 +252,7 @@ namespace BusinessLayer
             }
         }
 
-        public static void RollbackTrans()
+        private static void RollbackTrans()
         {
             try
             {

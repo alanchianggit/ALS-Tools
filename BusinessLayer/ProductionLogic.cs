@@ -7,7 +7,7 @@ namespace BusinessLayer.Productions
 {
     using DAL.Productions;
     using DAL.Factory;
-    public class ProductionLogic: BaseLogic
+    public class ProductionLogic: BaseLogLogic
     {
         private static string _tableName;
 
@@ -62,7 +62,6 @@ namespace BusinessLayer.Productions
                     da = pDAL.AdaptProduction();
 
                 }
-
                 ProductionAdapter = da;
                 return da;
             }

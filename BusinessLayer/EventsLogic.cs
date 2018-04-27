@@ -8,7 +8,7 @@ namespace BusinessLayer.Events
     using BusinessLayer;
     using DAL.Events;
     using DAL.Factory;
-    public class EventLogic : BaseLogic
+    public class EventLogic : BaseLogLogic
     {
         private static string _tableName;
         private static IDbDataAdapter _eventadapter;

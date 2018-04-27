@@ -23,7 +23,7 @@ namespace ALSTools
         private BindingSource AuditTrailBS = new BindingSource();
         private static IDbDataAdapter daAuditTrail;
         private static IDbDataAdapter daProductions;
-        private static List<IDbDataAdapter> das = new List<IDbDataAdapter>();
+        private static List<IDbDataAdapter> das = ProductionLogic.listDA;
         private DataSet MasterDS = ProductionLogic.MasterDS;
 
         Point mouseDownPoint = Point.Empty;
@@ -31,9 +31,10 @@ namespace ALSTools
         public Production()
         {
             InitializeComponent();
-            das.Clear();
-            das.Add(daProductions);
-            das.Add(daAuditTrail);
+
+            //das.Remove(daProductions);
+            //das.Remove(daAuditTrail);
+            
 
             GetData();
         }
@@ -51,8 +52,14 @@ namespace ALSTools
 
         private void GetData()
         {
+            
+
             daProductions = ProductionLogic.GetProductionAdapter();
             daAuditTrail = ProductionLogic.GetBackupAdapter();
+
+            das.Clear();
+            das.Add(daProductions);
+            das.Add(daAuditTrail);
 
             if (MasterDS.Tables.Count != 0) { MasterDS = new DataSet(); }
             using (DataSet ProductionDS = new DataSet())
@@ -191,31 +198,35 @@ namespace ALSTools
 
 
             frm_Event frm = GetEventForm();
-
-            if (mt.Equals(ModifiedType.Insert))
+            DataGridViewCell productionName = obj["ProductionName", e.RowIndex];
+            if (productionName.Value != null)
             {
-                //Create events about production
-                if (obj["ProductionName", e.RowIndex].Value.ToString() != string.Empty)
-                {
-                    frm.AddGeneralEvent(string.Format("New production: {0}", obj["ProductionID", e.RowIndex].Value), obj["ProductionName", e.RowIndex].Value.ToString());
-                }
-                else
-                {
-                    frm.AddGeneralEvent(string.Format("New production: {0}", obj["ProductionID", e.RowIndex].Value));
-                }
 
-            }
-            else if (mt.Equals(ModifiedType.Update))
-            {
-                //Create events about updateed production
-                if (obj["ProductionName", e.RowIndex].Value.ToString() != string.Empty)
+                if (mt.Equals(ModifiedType.Insert))
                 {
-                    frm.AddGeneralEvent(string.Format("Modified production: {0}", obj["ProductionID", e.RowIndex].Value), obj["ProductionName", e.RowIndex].Value.ToString());
+                    //Create events about production
+                    if (string.IsNullOrEmpty(obj["ProductionName", e.RowIndex].Value.ToString()))
+                    {
+                        frm.AddGeneralEvent(string.Format("New production: {0}", obj["ProductionID", e.RowIndex].Value), obj["ProductionName", e.RowIndex].Value.ToString());
+                    }
+                    else
+                    {
+                        frm.AddGeneralEvent(string.Format("New production: {0}", obj["ProductionID", e.RowIndex].Value));
+                    }
+
                 }
-                else
+                else if (mt.Equals(ModifiedType.Update))
                 {
-                    frm.AddGeneralEvent(string.Format("Modified production: {0}", obj["ProductionID", e.RowIndex].Value));
-                }
+                    //Create events about updateed production
+                    if (string.IsNullOrEmpty(obj["ProductionName", e.RowIndex].Value.ToString()))
+                    {
+                        frm.AddGeneralEvent(string.Format("Modified production: {0}", obj["ProductionID", e.RowIndex].Value), obj["ProductionName", e.RowIndex].Value.ToString());
+                    }
+                    else
+                    {
+                        frm.AddGeneralEvent(string.Format("Modified production: {0}", obj["ProductionID", e.RowIndex].Value));
+                    }
+                } 
             }
         }
         public enum ModifiedType
@@ -226,6 +237,8 @@ namespace ALSTools
 
         private ModifiedType UpdateDataSet(DataGridView dgv, DataGridViewCellEventArgs e)
         {
+            ////Bug
+            //// couldn't update dataset
             bool isNewRecord = false;
             ModifiedType modType;
             try
@@ -239,21 +252,6 @@ namespace ALSTools
                 //if (e.RowIndex > MasterDS.Tables[tablename].Rows.Count - 1)
                 {
                     isNewRecord = true;
-                    ////Create new row
-                    //DataRow dr = MasterDS.Tables[tablename].NewRow();
-                    ////Get old value from datagridview and put into row's cell
-                    //dr[e.ColumnIndex] = dgv[e.ColumnIndex, e.RowIndex].Value;
-                    //// Add row to current dataset
-                    //MasterDS.Tables[tablename].Rows.Add(dr);
-                    ////Remove datagridview row
-                    //dgv.Rows.RemoveAt(e.RowIndex);
-
-                    ////End edit
-                    //dgv.EndEdit();
-                    //modType = ModifiedType.Insert;
-
-                    ////return ModifiedType.Insert;
-
                     
                     currDR.Table.Rows.Add(currDR);
                     currDR.EndEdit();
@@ -291,10 +289,6 @@ namespace ALSTools
 
                 if (dt!= null)
                 {
-                    //MasterDS.Tables[tablename].Rows[e.RowIndex].EndEdit();
-
-                    //Audit trail if update succeeds
-                    //DataTable dt = MasterDS.Tables[tablename].GetChanges();
                     foreach (DataRow dr in dt.Rows)
                     {
                         for (int i = 0; i < dt.Columns.Count; i++)
@@ -332,19 +326,8 @@ namespace ALSTools
             }
             finally
             {
-                //ProductionLogic.AttachTransaction(das);
-                //for (int i = 0; i < MasterDS.Tables.Count; i++)
-                //{
-                //    using (DataSet DS = new DataSet())
-                //    {
-                //        DS.Merge(MasterDS.Tables[i], true, MissingSchemaAction.Add);
-                //        DS.Tables[0].TableName = "Table";
-                //        das[i].Update(DS);
-                //    }
-                //}
-
-                //ProductionLogic.TryCommit();
-                TryCommitDB();
+                ProductionLogic.TryCommitDB();
+                //TryCommitDB();
             }
             return modType;
 
@@ -365,7 +348,7 @@ namespace ALSTools
                     }
                 }
 
-                EventLogic.TryCommit();
+                EventLogic.CommitTrans();
                 MasterDS.AcceptChanges();
                 return true;
             }

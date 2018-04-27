@@ -22,7 +22,7 @@ namespace ALSTools
     {
         private BindingSource EventBS = new BindingSource();
         private BindingSource AuditTrailBS = new BindingSource();
-        private static List<IDbDataAdapter> das = new List<IDbDataAdapter>();
+        private static List<IDbDataAdapter> das = EventLogic.listDA;
         private static IDbDataAdapter daEvents;
         private static IDbDataAdapter daAuditTrail;
         private DataTable dtLogs;
@@ -32,15 +32,18 @@ namespace ALSTools
         public frm_Event()
         {
             InitializeComponent();
-            das.Clear();
-            das.Add(daEvents);
-            das.Add(daAuditTrail);
+
+            //das.Remove(daEvents);
+            //das.Remove(daAuditTrail);
+            
             GetData();
 
         }
 
         private void GetData()
         {
+            
+
             dtLogs = EventLogic.GetLogIDs();
             if (daEvents == null)
             {
@@ -51,7 +54,11 @@ namespace ALSTools
                 daAuditTrail = EventLogic.GetBackupAdapter();
             }
 
-            if (MasterDS.Tables.Count != 0) { MasterDS = new DataSet() ; }
+            das.Clear();
+            das.Add(daEvents);
+            das.Add(daAuditTrail);
+
+            if (MasterDS.Tables.Count != 0) { MasterDS = new DataSet(); }
             //New row doesn't update in bindingsource
             using (DataSet EventDS = new DataSet())
             {
@@ -124,7 +131,9 @@ namespace ALSTools
             }
             finally
             {
-                TryCommitDB();
+                EventLogic.TryCommitDB();
+                
+                //TryCommitDB();
             }
             GetData();
 
@@ -146,7 +155,7 @@ namespace ALSTools
                     }
                 }
 
-                EventLogic.TryCommit();
+                EventLogic.CommitTrans();
                 MasterDS.AcceptChanges();
                 return true;
             }
@@ -209,7 +218,6 @@ namespace ALSTools
 
         private void UpdateDataSet(DataGridView dgv, DataGridViewCellEventArgs e)
         {
-            //int currrowindex = 0 ;
             bool isNewRecord = false;
             try
             {
@@ -222,7 +230,7 @@ namespace ALSTools
 
                 DataRowView obj = (DataRowView)bs.Current;
                 DataRow currDR = obj.Row;
-                
+
                 if (obj.IsNew)
                 {
                     isNewRecord = true;
@@ -241,9 +249,9 @@ namespace ALSTools
                     isNewRecord = false;
                     //currDR.Table.AcceptChanges();
                     currDR.EndEdit();
-                    foreach(DataRow dr in currDR.Table.Rows)
+                    foreach (DataRow dr in currDR.Table.Rows)
                     {
-                       
+
                         if (dr.RowState == DataRowState.Added)
                         {
                             toDelete.Add(dr);
@@ -265,37 +273,36 @@ namespace ALSTools
                 {
                     dt = currDR.Table.GetChanges(DataRowState.Modified);
                 }
-                
-                //Audit trail if update succeeds
-                    if (dt != null)
-                    {
-                        foreach (DataRow dr in dt.Rows)
-                        {
-                            for (int i = 0; i < dt.Columns.Count; i++)
-                            {
-                                if (dr.HasVersion(DataRowVersion.Original))
-                                {
 
-                                    //compare current and original versions
-                                    if (!dr[i, DataRowVersion.Current].Equals(dr[i, DataRowVersion.Original]))
-                                    {
-                                        string tname = AuditTrailBS.DataMember.ToString();
-                                        DataTable dtbackup = MasterDS.Tables[tname];
-                                        DataRow drbackup = dtbackup.NewRow();
-                                        //Import row values from old table to new
-                                        drbackup["TimeLogged"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
-                                        drbackup["TableName"] = tablename;
-                                        drbackup["ColumnName"] = dt.Columns[i].ColumnName;
-                                        drbackup["OldValue"] = dr[i, DataRowVersion.Original].ToString();
-                                        drbackup["NewValue"] = dr[i, DataRowVersion.Current].ToString();
-                                        drbackup["AffectedID"] = dr["EventID"].ToString();
-                                        dtbackup.Rows.Add(drbackup);
-                                    }
+                //Audit trail if update succeeds
+                if (dt != null)
+                {
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        for (int i = 0; i < dt.Columns.Count; i++)
+                        {
+                            if (dr.HasVersion(DataRowVersion.Original))
+                            {
+
+                                //compare current and original versions
+                                if (!dr[i, DataRowVersion.Current].Equals(dr[i, DataRowVersion.Original]))
+                                {
+                                    string tname = AuditTrailBS.DataMember.ToString();
+                                    DataTable dtbackup = MasterDS.Tables[tname];
+                                    DataRow drbackup = dtbackup.NewRow();
+                                    //Import row values from old table to new
+                                    drbackup["TimeLogged"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
+                                    drbackup["TableName"] = tablename;
+                                    drbackup["ColumnName"] = dt.Columns[i].ColumnName;
+                                    drbackup["OldValue"] = dr[i, DataRowVersion.Original].ToString();
+                                    drbackup["NewValue"] = dr[i, DataRowVersion.Current].ToString();
+                                    drbackup["AffectedID"] = dr["EventID"].ToString();
+                                    dtbackup.Rows.Add(drbackup);
                                 }
                             }
                         }
                     }
-                //}
+                }
             }
             catch (Exception excep)
             {
@@ -303,10 +310,7 @@ namespace ALSTools
             }
             finally
             {
-                
-
                 TryCommitDB();
-                
             }
 
         }
@@ -469,10 +473,7 @@ namespace ALSTools
 
         private void dgv_Events_KeyDown(object sender, KeyEventArgs e)
         {
-            //if (e.KeyCode == Keys.Enter)
-            //{
-            //    e.Handled = true;
-            //}
+
         }
     }
 }
