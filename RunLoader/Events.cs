@@ -32,10 +32,6 @@ namespace ALSTools
         public frm_Event()
         {
             InitializeComponent();
-
-            //das.Remove(daEvents);
-            //das.Remove(daAuditTrail);
-            
             GetData();
 
         }
@@ -131,7 +127,7 @@ namespace ALSTools
             }
             finally
             {
-                EventLogic.TryCommitDB();
+                EventLogic.TryCommitDB(MasterDS);
                 
                 //TryCommitDB();
             }
@@ -218,6 +214,10 @@ namespace ALSTools
 
         private void UpdateDataSet(DataGridView dgv, DataGridViewCellEventArgs e)
         {
+            das.Clear();
+            das.Add(daEvents);
+            das.Add(daAuditTrail);
+
             bool isNewRecord = false;
             try
             {
@@ -310,7 +310,7 @@ namespace ALSTools
             }
             finally
             {
-                TryCommitDB();
+                EventLogic.TryCommitDB(MasterDS);
             }
 
         }

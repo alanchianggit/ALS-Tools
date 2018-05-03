@@ -191,6 +191,7 @@ namespace BusinessLayer
     public class BaseLogLogic
     {
         public static DataSet MasterDS = new DataSet("Master");
+
         public static List<IDbDataAdapter> listDA = new List<IDbDataAdapter>();
         public static void AttachTransaction(List<IDbDataAdapter> objs)
         {
@@ -211,16 +212,18 @@ namespace BusinessLayer
 
         }
 
-        public static bool TryCommitDB()
+        public static bool TryCommitDB(DataSet dataset)
         {
             try
             {
                 AttachTransaction(listDA);
-                for (int i = 0; i < MasterDS.Tables.Count; i++)
+                for (int i = 0; i < dataset.Tables.Count; i++)
+                //for (int i = 0; i < MasterDS.Tables.Count; i++)
                 {
                     using (DataSet DS = new DataSet())
                     {
-                        DS.Merge(MasterDS.Tables[i], true, MissingSchemaAction.Add);
+                        DS.Merge(dataset.Tables[i], true, MissingSchemaAction.Add);
+                        //DS.Merge(MasterDS.Tables[i], true, MissingSchemaAction.Add);
                         DS.Tables[0].TableName = "Table";
                         listDA[i].Update(DS);
                     }

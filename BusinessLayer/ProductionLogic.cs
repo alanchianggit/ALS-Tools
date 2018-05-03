@@ -63,12 +63,9 @@ namespace BusinessLayer.Productions
 
                 }
                 ProductionAdapter = da;
-                return da;
             }
-            else
-            {
+            
                 return ProductionAdapter;
-            }
         }
 
 

@@ -31,11 +31,6 @@ namespace ALSTools
         public Production()
         {
             InitializeComponent();
-
-            //das.Remove(daProductions);
-            //das.Remove(daAuditTrail);
-            
-
             GetData();
         }
 
@@ -237,25 +232,25 @@ namespace ALSTools
 
         private ModifiedType UpdateDataSet(DataGridView dgv, DataGridViewCellEventArgs e)
         {
-            ////Bug
-            //// couldn't update dataset
+            das.Clear();
+            das.Add(daProductions);
+            das.Add(daAuditTrail);
+
             bool isNewRecord = false;
             ModifiedType modType;
             try
             {
-                dgv.EndEdit();
                 BindingSource bs = (BindingSource)dgv.DataSource;
                 string tablename = bs.DataMember.ToString();
                 DataRowView obj = (DataRowView)bs.Current;
                 DataRow currDR = obj.Row;
                 if (obj.IsNew)
-                //if (e.RowIndex > MasterDS.Tables[tablename].Rows.Count - 1)
                 {
                     isNewRecord = true;
                     
                     currDR.Table.Rows.Add(currDR);
                     currDR.EndEdit();
-                    return modType = ModifiedType.Insert;
+                    modType = ModifiedType.Insert;
                 }
                 else
                 {
@@ -315,8 +310,6 @@ namespace ALSTools
                         }
                     }
                 }
-
-                //return ModifiedType.Update;
                 modType = ModifiedType.Update;
             }
             catch (Exception excep)
@@ -326,8 +319,7 @@ namespace ALSTools
             }
             finally
             {
-                ProductionLogic.TryCommitDB();
-                //TryCommitDB();
+                ProductionLogic.TryCommitDB(MasterDS);
             }
             return modType;
 
