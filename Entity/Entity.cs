@@ -667,9 +667,8 @@ namespace Entity
         #endregion
     }
 
-
-    
-    public class ProductionEntity : IDisposable, INotifyPropertyChanged
+   
+    public class ProductionEntity : IDisposable
     {
         protected string _name;
         protected DateTime? _startTime;
@@ -683,15 +682,8 @@ namespace Entity
         protected string _eqpname;
 
 
-        public event PropertyChangedEventHandler PropertyChanged;
 
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
+        
 
         public DateTime StartTime
         {
@@ -718,7 +710,6 @@ namespace Entity
                     return;
                 }
                 _startTime = DateTimeExtension.GetDateWithoutMilliseconds(value);
-                OnPropertyChanged("StartTime");
             }
         }
 
@@ -735,7 +726,6 @@ namespace Entity
             {
                 if (value == ProductionName) return;
                 _name = value;
-                OnPropertyChanged("ProductionName");
             }
         }
 
@@ -762,7 +752,6 @@ namespace Entity
                     return;
                 }
                 _endTime = DateTimeExtension.GetDateWithoutMilliseconds(value);
-                OnPropertyChanged("EndTime");
             }
         }
 
@@ -777,7 +766,6 @@ namespace Entity
             {
                 if (value == Starter) return;
                 _starter = value;
-                OnPropertyChanged("Starter");
             }
         }
 
@@ -792,7 +780,6 @@ namespace Entity
             {
                 if (value == Ender) return;
                 _ender = value;
-                OnPropertyChanged("Ender");
             }
         }
 
@@ -807,7 +794,6 @@ namespace Entity
             {
                 if (value == ProductionID) return;
                 _ProductionID = value;
-                OnPropertyChanged("ProductionID");
             }
         }
 
@@ -822,7 +808,6 @@ namespace Entity
             {
                 if (value == Type) return;
                 _type = value;
-                OnPropertyChanged("Type");
             }
         }
 
@@ -839,7 +824,6 @@ namespace Entity
                 if (value == Quantity) return;
                 if (!int.TryParse(value.ToString(), out val)) return;
                 _quantity = value;
-                OnPropertyChanged("Quantity");
             }
         }
 
@@ -854,7 +838,6 @@ namespace Entity
             {
                 if (value == Method) return;
                 _method = value;
-                OnPropertyChanged("Method");
             }
         }
 
@@ -869,7 +852,6 @@ namespace Entity
             {
                 if (value == EqpName) return;
                 _eqpname = value;
-                OnPropertyChanged("EqpName");
             }
         }
 
