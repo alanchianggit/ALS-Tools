@@ -5,8 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using DAL;
 using Auth;
-
-
+using RunLoader.Properties;
 namespace ALSTools
 {
     static class Program
@@ -48,4 +47,9 @@ namespace ALSTools
             
         }
     }
+
+    //public class ProgramSettings
+    //{
+    //    public static string DbPath = Settings.Default.DbPath.ToString();
+    //}
 }
