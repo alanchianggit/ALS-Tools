@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Data;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.IO.Compression;
 using Microsoft.VisualBasic.FileIO;
-
 using Microsoft.WindowsAPICodePack.Dialogs;
-using System.IO;
-using System.Collections.Generic;
-using System.Threading;
 
 namespace Archiver
 {

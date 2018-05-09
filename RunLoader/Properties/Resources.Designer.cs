@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ALSTools.Properties {
+namespace RunLoader.Properties {
     using System;
     
     
