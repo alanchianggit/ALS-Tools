@@ -12,6 +12,8 @@ using Entity;
 using System.Reflection;
 using System.Linq;
 using System.Data.Odbc;
+using DataAccessLayer.Properties;
+
 
 
 namespace AuthDAL
@@ -67,6 +69,7 @@ namespace AuthDAL
 }
 namespace DAL.Factory
 {
+    using System.Configuration;
     public enum DatabaseType
     {
         AccessACCDB,
@@ -93,6 +96,8 @@ namespace DAL.Factory
 
     public class DataLayer : IDisposable
     {
+        
+        
         //create new Lists for colum names and parameters
         //public static List<string> FieldNames = new List<string>();
         public static List<string> FieldNames = new List<string>();
@@ -100,7 +105,8 @@ namespace DAL.Factory
         //create exception fields list
         public static List<string> ExceptionFields = new List<string>();
 
-        private const string defaultDB = @"C:\Users\Alan\Documents\BackEnd1.accdb";
+        //private const string defaultDB = @"C:\Users\Alan\Documents\BackEnd1.accdb";
+        private static string defaultDB;
         public static DataLayer Instance = new DataLayer();
         //public IDbConnection AlternateConn;
 
@@ -114,7 +120,9 @@ namespace DAL.Factory
 
         public DataLayer()
         {
-            //CreateConnection(defaultDB);
+            defaultDB = Settings.Default.DbPath;
+            //var appsetting = ConfigurationManager.AppSettings;
+            //defaultDB = appsetting["DbPath"];
         }
 
         public static IDbConnection ActiveConn;/*{ get; set; }*/
