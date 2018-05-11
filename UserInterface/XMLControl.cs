@@ -43,6 +43,7 @@ namespace ALSTools
                 {
                     try
                     {
+                        dataset.Clear();
                         dataset.ReadXml(ofd.FileName);
                     }
                     catch (Exception ex)
@@ -74,7 +75,6 @@ namespace ALSTools
             }
 
         }
-        
     }
 
 

@@ -7,7 +7,7 @@ namespace BusinessLayer.Productions
 {
     using DAL.Productions;
     using DAL.Factory;
-    public class ProductionLogic: BaseLogLogic
+    public class ProductionLogic : BaseLogLogic
     {
         private static string _tableName;
 
@@ -17,36 +17,21 @@ namespace BusinessLayer.Productions
 
         public static IDbDataAdapter ProductionAdapter
         {
-            get
-            {
-                return _productionadapter;
-            }
+            get { return _productionadapter; }
 
-            set
-            {
-                _productionadapter = value;
-            }
+            set { _productionadapter = value; }
         }
 
         public static IDbTransaction EventTrans
         {
-            get
-            {
-                return _productiontrans;
-            }
+            get { return _productiontrans; }
 
-            set
-            {
-                _productiontrans = value;
-            }
+            set { _productiontrans = value; }
         }
 
         public static string TableName
         {
-            get
-            {
-                return _tableName = ProductionDAL.TableName.Replace("[", string.Empty).Replace("]", string.Empty);
-            }
+            get { return _tableName = ProductionDAL.TableName.Replace("[", string.Empty).Replace("]", string.Empty); }
         }
 
         public static IDbDataAdapter GetProductionAdapter()
@@ -58,14 +43,12 @@ namespace BusinessLayer.Productions
 
                 using (ProductionDAL pDAL = new ProductionDAL())
                 {
-
-                    da = pDAL.AdaptProduction();
-
+                    da = pDAL.GetAdapter();
                 }
                 ProductionAdapter = da;
             }
-            
-                return ProductionAdapter;
+
+            return ProductionAdapter;
         }
 
 

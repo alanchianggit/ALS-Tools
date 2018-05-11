@@ -59,7 +59,7 @@ namespace BusinessLayer.Events
                 using (EventDAL eDAL = new EventDAL())
                 {
 
-                    da = eDAL.AdaptEvent();
+                    da = eDAL.GetAdapter();
 
                 }
 

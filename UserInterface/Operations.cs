@@ -51,7 +51,7 @@ namespace ALSTools
 
             if (!strType.Contains("Analysis_Management") || frm == null || frm.IsDisposed)
             {
-                frm = new Analysis_Management();
+                //frm = new Analysis_Management();
                 frm = Analysis_Management.GetForm;
             }
             else
@@ -83,7 +83,7 @@ namespace ALSTools
                 string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
                 if (!strType.Contains("Event") || (frm == null || frm.IsDisposed))
                 {
-                    frm = new frm_Event();
+                    //frm = new frm_Event();
                     frm = frm_Event.GetForm;
                 }
                 else
@@ -105,7 +105,7 @@ namespace ALSTools
                 string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
                 if (!strType.Contains("Production") || (frm == null || frm.IsDisposed))
                 {
-                    frm = new Production();
+                    //frm = new Production();
                     frm = ALSTools.Production.GetForm;
                 }
                 else
@@ -125,7 +125,7 @@ namespace ALSTools
             string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
             if (!strType.Contains("Auth") || (frm == null || frm.IsDisposed))
             {
-                frm = new frmAuth();
+                //frm = new frmAuth();
                 frm = frmAuth.GetForm;
             }
             else
@@ -143,10 +143,25 @@ namespace ALSTools
         private void xMLControlToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
-            if (!strType.Contains("XML") || (frm == null || frm.IsDisposed))
+            if (!strType.Contains("XMLControl") || (frm == null || frm.IsDisposed))
             {
-                frm = new XMLControl ();
+                //frm = new XMLControl ();
                 frm = XMLControl.GetForm;
+            }
+            else
+            {
+                frm.WindowState = FormWindowState.Normal;
+            }
+            ShowChildForm(frm);
+        }
+
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
+            if (!strType.Contains("SettingForm") || (frm == null || frm.IsDisposed))
+            {
+                //frm = new RunLoader.SettingForm();
+                frm = RunLoader.SettingForm.GetForm;
             }
             else
             {
@@ -188,6 +203,11 @@ namespace ALSTools
             mouseDownPoint = Point.Empty;
         }
 
+
+        protected void CloseForm(object sender, EventArgs e)
+        {
+            Close();
+        }
 
     }
 }

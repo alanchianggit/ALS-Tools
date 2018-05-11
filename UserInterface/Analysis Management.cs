@@ -12,6 +12,7 @@ using Entity;
 
 namespace ALSTools
 {
+    using BusinessLayer.SettingsLogic;
     public partial class Analysis_Management : Form
     {
         DataSet ds = new DataSet();
@@ -36,8 +37,10 @@ namespace ALSTools
 
         public Analysis_Management()
         {
+            
             InitializeComponent();
-            this.txt_FileLocation.Text = @"C:\Users\Alan\Documents\BackEnd1.accdb";
+            this.txt_FileLocation.Text = SettingsLogic.GetFactorySettings("DbPath");
+            //this.txt_FileLocation.Text = @"C:\Users\Alan\Documents\BackEnd1.accdb";
             //this.txt_Output.Text = @"\\alvncws008\groups\minerals\spectroscopy\userfiles\alan\data\";
             this.cmb_Method.Text = "ME-MS41i";
         }

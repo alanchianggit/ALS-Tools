@@ -12,7 +12,7 @@ using Entity;
 using System.Reflection;
 using System.Linq;
 using System.Data.Odbc;
-using DataAccessLayer.Properties;
+
 
 
 
@@ -67,8 +67,11 @@ namespace AuthDAL
         #endregion
     }
 }
+
 namespace DAL.Factory
 {
+    using DataAccessLayer.Properties;
+
     using System.Configuration;
     public enum DatabaseType
     {
@@ -106,7 +109,36 @@ namespace DAL.Factory
         public static List<string> ExceptionFields = new List<string>();
 
         //private const string defaultDB = @"C:\Users\Alan\Documents\BackEnd1.accdb";
-        private static string defaultDB;
+        private static string _defaultDB;
+
+        public static void ChangeSettings(string arg, string val)
+        {
+            Settings.Default.Properties[arg].DefaultValue = val;
+            //ConfigurationManager.AppSettings.Set(arg, val);
+            //var path = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
+            Settings.Default.Save();
+        }
+        public static string GetSettings(string arg)
+        {
+            string result = string.Empty;
+            result = Settings.Default.Properties[arg].DefaultValue.ToString();
+            return result;
+        }
+
+        public static string defaultDB
+        {
+            get
+            {
+                return _defaultDB = Settings.Default.DbPath;
+            }
+            set
+            {
+                
+                Settings.Default.DbPath = value;
+            }
+        }
+
+
         public static DataLayer Instance = new DataLayer();
         //public IDbConnection AlternateConn;
 
@@ -120,10 +152,12 @@ namespace DAL.Factory
 
         public DataLayer()
         {
-            defaultDB = Settings.Default.DbPath;
-            //var appsetting = ConfigurationManager.AppSettings;
-            //defaultDB = appsetting["DbPath"];
+            
+            
         }
+
+
+
 
         public static IDbConnection ActiveConn;/*{ get; set; }*/
         public static string ActiveConnectionString { get; set; }
@@ -144,7 +178,6 @@ namespace DAL.Factory
             dbtype = (DatabaseType)dbfiletype;
             //create connection using database type
             IDbConnection conn = DataLayer.Instance.CreateConnection(dbtype, defaultDB);
-            //return DataFactory.CreateConnection(dbtype, defaultDB);
             return conn;
 
         }
@@ -737,6 +770,7 @@ namespace DAL.Files
 namespace DAL.Productions
 {
     using DAL.Factory;
+    using DAL.Backup;
 
     public class ProductionDAL :IDisposable
     {
@@ -787,7 +821,7 @@ namespace DAL.Productions
             }
         }
 
-        public IDbDataAdapter AdaptProduction()
+        public IDbDataAdapter GetAdapter()
         {
             ProductionEntity obj = new ProductionEntity ();
             IDbDataAdapter da = DataLayer.CreateAdapter();
@@ -846,45 +880,20 @@ namespace DAL.Productions
             da.InsertCommand = insertcmd;
             return da;
         }
-
         public IDbDataAdapter AdaptEventBackup()
         {
-            BackupEntity obj = new BackupEntity();
-            IDbDataAdapter da = DataLayer.CreateAdapter();
-
-            #region BackupAdapter Select
-            DataLayer.ExceptionFields.Clear();
-            DataLayer.ExceptionFields.Add("BackupID");
-            IDbCommand selectcmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
-            selectcmd.CommandText = string.Format("SELECT [BackupID], {1} FROM {0} WHERE [TableName]='{2}'", "[tbl_Backup]", string.Join(",", DataLayer.FieldNames.ToArray()), _tableName.Replace("[", string.Empty).Replace("]", string.Empty));
-            selectcmd.CommandType = CommandType.Text;
-            da.SelectCommand = selectcmd;
-
-            #endregion
-
-            #region BackupAdapter Insert
-            DataLayer.ExceptionFields.Clear();
-            DataLayer.ExceptionFields.Add("BackupID");
-            IDbCommand insertcmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
-            insertcmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});", "[tbl_Backup]", string.Join(",", DataLayer.FieldNames.ToArray()), string.Join(",", DataLayer.FieldValues.ToArray()));
-            insertcmd.CommandType = CommandType.Text;
-
-            da.InsertCommand = insertcmd;
-
-            #endregion
-
-
+            IDbDataAdapter da = BackupDAL.Instance.GetAdapter();
             return da;
         }
-        
-        private DataTable GetDataTable(ProductionEntity prod)
-        {
-            DataTable dt = new DataTable();
-            string strSQL = string.Format("SELECT * FROM {0} WHERE [ProductionName]='{1}'", _tableName, prod.ProductionName);
-            dt = DataLayer.QueryTable(strSQL);
-            return dt;
 
-        }
+        //private DataTable GetDataTable(ProductionEntity prod)
+        //{
+        //    DataTable dt = new DataTable();
+        //    string strSQL = string.Format("SELECT * FROM {0} WHERE [ProductionName]='{1}'", _tableName, prod.ProductionName);
+        //    dt = DataLayer.QueryTable(strSQL);
+        //    return dt;
+
+        //}
         
 
         #region IDisposable Support
@@ -930,13 +939,6 @@ namespace DAL.Productions
             return dt;
         }
 
-        public DataTable GetProductionIDs()
-        {
-            DataTable dt = new DataTable();
-            dt = GetProductionIDs(string.Empty);
-            return dt;
-        }
-
         public DataTable GetProductionIDs(string EqpFilter)
         {
             DataTable dt = new DataTable();
@@ -955,24 +957,13 @@ namespace DAL.Productions
             return dt;
         }
 
-        public DataTable GetMethods()
-        {
-            //List<string> methods = new List<string>();
-            DataTable dt = new DataTable();
-            string strSQL = "SELECT [Method] FROM [tbl_Method]";
-            dt = DataLayer.QueryTable(strSQL);
-
-            //methods = dt.AsEnumerable().Select(r => r.Field<string>("Method")).ToList();
-
-
-            return dt;
-        }
     }
     
 }
 
 namespace DAL.Events
 {
+    using DAL.Backup;
     using DAL.Factory;
 
     public class EventDAL: IDisposable
@@ -1015,7 +1006,7 @@ namespace DAL.Events
             }
         }
 
-        public IDbDataAdapter AdaptEvent()
+        public IDbDataAdapter GetAdapter()
         {
             EventEntity obj = new EventEntity();
             IDbDataAdapter da = DataLayer.CreateAdapter();
@@ -1074,36 +1065,12 @@ namespace DAL.Events
             da.InsertCommand = insertcmd;
             return da;
         }
-
         public IDbDataAdapter AdaptEventBackup()
         {
-            BackupEntity obj = new BackupEntity();
-            IDbDataAdapter da = DataLayer.CreateAdapter();
-
-            #region BackupAdapter Select
-            DataLayer.ExceptionFields.Clear();
-            DataLayer.ExceptionFields.Add("BackupID");
-            IDbCommand selectcmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
-            selectcmd.CommandText = string.Format("SELECT [BackupID], {1} FROM {0} WHERE [TableName]='{2}'", "[tbl_Backup]", string.Join(",", DataLayer.FieldNames.ToArray()), TableName.Replace("[", string.Empty).Replace("]", string.Empty));
-            selectcmd.CommandType = CommandType.Text;
-            da.SelectCommand = selectcmd;
-
-            #endregion
-
-            #region BackupAdapter Insert
-            DataLayer.ExceptionFields.Clear();
-            DataLayer.ExceptionFields.Add("BackupID");
-            IDbCommand insertcmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
-            insertcmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});", "[tbl_Backup]", string.Join(",", DataLayer.FieldNames.ToArray()), string.Join(",", DataLayer.FieldValues.ToArray()));
-            insertcmd.CommandType = CommandType.Text;
-
-            da.InsertCommand = insertcmd;
-
-            #endregion
-
-
+            IDbDataAdapter da = BackupDAL.Instance.GetAdapter();
             return da;
         }
+        
 
         public DataTable ReadAvailableLogs()
         {
@@ -1166,5 +1133,180 @@ namespace DAL.Events
     }
 
     
+}
+
+namespace DAL.Backup
+{
+    using DAL.Factory;
+
+    public class BackupDAL : IDisposable
+    {
+        public const string TableName = "[tbl_Backup]";
+        public static BackupDAL Instance = new BackupDAL();
+        public void Reset()
+        {
+            Instance = new BackupDAL();
+        }
+
+        public BackupDAL()
+        {
+            if (DataLayer.ActiveConn == null)
+            {
+                DataLayer.CreateConnection();
+            }
+
+            DataLayer.ExceptionFields.Clear();
+            DataLayer.FieldValues.Clear();
+            DataLayer.FieldNames.Clear();
+
+        }
+
+        private string UpdateClause
+        {
+            get
+            {
+                string strSQL = string.Format("UPDATE {0} SET ", TableName);
+                for (int i = 0; i <= DataLayer.FieldNames.Count - 1; i++)
+                {
+                    if (i > 0)
+                    {
+                        strSQL += ",";
+                    }
+                    strSQL += string.Format("{0}={1}", DataLayer.FieldNames[i], DataLayer.FieldValues[i]);
+                }
+
+                return strSQL;
+            }
+        }
+
+        public IDbDataAdapter GetAdapter()
+        {
+            BackupEntity obj = new BackupEntity();
+            IDbDataAdapter da = DataLayer.CreateAdapter();
+
+
+            #region BackupAdapter Select
+            DataLayer.ExceptionFields.Clear();
+            DataLayer.ExceptionFields.Add("BackupID");
+            IDbCommand selectcmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
+            selectcmd.CommandText = string.Format("SELECT [BackupID], {1} FROM {0}", TableName, string.Join(",", DataLayer.FieldNames.ToArray()));
+            selectcmd.CommandType = CommandType.Text;
+            #endregion
+
+
+            #region BackupAdapter Insert
+
+            DataLayer.ExceptionFields.Clear();
+            DataLayer.ExceptionFields.Add("BackupID");
+
+            IDbCommand insertcmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
+            insertcmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});", TableName, string.Join(",", DataLayer.FieldNames.ToArray()), string.Join(",", DataLayer.FieldValues.ToArray()));
+            insertcmd.CommandType = CommandType.Text;
+            #endregion
+
+            #region BackupAdapter Update
+            DataLayer.ExceptionFields.Clear();
+            DataLayer.ExceptionFields.Add("BackupID");
+            IDbCommand updatecmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
+
+            updatecmd.CommandText = string.Format("{0} WHERE [BackupID]=@BackupID", UpdateClause);
+            IDbDataParameter param = updatecmd.CreateParameter();
+            param.ParameterName = "@BackupID";
+            param.SourceColumn = "BackupID";
+            updatecmd.Parameters.Add(param);
+
+            #endregion
+
+
+            #region BackupAdapter Delete
+            DataLayer.ExceptionFields.Clear();
+            DataLayer.ExceptionFields.Add("BackupID");
+
+            //IDbCommand deletecmd = ExtractParameters(obj, ExceptionFields, true, "@");
+
+            string strSQL = string.Format("DELETE * FROM {0} WHERE [BackupID]=@BackupID", TableName);
+            IDbCommand deletecmd = DataLayer.CreateCommand(strSQL);
+            IDbDataParameter delparam = deletecmd.CreateParameter();
+            delparam.ParameterName = "@BackupID";
+            delparam.SourceColumn = "BackupID";
+            deletecmd.Parameters.Add(delparam);
+            #endregion
+
+            da.DeleteCommand = deletecmd;
+            da.UpdateCommand = updatecmd;
+            da.SelectCommand = selectcmd;
+            da.InsertCommand = insertcmd;
+            return da;
+        }
+
+        public IDbDataAdapter AdaptEventBackup()
+        {
+            BackupEntity obj = new BackupEntity();
+            IDbDataAdapter da = DataLayer.CreateAdapter();
+
+            #region BackupAdapter Select
+            DataLayer.ExceptionFields.Clear();
+            DataLayer.ExceptionFields.Add("BackupID");
+            IDbCommand selectcmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
+            selectcmd.CommandText = string.Format("SELECT [BackupID], {1} FROM {0} WHERE [TableName]='{2}'", "[tbl_Backup]", string.Join(",", DataLayer.FieldNames.ToArray()), TableName.Replace("[", string.Empty).Replace("]", string.Empty));
+            selectcmd.CommandType = CommandType.Text;
+            da.SelectCommand = selectcmd;
+
+            #endregion
+
+            #region BackupAdapter Insert
+            DataLayer.ExceptionFields.Clear();
+            DataLayer.ExceptionFields.Add("BackupID");
+            IDbCommand insertcmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
+            insertcmd.CommandText = string.Format("INSERT INTO {0} ({1}) VALUES ({2});", "[tbl_Backup]", string.Join(",", DataLayer.FieldNames.ToArray()), string.Join(",", DataLayer.FieldValues.ToArray()));
+            insertcmd.CommandType = CommandType.Text;
+
+            da.InsertCommand = insertcmd;
+
+            #endregion
+
+
+            return da;
+        }
+
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~EventsDAL() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        void IDisposable.Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
+    }
+
+
 }
 

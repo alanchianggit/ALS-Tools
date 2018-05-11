@@ -362,21 +362,22 @@ namespace ALSTools
 
         private void cmb_InstrumentFilter_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ComboBox txtbox = sender as ComboBox;
-            string value = null;
-            if (txtbox.SelectedText.Length > 0)
-            {
-                value = txtbox.SelectedValue.ToString();
-            }
-            else
-            {
-                value = txtbox.SelectedText;
-            }
-            if (value != string.Empty)
-            {
-                string strFilter = string.Format("[LogName] Like '%{0}%'", value);
-                FilterEvents(strFilter);
-            }
+            //ComboBox txtbox = sender as ComboBox;
+            //string value = null;
+            //if (txtbox.SelectedText.Length > 0)
+            //{
+            //    value = txtbox.SelectedValue.ToString();
+            //}
+            //else
+            //{
+            //    value = txtbox.SelectedText;
+            //}
+
+            //if (value.Equals(string.Empty))
+            //{
+            //    string strFilter = string.Format("[LogName] Like '%{0}%'", value);
+            //    FilterEvents(strFilter);
+            //}
 
 
         }
@@ -385,6 +386,7 @@ namespace ALSTools
         {
             if (value == null)
             {
+                EventBS.RemoveFilter();
                 return;
             }
             else if (value.Length > 0)
@@ -443,9 +445,6 @@ namespace ALSTools
             this.Hide();
         }
 
-        private void dgv_Events_KeyDown(object sender, KeyEventArgs e)
-        {
-
-        }
+        
     }
 }

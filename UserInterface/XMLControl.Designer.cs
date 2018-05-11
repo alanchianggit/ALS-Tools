@@ -30,6 +30,7 @@
         {
             this.btn_Load = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.btn_Close = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btn_Load
@@ -50,23 +51,28 @@
             this.tabControl1.Size = new System.Drawing.Size(1232, 424);
             this.tabControl1.TabIndex = 3;
             // 
+            // btn_Close
+            // 
+            this.btn_Close.Location = new System.Drawing.Point(1256, 94);
+            this.btn_Close.Name = "btn_Close";
+            this.btn_Close.Size = new System.Drawing.Size(75, 23);
+            this.btn_Close.TabIndex = 4;
+            this.btn_Close.Text = "Close";
+            this.btn_Close.UseVisualStyleBackColor = true;
+            this.btn_Close.Click += base.CloseForm;
+            // 
             // XMLControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(44)))), ((int)(((byte)(51)))));
             this.ClientSize = new System.Drawing.Size(1345, 452);
+            this.Controls.Add(this.btn_Close);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.btn_Load);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "XMLControl";
             this.Text = "XMLControl";
-            //this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.frmMsDown);
-            //this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.frmMsMove);
-            //this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.frmMsUp);
-            this.MouseDown += base.FormMouseDown;
-            this.MouseMove += base.FormMouseMove;
-            this.MouseUp += base.FormMouseUp;
             this.ResumeLayout(false);
 
         }
@@ -74,5 +80,6 @@
         #endregion
         private System.Windows.Forms.Button btn_Load;
         private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.Button btn_Close;
     }
 }
