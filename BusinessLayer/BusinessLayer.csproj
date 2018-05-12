@@ -60,10 +60,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnalysisManagementLogic.cs" />
-    <Compile Include="EventsLogic.cs" />
+    <Compile Include="NotInUse.cs" />
     <Compile Include="FileAccessLogic.cs" />
     <Compile Include="MiddleTier.cs" />
-    <Compile Include="ProductionLogic.cs" />
+    <Compile Include="OperationLogic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SettingsLogic.cs" />
   </ItemGroup>

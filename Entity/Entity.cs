@@ -376,7 +376,7 @@ namespace Entity
     {
         protected string _LogName;
         protected DateTime _TimeCreated;
-        protected string _ProductionID;
+        protected string _ProductionName;
         protected int _EventID;
         protected string _Level;
         protected string _User;
@@ -419,15 +419,15 @@ namespace Entity
             }
         }
 
-        public string ProductionID
+        public string ProductionName
         {
             get
             {
-                return _ProductionID;
+                return _ProductionName;
             }
             set
             {
-                _ProductionID = value;
+                _ProductionName = value;
             }
         }
 

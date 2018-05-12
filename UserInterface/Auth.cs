@@ -3,7 +3,8 @@ using System.Windows.Forms;
 
 namespace Auth
 {
-    public partial class frmAuth : Form
+    using ALSTools;
+    public partial class frmAuth : BaseOperationForm
     {
         private static frmAuth inst;
         public static frmAuth GetForm

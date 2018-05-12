@@ -71,6 +71,9 @@
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.btn_Load);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.MouseDown += base.FormMouseDown;
+            this.MouseUp += base.FormMouseUp;
+            this.MouseMove += base.FormMouseMove;
             this.Name = "XMLControl";
             this.Text = "XMLControl";
             this.ResumeLayout(false);

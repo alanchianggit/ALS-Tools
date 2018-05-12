@@ -4,6 +4,7 @@ using System.Data;
 using System.Reflection;
 using System.Windows.Forms;
 using BusinessLayer.Events;
+using BusinessLayer.Backup;
 using Entity;
 using LogicExtensions;
 
@@ -36,7 +37,7 @@ namespace ALSTools
             dtLogs = EventLogic.GetLogIDs();
             if (daEvents == null)
             {
-                daEvents = EventLogic.GetEventAdapter();
+                daEvents = EventLogic.GetAdapter();
             }
             if (daAuditTrail == null)
             {
@@ -51,24 +52,26 @@ namespace ALSTools
             //New row doesn't update in bindingsource
             using (DataSet EventDS = new DataSet())
             {
-                if (MasterDS.Tables.Contains(EventLogic.TableName)) { MasterDS.Tables.Remove(EventLogic.TableName); }
+                string tblname = EventLogic.TableName;
+                if (MasterDS.Tables.Contains(tblname)) { MasterDS.Tables.Remove(tblname); }
                 daEvents.Fill(EventDS);
                 MasterDS.Merge(EventDS.Tables["Table"], true, MissingSchemaAction.Add);
-                MasterDS.Tables["Table"].TableName = EventLogic.TableName;
+                MasterDS.Tables["Table"].TableName =tblname;
                 EventBS.DataSource = MasterDS;
-                EventBS.DataMember = EventLogic.TableName;
+                EventBS.DataMember = tblname;
                 this.dgv_Events.DataSource = EventBS;
                 this.dgv_Events.Columns["EventID"].ReadOnly = true;
             }
             using (DataSet AuditDS = new DataSet())
             {
-                if (MasterDS.Tables.Contains("tbl_Backup")) { MasterDS.Tables.Remove("tbl_Backup"); }
+                string tblname = BackupLogic.TableName;
+                if (MasterDS.Tables.Contains(tblname)) { MasterDS.Tables.Remove(tblname); }
                 daAuditTrail.Fill(AuditDS);
 
                 MasterDS.Merge(AuditDS.Tables["Table"], true, MissingSchemaAction.Add);
-                MasterDS.Tables["Table"].TableName = "tbl_Backup";
+                MasterDS.Tables["Table"].TableName = tblname;
                 AuditTrailBS.DataSource = MasterDS;
-                AuditTrailBS.DataMember = "tbl_Backup";
+                AuditTrailBS.DataMember = tblname;
                 this.dgv_AuditTrail.DataSource = AuditTrailBS;
                 this.dgv_AuditTrail.Columns["TableName"].Visible = false;
                 this.dgv_AuditTrail.ReadOnly = true;

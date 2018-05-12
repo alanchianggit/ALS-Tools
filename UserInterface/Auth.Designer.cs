@@ -95,6 +95,9 @@
             this.Name = "frmAuth";
             this.Text = "Auth";
             this.Load += new System.EventHandler(this.Auth_Load);
+            this.MouseDown += base.FormMouseDown;
+            this.MouseUp += base.FormMouseUp;
+            this.MouseMove += base.FormMouseMove;
             this.ResumeLayout(false);
             this.PerformLayout();
 

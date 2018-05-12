@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Windows.Forms;
 using BusinessLayer.Productions;
+using BusinessLayer.Backup;
 using LogicExtensions;
 
 
@@ -18,7 +19,6 @@ namespace ALSTools
         private static IDbDataAdapter daProductions;
         private static List<IDbDataAdapter> das = ProductionLogic.listDA;
         private DataSet MasterDS = ProductionLogic.MasterDS;
-        //Point mouseDownPoint = Point.Empty;
 
         public Production()
         {
@@ -41,7 +41,7 @@ namespace ALSTools
         {
             
 
-            daProductions = ProductionLogic.GetProductionAdapter();
+            daProductions = ProductionLogic.GetAdapter();
             daAuditTrail = ProductionLogic.GetBackupAdapter();
 
             das.Clear();
@@ -51,25 +51,27 @@ namespace ALSTools
             if (MasterDS.Tables.Count != 0) { MasterDS = new DataSet(); }
             using (DataSet ProductionDS = new DataSet())
             {
-                if (MasterDS.Tables.Contains(ProductionLogic.TableName)) { MasterDS.Tables.Remove(ProductionLogic.TableName); }
+                string tblname = ProductionLogic.TableName;
+                if (MasterDS.Tables.Contains(tblname)) { MasterDS.Tables.Remove(tblname); }
                 daProductions.Fill(ProductionDS);
                 MasterDS.Merge(ProductionDS.Tables["Table"], true, MissingSchemaAction.Add);
-                MasterDS.Tables["Table"].TableName = ProductionLogic.TableName;
+                MasterDS.Tables["Table"].TableName = tblname;
                 ProductionBS.DataSource = MasterDS;
-                ProductionBS.DataMember = ProductionLogic.TableName.ToString();
+                ProductionBS.DataMember = tblname;
                 this.dgv_Production.DataSource = ProductionBS;
                 this.dgv_Production.Columns["ProductionID"].ReadOnly = true;
             }
 
             using (DataSet AuditDS = new DataSet())
             {
-                if (MasterDS.Tables.Contains("tbl_Backup")) { MasterDS.Tables.Remove("tbl_Backup"); }
+                string tblname = BackupLogic.TableName;
+                if (MasterDS.Tables.Contains(tblname)) { MasterDS.Tables.Remove(tblname); }
                 daAuditTrail.Fill(AuditDS);
 
                 MasterDS.Merge(AuditDS.Tables["Table"], true, MissingSchemaAction.Add);
-                MasterDS.Tables["Table"].TableName = "tbl_Backup";
+                MasterDS.Tables["Table"].TableName = tblname;
                 AuditTrailBS.DataSource = MasterDS;
-                AuditTrailBS.DataMember = "tbl_Backup";
+                AuditTrailBS.DataMember = tblname;
                 this.dgv_AuditTrail.DataSource = AuditTrailBS;
 
                 this.dgv_AuditTrail.Columns["TableName"].Visible = false;
