@@ -22,7 +22,7 @@ namespace ALSTools
         private static IDbDataAdapter daAuditTrail;
         private DataTable dtLogs;
         private DataSet MasterDS = EventLogic.MasterDS;
-        //Point mouseDownPoint = Point.Empty;
+        private const string ID = EventLogic.ID;
 
         public frm_Event()
         {
@@ -60,7 +60,9 @@ namespace ALSTools
                 EventBS.DataSource = MasterDS;
                 EventBS.DataMember = tblname;
                 this.dgv_Events.DataSource = EventBS;
-                this.dgv_Events.Columns["EventID"].ReadOnly = true;
+                this.dgv_Events.Columns[ID].ReadOnly = true;
+
+                fillcombo();
             }
             using (DataSet AuditDS = new DataSet())
             {
@@ -105,7 +107,7 @@ namespace ALSTools
             AddGeneralEvent(str, string.Empty);
         }
 
-        public void AddGeneralEvent(string str, string ProdID)
+        public void AddGeneralEvent(string str, string ProdName)
         {
             das.Clear();
             das.Add(daEvents);
@@ -114,7 +116,7 @@ namespace ALSTools
             {
                 DataTable dt = MasterDS.Tables[EventLogic.TableName];
                 DataRow dr = dt.NewRow();
-                dr["ProductionID"] = ProdID;
+                dr["ProductionName"] = ProdName;
                 dr["Details"] = str;
                 dr["LogName"] = "General";
                 dr["TimeCreated"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
@@ -134,33 +136,7 @@ namespace ALSTools
 
         }
 
-
-        //private bool TryCommitDB()
-        //{
-        //    try
-        //    {
-        //        EventLogic.AttachTransaction(das);
-        //        for (int i = 0; i < MasterDS.Tables.Count; i++)
-        //        {
-        //            using (DataSet DS = new DataSet())
-        //            {
-        //                DS.Merge(MasterDS.Tables[i], true, MissingSchemaAction.Add);
-        //                DS.Tables[0].TableName = "Table";
-        //                das[i].Update(DS);
-        //            }
-        //        }
-
-        //        EventLogic.CommitTrans();
-        //        MasterDS.AcceptChanges();
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine(ex.Message);
-        //        return false;
-        //    }
-        //}
-
+        
         private void DisplayAuditTrail(object sender)
         {
             DataGridView obj = sender as DataGridView;
@@ -177,7 +153,7 @@ namespace ALSTools
             {
                 DataGridView dgv = sender as DataGridView;
                 //Can't find backupid from new event row to exisiting row
-                string backupid = dgv[dgv.Columns["EventID"].Index, e.RowIndex].Value.ToString();
+                string backupid = dgv[dgv.Columns[ID].Index, e.RowIndex].Value.ToString();
                 string filter = string.Format("[AffectedID] = '{0}'", backupid);
                 AuditTrailBS.Filter = filter;
             }
@@ -216,14 +192,15 @@ namespace ALSTools
             das.Clear();
             das.Add(daEvents);
             das.Add(daAuditTrail);
+            
 
             bool isNewRecord = false;
             try
             {
                 //dgv.EndEdit();
                 BindingSource bs = (BindingSource)dgv.DataSource;
-
-                string tablename = bs.DataMember.ToString();
+                string backuptblName = AuditTrailBS.DataMember.ToString();
+                string targetTblName = bs.DataMember.ToString();
 
                 //if modified cell's row is greater (newer) than current dataset
 
@@ -276,6 +253,7 @@ namespace ALSTools
                 //Audit trail if update succeeds
                 if (dt != null)
                 {
+                    //BackupLogic.AddDiffRows(dt, targetTblName, out MasterDS);
                     foreach (DataRow dr in dt.Rows)
                     {
                         for (int i = 0; i < dt.Columns.Count; i++)
@@ -286,16 +264,15 @@ namespace ALSTools
                                 //compare current and original versions
                                 if (!dr[i, DataRowVersion.Current].Equals(dr[i, DataRowVersion.Original]))
                                 {
-                                    string tname = AuditTrailBS.DataMember.ToString();
-                                    DataTable dtbackup = MasterDS.Tables[tname];
+                                    DataTable dtbackup = MasterDS.Tables[backuptblName];
                                     DataRow drbackup = dtbackup.NewRow();
                                     //Import row values from old table to new
                                     drbackup["TimeLogged"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
-                                    drbackup["TableName"] = tablename;
+                                    drbackup["TableName"] = targetTblName;
                                     drbackup["ColumnName"] = dt.Columns[i].ColumnName;
                                     drbackup["OldValue"] = dr[i, DataRowVersion.Original].ToString();
                                     drbackup["NewValue"] = dr[i, DataRowVersion.Current].ToString();
-                                    drbackup["AffectedID"] = dr["EventID"].ToString();
+                                    drbackup["AffectedID"] = dr[ID].ToString();
                                     dtbackup.Rows.Add(drbackup);
                                 }
                             }
@@ -352,13 +329,40 @@ namespace ALSTools
                 e.Cancel = false;
             }
         }
+
+        private void fillcombo()
+        {
+            //ADD COMBOBOX
+            DataGridViewComboBoxColumn combocol = new DataGridViewComboBoxColumn();
+            this.dgv_Events.Columns["ProductionName"].Name = "txtProductionName";
+            
+            combocol.HeaderText = "ProductionName";
+            combocol.Name = "ProductionName";
+            combocol.DataSource = EventLogic.GetLogIDs();
+            combocol.ValueMember = "LogID";
+            this.dgv_Events.Columns.Add(combocol);
+            List<string> rowval = new List<string>();
+
+            
+            foreach (DataGridViewRow dr in this.dgv_Events.Rows)
+            {
+                dr.Cells["ProductionName"].Value = dr.Cells["txtProductionName"].Value;
+                //rowval.Add(dr["ProductionName"].ToString());
+            }
+            //combocol.Items.AddRange(rowval.ToArray());
+            
+
+            //Need to trigger change value to original productioname column
+            
+        }
+
         private void txt_ProductionID_TextChanged(object sender, EventArgs e)
         {
             TextBox txtbox = sender as TextBox;
             string strFilter = null;
             if (!txtbox.Text.ToString().Equals(string.Empty))
             {
-                strFilter = string.Format("[ProductionID] Like '%{0}%'", txtbox.Text.ToString());
+                strFilter = string.Format("[ProductionName] Like '%{0}%'", txtbox.Text.ToString());
             }
             FilterEvents(strFilter);
         }

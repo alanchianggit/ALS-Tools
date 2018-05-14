@@ -96,9 +96,9 @@ namespace BusinessLayer.Productions
     public class ProductionLogic : BaseLogLogic
     {
         private static string _tableName;
+        public const string ID = "ProductionID";
 
         private static IDbDataAdapter _adapter;
-
 
         public static IDbDataAdapter Adapter
         {
@@ -136,10 +136,6 @@ namespace BusinessLayer.Productions
 
             IDbDataAdapter da;
             da = BackupLogic.GetAdapter();
-            //using (ProductionDAL obj = new ProductionDAL())
-            //{
-            //    da = obj.AdaptEventBackup();
-            //}
             return da;
         }
 
@@ -153,27 +149,18 @@ namespace BusinessLayer.Events
     {
         private static string _tableName;
         private static IDbDataAdapter _adapter;
-
+        public const string ID = "EventID";
 
         public static IDbDataAdapter Adapter
         {
-            get
-            {
-                return _adapter;
-            }
+            get { return _adapter; }
 
-            set
-            {
-                _adapter = value;
-            }
+            set { _adapter = value; }
         }
 
         public static string TableName
         {
-            get
-            {
-                return _tableName = EventDAL.TableName.Replace("[", string.Empty).Replace("]", string.Empty);
-            }
+            get { return _tableName = EventDAL.TableName.Replace("[", string.Empty).Replace("]", string.Empty); }
         }
 
         public static IDbDataAdapter GetAdapter()
@@ -185,9 +172,7 @@ namespace BusinessLayer.Events
 
                 using (EventDAL obj = new EventDAL())
                 {
-
                     da = obj.GetAdapter();
-
                 }
 
                 Adapter = da;
@@ -227,6 +212,8 @@ namespace BusinessLayer.Events
 namespace BusinessLayer.Backup
 {
     using DAL.Backup;
+    using LogicExtensions;
+
     public class BackupLogic : BaseLogLogic
     {
         private static string _tableName;
@@ -235,24 +222,17 @@ namespace BusinessLayer.Backup
 
         public static IDbDataAdapter Adapter
         {
-            get
-            {
-                return _adapter;
-            }
+            get { return _adapter; }
 
-            set
-            {
-                _adapter = value;
-            }
+            set { _adapter = value; }
         }
 
         public static string TableName
         {
-            get
-            {
-                return _tableName = BackupDAL.TableName.Replace("[", string.Empty).Replace("]", string.Empty);
-            }
+            get { return _tableName = BackupDAL.TableName.Replace("[", string.Empty).Replace("]", string.Empty); }
         }
+
+
 
         public static IDbDataAdapter GetAdapter()
         {
@@ -261,12 +241,12 @@ namespace BusinessLayer.Backup
             if (Adapter == null)
             {
 
-                using (BackupDAL obj = new BackupDAL())
-                {
-
-                    da = obj.GetAdapter();
-
-                }
+                da = BackupDAL.Instance.GetAdapter();
+                //using (BackupDAL obj = new BackupDAL())
+                //{
+                //    da = obj.GetAdapter();
+                    
+                //}
 
                 Adapter = da;
                 return da;
@@ -276,6 +256,6 @@ namespace BusinessLayer.Backup
                 return Adapter;
             }
         }
-        
+
     }
 }

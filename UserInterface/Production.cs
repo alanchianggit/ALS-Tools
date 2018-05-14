@@ -19,6 +19,7 @@ namespace ALSTools
         private static IDbDataAdapter daProductions;
         private static List<IDbDataAdapter> das = ProductionLogic.listDA;
         private DataSet MasterDS = ProductionLogic.MasterDS;
+        private const string ID = ProductionLogic.ID;
 
         public Production()
         {
@@ -59,7 +60,7 @@ namespace ALSTools
                 ProductionBS.DataSource = MasterDS;
                 ProductionBS.DataMember = tblname;
                 this.dgv_Production.DataSource = ProductionBS;
-                this.dgv_Production.Columns["ProductionID"].ReadOnly = true;
+                this.dgv_Production.Columns[ID].ReadOnly = true;
             }
 
             using (DataSet AuditDS = new DataSet())
@@ -113,7 +114,7 @@ namespace ALSTools
             {
                 DataGridView dgv = sender as DataGridView;
                 //Can't find backupid from new event row to exisiting row
-                string backupid = dgv[dgv.Columns["ProductionID"].Index, e.RowIndex].Value.ToString();
+                string backupid = dgv[dgv.Columns[ID].Index, e.RowIndex].Value.ToString();
                 string filter = string.Format("[AffectedID] = '{0}'", backupid);
                 AuditTrailBS.Filter = filter;
             }
@@ -167,32 +168,54 @@ namespace ALSTools
             DataGridViewCell productionName = obj["ProductionName", e.RowIndex];
             if (productionName.Value != null)
             {
-
+                string EventType = string.Empty;
                 if (mt.Equals(ModifiedType.Insert))
                 {
-                    //Create events about production
-                    if (string.IsNullOrEmpty(obj["ProductionName", e.RowIndex].Value.ToString()))
-                    {
-                        frm.AddGeneralEvent(string.Format("New production: {0}", obj["ProductionID", e.RowIndex].Value), obj["ProductionName", e.RowIndex].Value.ToString());
-                    }
-                    else
-                    {
-                        frm.AddGeneralEvent(string.Format("New production: {0}", obj["ProductionID", e.RowIndex].Value));
-                    }
-
+                    EventType = "New";
                 }
                 else if (mt.Equals(ModifiedType.Update))
                 {
-                    //Create events about updateed production
-                    if (string.IsNullOrEmpty(obj["ProductionName", e.RowIndex].Value.ToString()))
-                    {
-                        frm.AddGeneralEvent(string.Format("Modified production: {0}", obj["ProductionID", e.RowIndex].Value), obj["ProductionName", e.RowIndex].Value.ToString());
-                    }
-                    else
-                    {
-                        frm.AddGeneralEvent(string.Format("Modified production: {0}", obj["ProductionID", e.RowIndex].Value));
-                    }
-                } 
+                    EventType = "Modified";
+                }
+
+                if (!string.IsNullOrEmpty(productionName.Value.ToString()))
+                {
+                    //frm.AddGeneralEvent(string.Format("New production: {0}", obj["ProductionID", e.RowIndex].Value), obj["ProductionName", e.RowIndex].Value.ToString());
+                    frm.AddGeneralEvent(string.Format("{1} production: {0}", obj[ID, e.RowIndex].Value,EventType), productionName.Value.ToString());
+                }
+                else
+                {
+                    frm.AddGeneralEvent(string.Format("{1} production: {0}", obj[ID, e.RowIndex].Value,EventType));
+                }
+
+
+                //if (mt.Equals(ModifiedType.Insert))
+                //{
+                //    //Create events about production
+                //    if (!string.IsNullOrEmpty(productionName.Value.ToString()))
+                //    {
+                //        //frm.AddGeneralEvent(string.Format("New production: {0}", obj["ProductionID", e.RowIndex].Value), obj["ProductionName", e.RowIndex].Value.ToString());
+                //        frm.AddGeneralEvent(string.Format("New production: {0}", obj["ProductionID", e.RowIndex].Value), productionName.Value.ToString());
+                //    }
+                //    else
+                //    {
+                //        frm.AddGeneralEvent(string.Format("New production: {0}", obj["ProductionID", e.RowIndex].Value));
+                //    }
+
+                //}
+                //else if (mt.Equals(ModifiedType.Update))
+                //{
+                //    //Create events about updateed production
+                //    if (!string.IsNullOrEmpty(productionName.Value.ToString()))
+                //    {
+                //        //frm.AddGeneralEvent(string.Format("Modified production: {0}", obj["ProductionID", e.RowIndex].Value), obj["ProductionName", e.RowIndex].Value.ToString());
+                //        frm.AddGeneralEvent(string.Format("Modified production: {0}", obj["ProductionID", e.RowIndex].Value), productionName.Value.ToString());
+                //    }
+                //    else
+                //    {
+                //        frm.AddGeneralEvent(string.Format("Modified production: {0}", obj["ProductionID", e.RowIndex].Value));
+                //    }
+                //} 
             }
         }
         public enum ModifiedType
@@ -212,7 +235,10 @@ namespace ALSTools
             try
             {
                 BindingSource bs = (BindingSource)dgv.DataSource;
-                string tablename = bs.DataMember.ToString();
+                string targettblName = bs.DataMember.ToString();
+                string backuptblName = AuditTrailBS.DataMember.ToString();
+
+
                 DataRowView obj = (DataRowView)bs.Current;
                 DataRow currDR = obj.Row;
                 if (obj.IsNew)
@@ -241,6 +267,8 @@ namespace ALSTools
                     {
                         currDR.Table.Rows.Remove(dr);
                     }
+
+                    modType = ModifiedType.Update;
                 }
 
                 DataTable dt = new DataTable();
@@ -265,23 +293,23 @@ namespace ALSTools
                                 //compare current and original versions
                                 if (!dr[i, DataRowVersion.Current].Equals(dr[i, DataRowVersion.Original]))
                                 {
-                                    string tname = AuditTrailBS.DataMember.ToString();
-                                    DataTable dtbackup = MasterDS.Tables[tname];
+                                    
+                                    DataTable dtbackup = MasterDS.Tables[backuptblName];
                                     DataRow drbackup = dtbackup.NewRow();
                                     //Import row values from old table to new
                                     drbackup["TimeLogged"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
-                                    drbackup["TableName"] = tablename;
+                                    drbackup["TableName"] = targettblName;
                                     drbackup["ColumnName"] = dt.Columns[i].ColumnName;
                                     drbackup["OldValue"] = dr[i, DataRowVersion.Original].ToString();
                                     drbackup["NewValue"] = dr[i, DataRowVersion.Current].ToString();
-                                    drbackup["AffectedID"] = dr["ProductionID"].ToString();
+                                    drbackup["AffectedID"] = dr[ID].ToString();
                                     dtbackup.Rows.Add(drbackup);
                                 }
                             }
                         }
                     }
                 }
-                modType = ModifiedType.Update;
+
             }
             catch (Exception excep)
             {
