@@ -7,8 +7,7 @@ using BusinessLayer.Events;
 using BusinessLayer.Backup;
 using Entity;
 using LogicExtensions;
-
-
+using System.Linq;
 
 namespace ALSTools
 {
@@ -29,10 +28,10 @@ namespace ALSTools
             InitializeComponent();
             GetData();
         }
-        
+
         private void GetData()
         {
-            
+
 
             dtLogs = EventLogic.GetLogIDs();
             if (daEvents == null)
@@ -56,13 +55,13 @@ namespace ALSTools
                 if (MasterDS.Tables.Contains(tblname)) { MasterDS.Tables.Remove(tblname); }
                 daEvents.Fill(EventDS);
                 MasterDS.Merge(EventDS.Tables["Table"], true, MissingSchemaAction.Add);
-                MasterDS.Tables["Table"].TableName =tblname;
+                MasterDS.Tables["Table"].TableName = tblname;
                 EventBS.DataSource = MasterDS;
                 EventBS.DataMember = tblname;
                 this.dgv_Events.DataSource = EventBS;
                 this.dgv_Events.Columns[ID].ReadOnly = true;
 
-                fillcombo();
+                //fillcombo("ProductionName");
             }
             using (DataSet AuditDS = new DataSet())
             {
@@ -129,14 +128,14 @@ namespace ALSTools
             finally
             {
                 EventLogic.TryCommitDB(MasterDS);
-                
+
                 //TryCommitDB();
             }
             GetData();
 
         }
 
-        
+
         private void DisplayAuditTrail(object sender)
         {
             DataGridView obj = sender as DataGridView;
@@ -192,7 +191,7 @@ namespace ALSTools
             das.Clear();
             das.Add(daEvents);
             das.Add(daAuditTrail);
-            
+
 
             bool isNewRecord = false;
             try
@@ -330,30 +329,34 @@ namespace ALSTools
             }
         }
 
-        private void fillcombo()
+        private void fillcombo(string colName)
         {
             //ADD COMBOBOX
             DataGridViewComboBoxColumn combocol = new DataGridViewComboBoxColumn();
-            this.dgv_Events.Columns["ProductionName"].Name = "txtProductionName";
-            
-            combocol.HeaderText = "ProductionName";
-            combocol.Name = "ProductionName";
+            this.dgv_Events.Columns[colName].Name = string.Format("txt{0}", colName);
+
+            combocol.HeaderText = colName;
+            combocol.Name = colName;
             combocol.DataSource = EventLogic.GetLogIDs();
             combocol.ValueMember = "LogID";
             this.dgv_Events.Columns.Add(combocol);
-            List<string> rowval = new List<string>();
 
-            
+
             foreach (DataGridViewRow dr in this.dgv_Events.Rows)
             {
-                dr.Cells["ProductionName"].Value = dr.Cells["txtProductionName"].Value;
+
+                {
+                    dr.Cells[colName].Value = dr.Cells[string.Format("txt{0}", colName)].Value;
+                }
                 //rowval.Add(dr["ProductionName"].ToString());
+
             }
+            this.dgv_Events.EndEdit();
             //combocol.Items.AddRange(rowval.ToArray());
-            
+
 
             //Need to trigger change value to original productioname column
-            
+
         }
 
         private void txt_ProductionID_TextChanged(object sender, EventArgs e)
@@ -441,7 +444,7 @@ namespace ALSTools
         {
             DisplayAuditTrail(sender, e);
         }
-       
+
         private void dgv_Events_SelectionChanged(object sender, EventArgs e)
         {
             DisplayAuditTrail(sender);
@@ -452,6 +455,25 @@ namespace ALSTools
             this.Hide();
         }
 
-        
+        private void dgv_Events_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+        {
+            string header = this.dgv_Events.CurrentCell.OwningColumn.HeaderText;
+            if (header.Equals("ProductionName"))
+            {
+                TextBox auto = e.Control as TextBox;
+                if (auto != null)
+                {
+                    auto.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+                    auto.AutoCompleteSource = AutoCompleteSource.CustomSource;
+                    AutoCompleteStringCollection data = new AutoCompleteStringCollection();
+                    DataTable dt = EventLogic.GetLogIDs();
+                    List<string> obj = dt.AsEnumerable().Where(r=>r.Field<string>("LogID") != null).Select(r => r.Field<string>("LogID")).ToList();
+
+                    data.AddRange(obj.ToArray());
+                    auto.AutoCompleteCustomSource = data;
+
+                }
+            }
+        }
     }
 }
