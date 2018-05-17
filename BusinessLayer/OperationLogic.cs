@@ -85,6 +85,8 @@ namespace BusinessLayer
             }
         }
     }
+
+
 }
 
 
@@ -189,21 +191,15 @@ namespace BusinessLayer.Events
 
             IDbDataAdapter da;
             using (EventDAL obj = new EventDAL())
-            {
-                da = obj.AdaptEventBackup();
-            }
+            { da = obj.AdaptEventBackup(); }
             return da;
         }
 
         public static DataTable GetLogIDs()
         {
-
             DataTable da;
             using (EventDAL obj = new EventDAL())
-            {
-                da = obj.ReadAvailableLogs();
-
-            }
+            { da = obj.ReadAvailableLogs(); }
             return da;
         }
 
@@ -246,7 +242,7 @@ namespace BusinessLayer.Backup
                 //using (BackupDAL obj = new BackupDAL())
                 //{
                 //    da = obj.GetAdapter();
-                    
+
                 //}
 
                 Adapter = da;

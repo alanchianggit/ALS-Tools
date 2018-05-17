@@ -89,7 +89,8 @@
             this.dgv_Events.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Events_CellClick);
             this.dgv_Events.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Events_CellEndEdit);
             this.dgv_Events.CellValidating += new System.Windows.Forms.DataGridViewCellValidatingEventHandler(this.dgv_Events_CellValidating);
-            this.dgv_Events.EditingControlShowing += new System.Windows.Forms.DataGridViewEditingControlShowingEventHandler(this.dgv_Events_EditingControlShowing);
+            //this.dgv_Events.EditingControlShowing += new System.Windows.Forms.DataGridViewEditingControlShowingEventHandler(this.dgv_Events_EditingControlShowing);
+            this.dgv_Events.EditingControlShowing += base.DataGridViewAutoCompleteText;
             this.dgv_Events.SelectionChanged += new System.EventHandler(this.dgv_Events_SelectionChanged);
             // 
             // dgv_AuditTrail
@@ -124,7 +125,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txt_SearchPhrase.Location = new System.Drawing.Point(63, 37);
             this.txt_SearchPhrase.Name = "txt_SearchPhrase";
-            this.txt_SearchPhrase.Size = new System.Drawing.Size(1312, 20);
+            this.txt_SearchPhrase.Size = new System.Drawing.Size(724, 20);
             this.txt_SearchPhrase.TabIndex = 9;
             this.txt_SearchPhrase.TextChanged += new System.EventHandler(this.txt_SearchPhrase_TextChanged);
             // 
@@ -176,6 +177,9 @@
             this.Name = "frm_Event";
             this.Text = "Events";
             this.DoubleClick += new System.EventHandler(this.frm_Event_DoubleClick);
+            this.MouseUp += base.FormMouseUp;
+            this.MouseDown += base.FormMouseDown;
+            this.MouseMove += base.FormMouseMove;
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Events)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_AuditTrail)).EndInit();
             this.ResumeLayout(false);

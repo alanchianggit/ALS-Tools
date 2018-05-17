@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using DAL.Factory;
 using Auth;
+using System.Data;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ALSTools
 {
@@ -49,6 +46,8 @@ namespace ALSTools
         {
             string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
 
+            //ShowForm(strType);
+
             if (!strType.Contains("Analysis_Management") || frm == null || frm.IsDisposed)
             {
                 //frm = new Analysis_Management();
@@ -60,6 +59,28 @@ namespace ALSTools
             }
             ShowChildForm(frm);
             
+        }
+
+        private void ShowForm(string frmName)
+        {
+            if (frm == null || frm.IsDisposed)            { return;  }
+
+            if (!frmName.Contains("Analysis_Management"))
+            { frm = Analysis_Management.GetForm; }
+            else 
+            {
+
+            }
+            
+            if (!frmName.Contains("Analysis_Management") || frm == null || frm.IsDisposed)
+            {
+                //frm = new Analysis_Management();
+                frm = Analysis_Management.GetForm;
+            }
+            else
+            {
+                frm.WindowState = FormWindowState.Normal;
+            }
         }
 
         public void ClickEvent()
@@ -171,6 +192,7 @@ namespace ALSTools
         }
     }
 }
+
 namespace ALSTools
 {
     public partial class BaseOperationForm : Form
@@ -209,5 +231,36 @@ namespace ALSTools
             Close();
         }
 
+
+        protected void DataGridViewAutoCompleteText(object sender, DataGridViewEditingControlShowingEventArgs e)
+        {
+            DataGridView dgv = sender as DataGridView;
+            string header = dgv.CurrentCell.OwningColumn.HeaderText;
+            TextBox txtCell = e.Control as TextBox;
+            if (dgv.Parent.ToString().Contains("Event"))
+            {
+                //switch case for different column
+                if (header.Equals("LogName"))
+                {
+                    if (txtCell != null)
+                    {
+                        txtCell.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+                        txtCell.AutoCompleteSource = AutoCompleteSource.CustomSource;
+                        AutoCompleteStringCollection data = new AutoCompleteStringCollection();
+                        //get logid
+                        //DataTable dt = BusinessLayer.Events.EventLogic.GetLogIDs();
+                        List<string> obj = BusinessLayer.Events.EventLogic.GetLogIDs().AsEnumerable().Where(r => r.Field<string>("LogID") != null).Select(r => r.Field<string>("LogID")).ToList();
+
+                        data.AddRange(obj.ToArray());
+                        txtCell.AutoCompleteCustomSource = data;
+
+                    }
+                }
+            }
+            else if (dgv.Parent.ToString().Contains("Production"))
+            {
+
+            }
+        }
     }
 }

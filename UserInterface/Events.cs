@@ -455,25 +455,5 @@ namespace ALSTools
             this.Hide();
         }
 
-        private void dgv_Events_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
-        {
-            string header = this.dgv_Events.CurrentCell.OwningColumn.HeaderText;
-            if (header.Equals("ProductionName"))
-            {
-                TextBox auto = e.Control as TextBox;
-                if (auto != null)
-                {
-                    auto.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-                    auto.AutoCompleteSource = AutoCompleteSource.CustomSource;
-                    AutoCompleteStringCollection data = new AutoCompleteStringCollection();
-                    DataTable dt = EventLogic.GetLogIDs();
-                    List<string> obj = dt.AsEnumerable().Where(r=>r.Field<string>("LogID") != null).Select(r => r.Field<string>("LogID")).ToList();
-
-                    data.AddRange(obj.ToArray());
-                    auto.AutoCompleteCustomSource = data;
-
-                }
-            }
-        }
     }
 }
