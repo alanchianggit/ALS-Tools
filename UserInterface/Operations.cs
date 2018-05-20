@@ -11,7 +11,7 @@ namespace ALSTools
 {
     public partial class Operations : Form
     {
-        
+
         private static Operations inst;
         public static Operations Instance
         {
@@ -58,20 +58,20 @@ namespace ALSTools
                 frm.WindowState = FormWindowState.Normal;
             }
             ShowChildForm(frm);
-            
+
         }
 
         private void ShowForm(string frmName)
         {
-            if (frm == null || frm.IsDisposed)            { return;  }
+            if (frm == null || frm.IsDisposed) { return; }
 
             if (!frmName.Contains("Analysis_Management"))
             { frm = Analysis_Management.GetForm; }
-            else 
+            else
             {
 
             }
-            
+
             if (!frmName.Contains("Analysis_Management") || frm == null || frm.IsDisposed)
             {
                 //frm = new Analysis_Management();
@@ -90,7 +90,7 @@ namespace ALSTools
 
         private void ShowChildForm(Form fm)
         {
-            
+
             fm.MdiParent = this;
             fm.Show();
             fm.BringToFront();
@@ -202,7 +202,7 @@ namespace ALSTools
         {
 
         }
-        protected  void FormMouseDown(object sender, MouseEventArgs e)
+        protected void FormMouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -237,29 +237,56 @@ namespace ALSTools
             DataGridView dgv = sender as DataGridView;
             string header = dgv.CurrentCell.OwningColumn.HeaderText;
             TextBox txtCell = e.Control as TextBox;
+            List<string> obj = new List<string>();
             if (dgv.Parent.ToString().Contains("Event"))
             {
-                //switch case for different column
-                if (header.Equals("LogName"))
+                switch (header)
                 {
-                    if (txtCell != null)
-                    {
-                        txtCell.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-                        txtCell.AutoCompleteSource = AutoCompleteSource.CustomSource;
-                        AutoCompleteStringCollection data = new AutoCompleteStringCollection();
-                        //get logid
-                        //DataTable dt = BusinessLayer.Events.EventLogic.GetLogIDs();
-                        List<string> obj = BusinessLayer.Events.EventLogic.GetLogIDs().AsEnumerable().Where(r => r.Field<string>("LogID") != null).Select(r => r.Field<string>("LogID")).ToList();
-
-                        data.AddRange(obj.ToArray());
-                        txtCell.AutoCompleteCustomSource = data;
-
-                    }
+                    case "LogName":
+                        obj = BusinessLayer.Events.EventLogic.GetLogIDList();
+                        break;
+                    case "ProductionName":
+                        obj = BusinessLayer.BaseLogLogic.GetProductionList();
+                        break;
+                    case "User":
+                        obj.Add(Auth.AuthEntity.Username);
+                        obj.Add(Environment.UserName);
+                        break;
+                    case "Terminal":
+                        obj.Add(Environment.GetEnvironmentVariable("ComputerName"));
+                        break;
+                    default:
+                        break;
                 }
             }
             else if (dgv.Parent.ToString().Contains("Production"))
             {
+                switch (header)
+                {
+                    case "EqpName":
+                        obj = BusinessLayer.BaseLogLogic.GetLogIDList();
+                        break;
+                    case "Method":
+                        obj = BusinessLayer.BaseLogLogic.GetMethodList();
+                        break;
+                    default:
+                        break;
+                }
+            }
 
+            SetAutoComplete(txtCell, obj);
+        }
+
+        private static void SetAutoComplete(TextBox txtCell, List<string> list)
+        {
+            if (txtCell != null)
+            {
+                txtCell.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+                txtCell.AutoCompleteSource = AutoCompleteSource.CustomSource;
+                AutoCompleteStringCollection data = new AutoCompleteStringCollection();
+
+                data.AddRange(list.ToArray());
+                txtCell.AutoCompleteCustomSource = data;
             }
         }
     }

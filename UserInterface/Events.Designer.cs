@@ -146,8 +146,8 @@
             this.cmb_InstrumentFilter.Name = "cmb_InstrumentFilter";
             this.cmb_InstrumentFilter.Size = new System.Drawing.Size(129, 21);
             this.cmb_InstrumentFilter.TabIndex = 11;
-            this.cmb_InstrumentFilter.SelectedIndexChanged += new System.EventHandler(this.cmb_InstrumentFilter_SelectedIndexChanged);
-            this.cmb_InstrumentFilter.TextChanged += new System.EventHandler(this.cmb_InstrumentFilter_SelectedIndexChanged);
+            //this.cmb_InstrumentFilter.SelectedIndexChanged += new System.EventHandler(this.cmb_InstrumentFilter_SelectedIndexChanged);
+            //this.cmb_InstrumentFilter.TextChanged += new System.EventHandler(this.cmb_InstrumentFilter_SelectedIndexChanged);
             // 
             // Label_InstFilter
             // 

@@ -99,8 +99,8 @@ namespace DAL.Factory
 
     public class DataLayer : IDisposable
     {
-        
-        
+
+
         //create new Lists for colum names and parameters
         //public static List<string> FieldNames = new List<string>();
         public static List<string> FieldNames = new List<string>();
@@ -133,7 +133,7 @@ namespace DAL.Factory
             }
             set
             {
-                
+
                 Settings.Default.DbPath = value;
             }
         }
@@ -152,8 +152,8 @@ namespace DAL.Factory
 
         public DataLayer()
         {
-            
-            
+
+
         }
 
 
@@ -772,28 +772,20 @@ namespace DAL.Productions
     using DAL.Factory;
     using DAL.Backup;
 
-    public class ProductionDAL :IDisposable
+    public class ProductionDAL : BaseDAL, IDisposable
     {
         private const string _tableName = "[tbl_Production]";
-        public static ProductionDAL Instance = new ProductionDAL();
-        public void Reset()
+        public static new ProductionDAL Instance = new ProductionDAL();
+        public new void Reset()
         {
             Instance = new ProductionDAL();
         }
 
         public ProductionDAL()
         {
-            if (DataLayer.ActiveConn == null)
-            {
-                DataLayer.CreateConnection();
-            }
-
-            DataLayer.ExceptionFields.Clear();
-            DataLayer.FieldValues.Clear();
-            DataLayer.FieldNames.Clear();
-
+            Initialize();
         }
-        
+
         private string UpdateClause
         {
             get
@@ -823,7 +815,7 @@ namespace DAL.Productions
 
         public IDbDataAdapter GetAdapter()
         {
-            ProductionEntity obj = new ProductionEntity ();
+            ProductionEntity obj = new ProductionEntity();
             IDbDataAdapter da = DataLayer.CreateAdapter();
 
 
@@ -886,20 +878,11 @@ namespace DAL.Productions
             return da;
         }
 
-        //private DataTable GetDataTable(ProductionEntity prod)
-        //{
-        //    DataTable dt = new DataTable();
-        //    string strSQL = string.Format("SELECT * FROM {0} WHERE [ProductionName]='{1}'", _tableName, prod.ProductionName);
-        //    dt = DataLayer.QueryTable(strSQL);
-        //    return dt;
-
-        //}
-        
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
@@ -931,51 +914,48 @@ namespace DAL.Productions
         }
         #endregion
 
-        
-        public DataTable GetAvailableLogs()
-        {
-            DataTable dt = new DataTable();
-            dt = DataLayer.QueryTable(string.Format("SELECT [ID],[LogID] FROM [tbl_AvailableLogs] WHERE [Department]='ICP-MS'"));
-            return dt;
-        }
 
-        public DataTable GetProductionIDs(string EqpFilter)
-        {
-            DataTable dt = new DataTable();
-            if (EqpFilter.Equals(string.Empty))
-            {
-                EqpFilter = string.Empty;
-            }
-            else
-            {
-                EqpFilter = string.Format(" AND [EqpName] = '{0}'", EqpFilter);
-            }
+        //public DataTable GetAvailableLogs()
+        //{
+        //    DataTable dt = new DataTable();
+        //    dt = DataLayer.QueryTable(string.Format("SELECT [ID],[LogID] FROM [tbl_AvailableLogs] WHERE [Department]='ICP-MS'"));
+        //    return dt;
+        //}
 
-            string strSQL = string.Format("SELECT [ProductionName] FROM [tbl_Production] WHERE [ProductionName] IN (SELECT [ProductionName] FROM [tbl_Production]){0} ORDER BY [ProductionName]", EqpFilter);
-            dt = DataLayer.QueryTable(strSQL);
+        //public DataTable GetProductionIDs(string EqpFilter)
+        //{
+        //    DataTable dt = new DataTable();
+        //    if (EqpFilter.Equals(string.Empty))
+        //    {
+        //        EqpFilter = string.Empty;
+        //    }
+        //    else
+        //    {
+        //        EqpFilter = string.Format(" AND [EqpName] = '{0}'", EqpFilter);
+        //    }
 
-            return dt;
-        }
+        //    string strSQL = string.Format("SELECT [ProductionName] FROM [tbl_Production] WHERE [ProductionName] IN (SELECT [ProductionName] FROM [tbl_Production]){0} ORDER BY [ProductionName]", EqpFilter);
+        //    dt = DataLayer.QueryTable(strSQL);
+
+        //    return dt;
+        //}
 
     }
-    
-}
 
-namespace DAL.Events
+}
+namespace DAL
 {
-    using DAL.Backup;
     using DAL.Factory;
 
-    public class EventDAL: IDisposable
+    public class BaseDAL : IDisposable
     {
-        public const string TableName = "[tbl_Events]";
-        public static EventDAL Instance = new EventDAL();
+        public static BaseDAL Instance = new BaseDAL();
         public void Reset()
         {
-            Instance = new EventDAL();
+            Instance = new BaseDAL();
         }
 
-        public EventDAL()
+        public void Initialize()
         {
             if (DataLayer.ActiveConn == null)
             {
@@ -985,7 +965,136 @@ namespace DAL.Events
             DataLayer.ExceptionFields.Clear();
             DataLayer.FieldValues.Clear();
             DataLayer.FieldNames.Clear();
+        }
+        public BaseDAL()
+        {
+            Initialize();
+        }
+        public DataTable GetMethods()
+        {
+            DataTable dt = new DataTable("Methods");
+            DataRow dr = dt.NewRow();
+            for (int i = 0; i < dt.Columns.Count; i++)
+            {
+                dr[i] = null;
+            }
+            dt.Rows.Add(dr);
+            dr.EndEdit();
 
+            string strSQL = string.Format("SELECT DISTINCT [Method] FROM {0} ORDER BY [Method]", "[tbl_Method]");
+            IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
+            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
+            {
+                reader.Read();
+                dt.Load(reader, LoadOption.PreserveChanges);
+            }
+            return dt;
+
+        }
+
+        public DataTable ReadAvailableProductionNames()
+        {
+            DataTable dt = new DataTable("AvailableProductionNames");
+            DataRow dr = dt.NewRow();
+            for (int i = 0; i < dt.Columns.Count; i++)
+            {
+                dr[i] = null;
+            }
+            dt.Rows.Add(dr);
+            dr.EndEdit();
+
+            string strSQL = string.Format("SELECT DISTINCT [ProductionName] FROM {0} ORDER BY [ProductionName]", "[tbl_Production]");
+            IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
+            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
+            {
+                reader.Read();
+                dt.Load(reader, LoadOption.PreserveChanges);
+            }
+            return dt;
+
+        }
+
+        public DataTable ReadAvailableLogs()
+        {
+            DataTable dt = new DataTable("AvailableLogs");
+            DataRow dr = dt.NewRow();
+            for (int i = 0; i < dt.Columns.Count; i++)
+            {
+                dr[i] = null;
+            }
+            dt.Rows.Add(dr);
+            dr.EndEdit();
+
+            string strSQL = string.Format("SELECT [LogID],[Department] FROM {0} ORDER BY [LogID]", "[tbl_AvailableLogs]");
+            IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
+            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
+            {
+                reader.Read();
+                dt.Load(reader, LoadOption.PreserveChanges);
+            }
+            return dt;
+
+        }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~BaseDAL() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
+
+
+    }
+
+}
+
+
+namespace DAL.Events
+{
+
+    using DAL.Backup;
+    using DAL.Factory;
+
+    public class EventDAL : BaseDAL, IDisposable
+    {
+        public const string TableName = "[tbl_Events]";
+        public static new EventDAL Instance = new EventDAL();
+        public new void Reset()
+        {
+            Instance = new EventDAL();
+        }
+
+        public EventDAL()
+        {
+            Initialize();
         }
 
         private string UpdateClause
@@ -1070,35 +1179,14 @@ namespace DAL.Events
             IDbDataAdapter da = BackupDAL.Instance.GetAdapter();
             return da;
         }
-        
 
-        public DataTable ReadAvailableLogs()
-        {
-            DataTable dt = new DataTable("AvailableLogs");
-            DataRow dr = dt.NewRow();
-            for (int i = 0; i < dt.Columns.Count; i++)
-            {
-                dr[i] = null;
-            }
-            dt.Rows.Add(dr);
-            dr.EndEdit();
 
-            string strSQL = string.Format("SELECT [LogID],[Department] FROM {0} ORDER BY [LogID]", "[tbl_AvailableLogs]");
-            IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
-            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
-            {
-                reader.Read();
-                dt.Load(reader, LoadOption.PreserveChanges);
-            }
-            return dt;
-
-        }
 
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
@@ -1132,7 +1220,7 @@ namespace DAL.Events
         #endregion
     }
 
-    
+
 }
 
 namespace DAL.Backup

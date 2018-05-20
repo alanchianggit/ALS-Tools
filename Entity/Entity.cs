@@ -378,7 +378,6 @@ namespace Entity
         protected DateTime _TimeCreated;
         protected string _ProductionName;
         protected int _EventID;
-        protected string _Level;
         protected string _User;
         //protected string _Terminal;
         protected string _Details;
@@ -443,17 +442,6 @@ namespace Entity
             }
         }
 
-        public string Level
-        {
-            get
-            {
-                return _Level;
-            }
-            set
-            {
-                _Level = value;
-            }
-        }
 
         public string User
         {

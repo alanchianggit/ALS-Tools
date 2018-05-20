@@ -5,6 +5,8 @@ using System.Data;
 
 namespace BusinessLayer
 {
+    using System.Linq;
+    using DAL;
     using DAL.Factory;
     public class BaseLogLogic
     {
@@ -84,6 +86,46 @@ namespace BusinessLayer
                 Console.WriteLine(ex.Message);
             }
         }
+
+        public static DataTable GetLogIDs()
+        {
+            DataTable da;
+            using (BaseDAL obj = new BaseDAL())
+            { da = obj.ReadAvailableLogs(); }
+            return da;
+        }
+        public static DataTable GetProductionNames()
+        {
+            DataTable da;
+            using (BaseDAL obj = new BaseDAL())
+            { da = obj.ReadAvailableProductionNames(); }
+            return da;
+        }
+        public static DataTable GetMethods()
+        {
+            DataTable da;
+            using (BaseDAL obj = new BaseDAL())
+            { da = obj.GetMethods(); }
+            return da;
+        }
+
+        public static List<string> GetMethodList()
+        {
+            List<string> obj = GetMethods().AsEnumerable().Where(r => r.Field<string>("Method") != null).Select(r => r.Field<string>("Method")).ToList();
+            return obj;
+        }
+
+        public static List<string> GetProductionList()
+        {
+            List<string> obj = GetProductionNames().AsEnumerable().Where(r => r.Field<string>("ProductionName") != null).Select(r => r.Field<string>("ProductionName")).ToList();
+            return obj;
+        }
+
+        public static List<string> GetLogIDList()
+        {
+            List<string> obj = GetLogIDs().AsEnumerable().Where(r => r.Field<string>("LogID") != null).Select(r => r.Field<string>("LogID")).ToList();
+            return obj;
+        }
     }
 
 
@@ -146,6 +188,7 @@ namespace BusinessLayer.Productions
 
 namespace BusinessLayer.Events
 {
+    using System.Linq;
     using DAL.Events;
     public class EventLogic : BaseLogLogic
     {
@@ -195,13 +238,32 @@ namespace BusinessLayer.Events
             return da;
         }
 
-        public static DataTable GetLogIDs()
-        {
-            DataTable da;
-            using (EventDAL obj = new EventDAL())
-            { da = obj.ReadAvailableLogs(); }
-            return da;
-        }
+        //public static DataTable GetLogIDs()
+        //{
+        //    DataTable da;
+        //    using (EventDAL obj = new EventDAL())
+        //    { da = obj.ReadAvailableLogs(); }
+        //    return da;
+        //}
+        //public static DataTable GetProductionNames()
+        //{
+        //    DataTable da;
+        //    using (EventDAL obj = new EventDAL())
+        //    { da = obj.ReadAvailableProductionNames(); }
+        //    return da;
+        //}
+
+        //public static List<string> GetProductionList()
+        //{
+        //    List<string> obj = GetProductionNames().AsEnumerable().Where(r => r.Field<string>("ProductionName") != null).Select(r => r.Field<string>("ProductionName")).ToList();
+        //    return obj;
+        //}
+
+        //public static List<string> GetLogIDList()
+        //{
+        //    List<string> obj = GetLogIDs().AsEnumerable().Where(r => r.Field<string>("LogID") != null).Select(r => r.Field<string>("LogID")).ToList();
+        //    return obj;
+        //}
 
     }
 }
@@ -239,11 +301,6 @@ namespace BusinessLayer.Backup
             {
 
                 da = BackupDAL.Instance.GetAdapter();
-                //using (BackupDAL obj = new BackupDAL())
-                //{
-                //    da = obj.GetAdapter();
-
-                //}
 
                 Adapter = da;
                 return da;
