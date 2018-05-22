@@ -61,7 +61,9 @@ namespace ALSTools
                 this.dgv_Events.DataSource = EventBS;
                 this.dgv_Events.Columns[ID].ReadOnly = true;
 
-                //fillcombo("ProductionName");
+                CreateComboColumn("ProductionName");
+
+
             }
             using (DataSet AuditDS = new DataSet())
             {
@@ -188,6 +190,12 @@ namespace ALSTools
 
         private void UpdateDataSet(DataGridView dgv, DataGridViewCellEventArgs e)
         {
+
+            //Need to check for if is combocell and trigger update into textfield instead
+
+
+
+
             das.Clear();
             das.Add(daEvents);
             das.Add(daAuditTrail);
@@ -329,34 +337,41 @@ namespace ALSTools
             }
         }
 
-        private void fillcombo(string colName)
+        private void CreateComboColumn(string colName)
         {
+            string comboColName = string.Format("combo{0}", colName);
             //ADD COMBOBOX
-            DataGridViewComboBoxColumn combocol = new DataGridViewComboBoxColumn();
-            this.dgv_Events.Columns[colName].Name = string.Format("txt{0}", colName);
-
-            combocol.HeaderText = colName;
-            combocol.Name = colName;
-            combocol.DataSource = EventLogic.GetLogIDs();
-            combocol.ValueMember = "LogID";
-            this.dgv_Events.Columns.Add(combocol);
-
-
-            foreach (DataGridViewRow dr in this.dgv_Events.Rows)
+            if (!this.dgv_Events.Columns.Contains(comboColName))
             {
+                DataGridViewComboBoxColumn combocol = new DataGridViewComboBoxColumn();
 
+                combocol.HeaderText = colName;
+                combocol.Name = comboColName;
+                combocol.DataSource = BusinessLayer.BaseLogLogic.GetProductionNames();
+                combocol.ValueMember = colName;
+                combocol.DisplayMember = combocol.ValueMember;
+                //Key property to set in order to display values
+                combocol.DataPropertyName = combocol.ValueMember;
+                combocol.ValueType = typeof(String);
+                this.dgv_Events.Columns.Insert(this.dgv_Events.Columns[colName].Index, combocol);
+                //Hide original field
+                //this.dgv_Events.Columns[this.dgv_Events.Columns[colName].Index].Visible = false;    
+                
+                foreach (DataGridViewRow dr in this.dgv_Events.Rows)
                 {
-                    dr.Cells[colName].Value = dr.Cells[string.Format("txt{0}", colName)].Value;
+                    {
+                        ////BUG: value invalid for datagridviewcombocell when not in items/datasource
+                        try
+                        {
+                            dr.Cells[comboColName].Value = dr.Cells[colName].Value;
+                        }
+                        catch (Exception ex) { Console.WriteLine(ex.Message); }
+                    }
                 }
-                //rowval.Add(dr["ProductionName"].ToString());
+                
+                this.dgv_Events.EndEdit();
 
             }
-            this.dgv_Events.EndEdit();
-            //combocol.Items.AddRange(rowval.ToArray());
-
-
-            //Need to trigger change value to original productioname column
-
         }
 
         private void txt_ProductionID_TextChanged(object sender, EventArgs e)
@@ -370,27 +385,6 @@ namespace ALSTools
             FilterEvents(strFilter);
         }
 
-        private void cmb_InstrumentFilter_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            //ComboBox txtbox = sender as ComboBox;
-            //string value = null;
-            //if (txtbox.SelectedText.Length > 0)
-            //{
-            //    value = txtbox.SelectedValue.ToString();
-            //}
-            //else
-            //{
-            //    value = txtbox.SelectedText;
-            //}
-
-            //if (value.Equals(string.Empty))
-            //{
-            //    string strFilter = string.Format("[LogName] Like '%{0}%'", value);
-            //    FilterEvents(strFilter);
-            //}
-
-
-        }
 
         private void FilterEvents(string value)
         {
