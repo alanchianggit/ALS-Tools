@@ -973,13 +973,13 @@ namespace DAL
         public DataTable GetMethods()
         {
             DataTable dt = new DataTable("Methods");
-            DataRow dr = dt.NewRow();
-            for (int i = 0; i < dt.Columns.Count; i++)
-            {
-                dr[i] = null;
-            }
-            dt.Rows.Add(dr);
-            dr.EndEdit();
+            //DataRow dr = dt.NewRow();
+            //for (int i = 0; i < dt.Columns.Count; i++)
+            //{
+            //    dr[i] = null;
+            //}
+            //dt.Rows.Add(dr);
+            //dr.EndEdit();
 
             string strSQL = string.Format("SELECT DISTINCT [Method] FROM {0} ORDER BY [Method]", "[tbl_Method]");
             IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
@@ -987,6 +987,28 @@ namespace DAL
             {
                 reader.Read();
                 dt.Load(reader, LoadOption.PreserveChanges);
+                //Add empty value
+                DataRow drc = dt.NewRow();
+                dt.Rows.InsertAt(drc, 0);
+            }
+            return dt;
+
+        }
+
+        public DataTable GetUsers()
+        {
+            DataTable dt = new DataTable("Users");
+
+            //Returns all empty values, even select *
+            string strSQL = string.Format("SELECT DISTINCT [Initials] AS [User] FROM {0} ORDER BY [Initials]", "[tbl_Employee]");
+
+            IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
+            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
+            {
+                dt.Load(reader,LoadOption.PreserveChanges);
+                //Add empty value
+                DataRow drc = dt.NewRow();
+                dt.Rows.InsertAt(drc, 0);
             }
             return dt;
 
@@ -995,42 +1017,51 @@ namespace DAL
         public DataTable ReadAvailableProductionNames()
         {
             DataTable dt = new DataTable("AvailableProductionNames");
-            DataRow dr = dt.NewRow();
-            for (int i = 0; i < dt.Columns.Count; i++)
-            {
-                dr[i] = null;
-            }
-            dt.Rows.Add(dr);
-            dr.EndEdit();
 
             string strSQL = string.Format("SELECT DISTINCT [ProductionName] FROM {0} ORDER BY [ProductionName]", "[tbl_Production]");
             IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
             using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
             {
-                reader.Read();
                 dt.Load(reader, LoadOption.PreserveChanges);
+                //Add empty value
+                DataRow drc = dt.NewRow();
+                dt.Rows.InsertAt(drc, 0);
             }
+
+
             return dt;
 
         }
 
+        public DataTable ReadLogs()
+        {
+            DataTable dt = new DataTable("AvailableLogs");
+
+            string strSQL = string.Format("SELECT [LogID] AS [LogName],[Department] FROM {0} ORDER BY [LogID]", "[tbl_AvailableLogs]");
+            IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
+            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
+            {
+                dt.Load(reader, LoadOption.PreserveChanges);
+                //Add empty value
+                DataRow drc = dt.NewRow();
+                dt.Rows.InsertAt(drc, 0);
+            }
+            return dt;
+        }
+
+
         public DataTable ReadAvailableLogs()
         {
             DataTable dt = new DataTable("AvailableLogs");
-            DataRow dr = dt.NewRow();
-            for (int i = 0; i < dt.Columns.Count; i++)
-            {
-                dr[i] = null;
-            }
-            dt.Rows.Add(dr);
-            dr.EndEdit();
 
             string strSQL = string.Format("SELECT [LogID],[Department] FROM {0} ORDER BY [LogID]", "[tbl_AvailableLogs]");
             IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
             using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
             {
-                reader.Read();
                 dt.Load(reader, LoadOption.PreserveChanges);
+                //Add empty value
+                DataRow drc = dt.NewRow();
+                dt.Rows.InsertAt(drc, 0);
             }
             return dt;
 

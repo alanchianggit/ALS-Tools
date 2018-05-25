@@ -38,12 +38,11 @@ namespace BusinessLayer
             {
                 AttachTransaction(listDA);
                 for (int i = 0; i < dataset.Tables.Count; i++)
-                //for (int i = 0; i < MasterDS.Tables.Count; i++)
                 {
                     using (DataSet DS = new DataSet())
                     {
+                        
                         DS.Merge(dataset.Tables[i], true, MissingSchemaAction.Add);
-                        //DS.Merge(MasterDS.Tables[i], true, MissingSchemaAction.Add);
                         DS.Tables[0].TableName = "Table";
                         listDA[i].Update(DS);
                     }
@@ -86,13 +85,20 @@ namespace BusinessLayer
                 Console.WriteLine(ex.Message);
             }
         }
+        public static DataTable GetLogs()
+        {
+            DataTable dt;
+            using (BaseDAL obj = new BaseDAL())
+            { dt = obj.ReadLogs(); }
+            return dt;
+        }
 
         public static DataTable GetLogIDs()
         {
-            DataTable da;
+            DataTable dt;
             using (BaseDAL obj = new BaseDAL())
-            { da = obj.ReadAvailableLogs(); }
-            return da;
+            { dt = obj.ReadAvailableLogs(); }
+            return dt;
         }
         public static DataTable GetProductionNames()
         {
@@ -109,9 +115,22 @@ namespace BusinessLayer
             return da;
         }
 
+        public static DataTable GetUsers()
+        {
+            DataTable da;
+            using (BaseDAL obj = new BaseDAL())
+            { da = obj.GetUsers(); }
+            return da;
+        }
+
         public static List<string> GetMethodList()
         {
             List<string> obj = GetMethods().AsEnumerable().Where(r => r.Field<string>("Method") != null).Select(r => r.Field<string>("Method")).ToList();
+            return obj;
+        }
+        public static List<string> GetUserList()
+        {
+            List<string> obj = GetUsers().AsEnumerable().Where(r => r.Field<string>("User") != null).Select(r => r.Field<string>("User")).ToList();
             return obj;
         }
 

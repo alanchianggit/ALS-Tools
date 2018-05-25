@@ -33,7 +33,7 @@ namespace ALSTools
         {
 
 
-            dtLogs = EventLogic.GetLogIDs();
+            //dtLogs = EventLogic.GetLogIDs();
             if (daEvents == null)
             {
                 daEvents = EventLogic.GetAdapter();
@@ -61,7 +61,9 @@ namespace ALSTools
                 this.dgv_Events.DataSource = EventBS;
                 this.dgv_Events.Columns[ID].ReadOnly = true;
 
-                CreateComboColumn("ProductionName");
+                CreateComboColumn("LogName", BusinessLayer.BaseLogLogic.GetLogs());
+                CreateComboColumn("ProductionName", BusinessLayer.BaseLogLogic.GetProductionNames());
+                CreateComboColumn("User", BusinessLayer.BaseLogLogic.GetUsers());
 
 
             }
@@ -191,9 +193,17 @@ namespace ALSTools
         private void UpdateDataSet(DataGridView dgv, DataGridViewCellEventArgs e)
         {
 
+            //BUG 2nd update works, but not first
+
             //Need to check for if is combocell and trigger update into textfield instead
 
-
+            if (dgv.Columns[e.ColumnIndex].Name.Contains("combo"))
+            {
+                //start editing text field method here
+                int colindex = dgv.Columns[dgv.Columns[e.ColumnIndex].Name.Replace("combo", string.Empty)].Index;
+                //dgv.Rows[e.RowIndex].Cells[colindex].Value = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+                //dgv.EndEdit();
+            }
 
 
             das.Clear();
@@ -204,7 +214,7 @@ namespace ALSTools
             bool isNewRecord = false;
             try
             {
-                //dgv.EndEdit();
+
                 BindingSource bs = (BindingSource)dgv.DataSource;
                 string backuptblName = AuditTrailBS.DataMember.ToString();
                 string targetTblName = bs.DataMember.ToString();
@@ -337,7 +347,7 @@ namespace ALSTools
             }
         }
 
-        private void CreateComboColumn(string colName)
+        private void CreateComboColumn(string colName, DataTable dt)
         {
             string comboColName = string.Format("combo{0}", colName);
             //ADD COMBOBOX
@@ -345,18 +355,24 @@ namespace ALSTools
             {
                 DataGridViewComboBoxColumn combocol = new DataGridViewComboBoxColumn();
 
+                //Set combo-column to original col name so it can replace
                 combocol.HeaderText = colName;
+                //set name to appropriate column name but not replace original
                 combocol.Name = comboColName;
-                combocol.DataSource = BusinessLayer.BaseLogLogic.GetProductionNames();
+                //set datasource
+                combocol.DataSource = dt;
+                //set value member to appropriate column name
                 combocol.ValueMember = colName;
+                //set display member to same column name
                 combocol.DisplayMember = combocol.ValueMember;
-                //Key property to set in order to display values
+                //Key property to set in order to display values, set to original column name
                 combocol.DataPropertyName = combocol.ValueMember;
-                combocol.ValueType = typeof(String);
+                //dEFINES value type
+                combocol.ValueType = this.dgv_Events.Columns[colName].ValueType;
                 this.dgv_Events.Columns.Insert(this.dgv_Events.Columns[colName].Index, combocol);
                 //Hide original field
-                //this.dgv_Events.Columns[this.dgv_Events.Columns[colName].Index].Visible = false;    
-                
+                this.dgv_Events.Columns[this.dgv_Events.Columns[colName].Index].Visible = false;
+
                 foreach (DataGridViewRow dr in this.dgv_Events.Rows)
                 {
                     {
@@ -368,9 +384,9 @@ namespace ALSTools
                         catch (Exception ex) { Console.WriteLine(ex.Message); }
                     }
                 }
-                
-                this.dgv_Events.EndEdit();
 
+                this.dgv_Events.EndEdit();
+                MasterDS.AcceptChanges();
             }
         }
 
@@ -451,3 +467,4 @@ namespace ALSTools
 
     }
 }
+
