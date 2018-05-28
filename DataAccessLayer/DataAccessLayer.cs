@@ -973,13 +973,7 @@ namespace DAL
         public DataTable GetMethods()
         {
             DataTable dt = new DataTable("Methods");
-            //DataRow dr = dt.NewRow();
-            //for (int i = 0; i < dt.Columns.Count; i++)
-            //{
-            //    dr[i] = null;
-            //}
-            //dt.Rows.Add(dr);
-            //dr.EndEdit();
+
 
             string strSQL = string.Format("SELECT DISTINCT [Method] FROM {0} ORDER BY [Method]", "[tbl_Method]");
             IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
@@ -1000,7 +994,7 @@ namespace DAL
             DataTable dt = new DataTable("Users");
 
             //Returns all empty values, even select *
-            string strSQL = string.Format("SELECT DISTINCT [Initials] AS [User] FROM {0} ORDER BY [Initials]", "[tbl_Employee]");
+            string strSQL = string.Format("SELECT DISTINCT [Initials] FROM {0} ORDER BY [Initials]", "[tbl_Employee]");
 
             IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
             using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
@@ -1037,7 +1031,7 @@ namespace DAL
         {
             DataTable dt = new DataTable("AvailableLogs");
 
-            string strSQL = string.Format("SELECT [LogID] AS [LogName],[Department] FROM {0} ORDER BY [LogID]", "[tbl_AvailableLogs]");
+            string strSQL = string.Format("SELECT [LogID],[Department] FROM {0} ORDER BY [LogID]", "[tbl_AvailableLogs]");
             IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
             using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
             {
@@ -1156,7 +1150,7 @@ namespace DAL.Events
             DataLayer.ExceptionFields.Clear();
             DataLayer.ExceptionFields.Add("EventID");
             IDbCommand selectcmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
-            selectcmd.CommandText = string.Format("SELECT [EventID], {1} FROM {0}", TableName, string.Join(",", DataLayer.FieldNames.ToArray()));
+            selectcmd.CommandText = string.Format("SELECT [EventID], {1} FROM {0} ORDER BY [EventID]", TableName, string.Join(",", DataLayer.FieldNames.ToArray()));
             selectcmd.CommandType = CommandType.Text;
             #endregion
 
@@ -1308,7 +1302,7 @@ namespace DAL.Backup
             DataLayer.ExceptionFields.Clear();
             DataLayer.ExceptionFields.Add("BackupID");
             IDbCommand selectcmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
-            selectcmd.CommandText = string.Format("SELECT [BackupID], {1} FROM {0}", TableName, string.Join(",", DataLayer.FieldNames.ToArray()));
+            selectcmd.CommandText = string.Format("SELECT [BackupID], {1} FROM {0} ORDER BY [BackupID]", TableName, string.Join(",", DataLayer.FieldNames.ToArray()));
             selectcmd.CommandType = CommandType.Text;
             #endregion
 

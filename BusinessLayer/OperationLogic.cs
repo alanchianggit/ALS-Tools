@@ -85,15 +85,9 @@ namespace BusinessLayer
                 Console.WriteLine(ex.Message);
             }
         }
-        public static DataTable GetLogs()
-        {
-            DataTable dt;
-            using (BaseDAL obj = new BaseDAL())
-            { dt = obj.ReadLogs(); }
-            return dt;
-        }
 
-        public static DataTable GetLogIDs()
+
+        public static DataTable GetLogs()
         {
             DataTable dt;
             using (BaseDAL obj = new BaseDAL())
@@ -142,7 +136,7 @@ namespace BusinessLayer
 
         public static List<string> GetLogIDList()
         {
-            List<string> obj = GetLogIDs().AsEnumerable().Where(r => r.Field<string>("LogID") != null).Select(r => r.Field<string>("LogID")).ToList();
+            List<string> obj = GetLogs().AsEnumerable().Where(r => r.Field<string>("LogID") != null).Select(r => r.Field<string>("LogID")).ToList();
             return obj;
         }
     }
@@ -170,6 +164,33 @@ namespace BusinessLayer.Productions
             set { _adapter = value; }
         }
 
+        public static new DataTable GetLogs()
+        {
+            DataTable dt = BaseLogLogic.GetLogs();
+            dt.Columns["LogID"].ColumnName = "EqpName";
+            return dt;
+        }
+
+        public static DataTable GetEnder()
+        {
+            DataTable dt = BaseLogLogic.GetUsers();
+            dt.Columns["Initials"].ColumnName = "Ender";
+            return dt;
+        }
+        public static DataTable GetStarter()
+        {
+            DataTable dt = BaseLogLogic.GetUsers();
+            dt.Columns["Initials"].ColumnName = "Starter";
+            return dt;
+        }
+
+        public static new DataTable GetMethods()
+        {
+            DataTable dt = BaseLogLogic.GetMethods();
+
+            return dt;
+
+        }
 
         public static string TableName
         {
@@ -225,6 +246,19 @@ namespace BusinessLayer.Events
         public static string TableName
         {
             get { return _tableName = EventDAL.TableName.Replace("[", string.Empty).Replace("]", string.Empty); }
+        }
+        public static new DataTable GetLogs()
+        {
+            DataTable dt = BaseLogLogic.GetLogs();
+            dt.Columns["LogID"].ColumnName = "LogName";
+            return dt;
+        }
+
+        public static new DataTable GetUsers()
+        {
+            DataTable dt = BaseLogLogic.GetUsers();
+            dt.Columns["Initials"].ColumnName = "User";
+            return dt;
         }
 
         public static IDbDataAdapter GetAdapter()

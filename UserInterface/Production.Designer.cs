@@ -61,7 +61,7 @@
             this.dgv_Production.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Production_CellDoubleClick);
             this.dgv_Production.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Production_CellEndEdit);
             this.dgv_Production.CellValidating += new System.Windows.Forms.DataGridViewCellValidatingEventHandler(this.dgv_Production_CellValidating);
-            this.dgv_Production.EditingControlShowing += base.DataGridViewAutoCompleteText;
+            //this.dgv_Production.EditingControlShowing += base.DataGridViewAutoCompleteText;
             // 
             // dgv_AuditTrail
             // 

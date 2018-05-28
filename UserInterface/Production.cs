@@ -52,6 +52,7 @@ namespace ALSTools
             if (MasterDS.Tables.Count != 0) { MasterDS = new DataSet(); }
             using (DataSet ProductionDS = new DataSet())
             {
+                DataGridView dgv = this.dgv_Production;
                 string tblname = ProductionLogic.TableName;
                 if (MasterDS.Tables.Contains(tblname)) { MasterDS.Tables.Remove(tblname); }
                 daProductions.Fill(ProductionDS);
@@ -59,12 +60,21 @@ namespace ALSTools
                 MasterDS.Tables["Table"].TableName = tblname;
                 ProductionBS.DataSource = MasterDS;
                 ProductionBS.DataMember = tblname;
-                this.dgv_Production.DataSource = ProductionBS;
-                this.dgv_Production.Columns[ID].ReadOnly = true;
+                dgv.DataSource = ProductionBS;
+                dgv.Columns[ID].ReadOnly = true;
+
+
+                CreateComboColumn(dgv, "EqpName", ProductionLogic.GetLogs());
+                CreateComboColumn(dgv, "Starter", ProductionLogic.GetStarter());
+                CreateComboColumn(dgv, "Ender", ProductionLogic.GetEnder());
+                CreateComboColumn(dgv, "Method", ProductionLogic.GetMethods());
+
+                MasterDS.AcceptChanges();
             }
 
             using (DataSet AuditDS = new DataSet())
             {
+                DataGridView dgv = this.dgv_AuditTrail;
                 string tblname = BackupLogic.TableName;
                 if (MasterDS.Tables.Contains(tblname)) { MasterDS.Tables.Remove(tblname); }
                 daAuditTrail.Fill(AuditDS);
@@ -73,10 +83,10 @@ namespace ALSTools
                 MasterDS.Tables["Table"].TableName = tblname;
                 AuditTrailBS.DataSource = MasterDS;
                 AuditTrailBS.DataMember = tblname;
-                this.dgv_AuditTrail.DataSource = AuditTrailBS;
+                dgv.DataSource = AuditTrailBS;
 
-                this.dgv_AuditTrail.Columns["TableName"].Visible = false;
-                this.dgv_AuditTrail.Columns["AffectedID"].Visible = false;
+                dgv.Columns["TableName"].Visible = false;
+                dgv.Columns["AffectedID"].Visible = false;
 
             }
         }

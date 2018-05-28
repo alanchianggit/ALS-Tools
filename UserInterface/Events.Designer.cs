@@ -89,8 +89,7 @@
             this.dgv_Events.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Events_CellClick);
             this.dgv_Events.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Events_CellEndEdit);
             this.dgv_Events.CellValidating += new System.Windows.Forms.DataGridViewCellValidatingEventHandler(this.dgv_Events_CellValidating);
-            //this.dgv_Events.EditingControlShowing += new System.Windows.Forms.DataGridViewEditingControlShowingEventHandler(this.dgv_Events_EditingControlShowing);
-            this.dgv_Events.EditingControlShowing += base.DataGridViewAutoCompleteText;
+            this.dgv_Events.DefaultValuesNeeded += new System.Windows.Forms.DataGridViewRowEventHandler(this.dgv_Events_DefaultValuesNeeded);
             this.dgv_Events.SelectionChanged += new System.EventHandler(this.dgv_Events_SelectionChanged);
             // 
             // dgv_AuditTrail
@@ -146,8 +145,6 @@
             this.cmb_InstrumentFilter.Name = "cmb_InstrumentFilter";
             this.cmb_InstrumentFilter.Size = new System.Drawing.Size(129, 21);
             this.cmb_InstrumentFilter.TabIndex = 11;
-            //this.cmb_InstrumentFilter.SelectedIndexChanged += new System.EventHandler(this.cmb_InstrumentFilter_SelectedIndexChanged);
-            //this.cmb_InstrumentFilter.TextChanged += new System.EventHandler(this.cmb_InstrumentFilter_SelectedIndexChanged);
             // 
             // Label_InstFilter
             // 
@@ -177,9 +174,6 @@
             this.Name = "frm_Event";
             this.Text = "Events";
             this.DoubleClick += new System.EventHandler(this.frm_Event_DoubleClick);
-            this.MouseUp += base.FormMouseUp;
-            this.MouseDown += base.FormMouseDown;
-            this.MouseMove += base.FormMouseMove;
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Events)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_AuditTrail)).EndInit();
             this.ResumeLayout(false);

@@ -49,42 +49,46 @@ namespace ALSTools
 
             if (MasterDS.Tables.Count != 0) { MasterDS = new DataSet(); }
             //New row doesn't update in bindingsource
-            using (DataSet EventDS = new DataSet())
+            using (DataSet ds = new DataSet())
             {
+                DataGridView dgv = this.dgv_Events;
                 string tblname = EventLogic.TableName;
                 if (MasterDS.Tables.Contains(tblname)) { MasterDS.Tables.Remove(tblname); }
-                daEvents.Fill(EventDS);
-                MasterDS.Merge(EventDS.Tables["Table"], true, MissingSchemaAction.Add);
+                daEvents.Fill(ds);
+                MasterDS.Merge(ds.Tables["Table"], true, MissingSchemaAction.Add);
                 MasterDS.Tables["Table"].TableName = tblname;
                 EventBS.DataSource = MasterDS;
                 EventBS.DataMember = tblname;
-                this.dgv_Events.DataSource = EventBS;
-                this.dgv_Events.Columns[ID].ReadOnly = true;
+                dgv.DataSource = EventBS;
+                dgv.Columns[ID].ReadOnly = true;
+                
+                
 
-                CreateComboColumn("LogName", BusinessLayer.BaseLogLogic.GetLogs());
-                CreateComboColumn("ProductionName", BusinessLayer.BaseLogLogic.GetProductionNames());
-                CreateComboColumn("User", BusinessLayer.BaseLogLogic.GetUsers());
+                CreateComboColumn(dgv,"LogName", EventLogic.GetLogs());
+                CreateComboColumn(dgv,"ProductionName", BusinessLayer.BaseLogLogic.GetProductionNames());
+                CreateComboColumn(dgv,"User", EventLogic.GetUsers());
 
-
+                MasterDS.AcceptChanges();
             }
-            using (DataSet AuditDS = new DataSet())
+            using (DataSet ds = new DataSet())
             {
+                DataGridView dgv = this.dgv_AuditTrail;
                 string tblname = BackupLogic.TableName;
                 if (MasterDS.Tables.Contains(tblname)) { MasterDS.Tables.Remove(tblname); }
-                daAuditTrail.Fill(AuditDS);
+                daAuditTrail.Fill(ds);
 
-                MasterDS.Merge(AuditDS.Tables["Table"], true, MissingSchemaAction.Add);
+                MasterDS.Merge(ds.Tables["Table"], true, MissingSchemaAction.Add);
                 MasterDS.Tables["Table"].TableName = tblname;
                 AuditTrailBS.DataSource = MasterDS;
                 AuditTrailBS.DataMember = tblname;
-                this.dgv_AuditTrail.DataSource = AuditTrailBS;
-                this.dgv_AuditTrail.Columns["TableName"].Visible = false;
-                this.dgv_AuditTrail.ReadOnly = true;
-                this.dgv_AuditTrail.Columns["AffectedID"].Visible = false;
+                dgv.DataSource = AuditTrailBS;
+                dgv.Columns["TableName"].Visible = false;
+                dgv.ReadOnly = true;
+                dgv.Columns["AffectedID"].Visible = false;
             }
             using (DataTable dt = new DataTable())
             {
-
+                dtLogs = BusinessLayer.BaseLogLogic.GetLogs();
                 this.cmb_InstrumentFilter.DataSource = dtLogs;
                 this.cmb_InstrumentFilter.ValueMember = "LogID";
                 this.cmb_InstrumentFilter.SelectedIndex = -1;
@@ -120,6 +124,7 @@ namespace ALSTools
                 DataTable dt = MasterDS.Tables[EventLogic.TableName];
                 DataRow dr = dt.NewRow();
                 dr["ProductionName"] = ProdName;
+                dr["Terminal"] = Environment.GetEnvironmentVariable("computername");
                 dr["Details"] = str;
                 dr["LogName"] = "General";
                 dr["TimeCreated"] = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
@@ -185,27 +190,9 @@ namespace ALSTools
             DisplayAuditTrail(sender, e);
         }
 
-        //private bool HasRowAt(DataTable dt, int index)
-        //{
-        //    return dt.Rows.Count <= index;
-        //}
 
         private void UpdateDataSet(DataGridView dgv, DataGridViewCellEventArgs e)
         {
-
-            //BUG 2nd update works, but not first
-
-            //Need to check for if is combocell and trigger update into textfield instead
-
-            if (dgv.Columns[e.ColumnIndex].Name.Contains("combo"))
-            {
-                //start editing text field method here
-                int colindex = dgv.Columns[dgv.Columns[e.ColumnIndex].Name.Replace("combo", string.Empty)].Index;
-                //dgv.Rows[e.RowIndex].Cells[colindex].Value = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
-                //dgv.EndEdit();
-            }
-
-
             das.Clear();
             das.Add(daEvents);
             das.Add(daAuditTrail);
@@ -347,48 +334,51 @@ namespace ALSTools
             }
         }
 
-        private void CreateComboColumn(string colName, DataTable dt)
-        {
-            string comboColName = string.Format("combo{0}", colName);
-            //ADD COMBOBOX
-            if (!this.dgv_Events.Columns.Contains(comboColName))
-            {
-                DataGridViewComboBoxColumn combocol = new DataGridViewComboBoxColumn();
+        //private void CreateComboColumn(DataGridView dgv, string colName, DataTable dt)
+        //{
+        //    string comboColName = string.Format("combo{0}", colName);
+        //    //ADD COMBOBOX
+        //    if (!dgv.Columns.Contains(comboColName))
+        //    {
+        //        DataGridViewComboBoxColumn combocol = new DataGridViewComboBoxColumn();
 
-                //Set combo-column to original col name so it can replace
-                combocol.HeaderText = colName;
-                //set name to appropriate column name but not replace original
-                combocol.Name = comboColName;
-                //set datasource
-                combocol.DataSource = dt;
-                //set value member to appropriate column name
-                combocol.ValueMember = colName;
-                //set display member to same column name
-                combocol.DisplayMember = combocol.ValueMember;
-                //Key property to set in order to display values, set to original column name
-                combocol.DataPropertyName = combocol.ValueMember;
-                //dEFINES value type
-                combocol.ValueType = this.dgv_Events.Columns[colName].ValueType;
-                this.dgv_Events.Columns.Insert(this.dgv_Events.Columns[colName].Index, combocol);
-                //Hide original field
-                this.dgv_Events.Columns[this.dgv_Events.Columns[colName].Index].Visible = false;
+        //        //Set combo-column to original col name so it can replace
+        //        combocol.HeaderText = colName;
+        //        //set name to appropriate column name but not replace original
+        //        combocol.Name = comboColName;
+        //        //set datasource
+        //        combocol.DataSource = dt;
+        //        //set value member to appropriate column name
+        //        combocol.ValueMember = colName;
+        //        //set display member to same column name
+        //        combocol.DisplayMember = combocol.ValueMember;
+        //        //Key property to set in order to display values, set to original column name
+        //        combocol.DataPropertyName = combocol.ValueMember;
+        //        //dEFINES value type
+        //        combocol.ValueType = dgv.Columns[colName].ValueType;
 
-                foreach (DataGridViewRow dr in this.dgv_Events.Rows)
-                {
-                    {
-                        ////BUG: value invalid for datagridviewcombocell when not in items/datasource
-                        try
-                        {
-                            dr.Cells[comboColName].Value = dr.Cells[colName].Value;
-                        }
-                        catch (Exception ex) { Console.WriteLine(ex.Message); }
-                    }
-                }
+        //        //Add combo column to current text column
+        //        dgv.Columns.Insert(dgv.Columns[colName].Index, combocol);
+        //        //Hide original field
+        //        dgv.Columns[dgv.Columns[colName].Index].Visible = false;
+                
 
-                this.dgv_Events.EndEdit();
-                MasterDS.AcceptChanges();
-            }
-        }
+        //        foreach (DataGridViewRow dr in dgv.Rows)
+        //        {
+        //            {
+        //                ////BUG: value invalid for datagridviewcombocell when not in items/datasource
+        //                try
+        //                {
+        //                    dr.Cells[comboColName].Value = dr.Cells[colName].Value;
+        //                }
+        //                catch (Exception ex) { Console.WriteLine(ex.Message); }
+        //            }
+        //        }
+
+        //        dgv.EndEdit();
+        //        MasterDS.AcceptChanges();
+        //    }
+        //}
 
         private void txt_ProductionID_TextChanged(object sender, EventArgs e)
         {
@@ -465,6 +455,11 @@ namespace ALSTools
             this.Hide();
         }
 
+        private void dgv_Events_DefaultValuesNeeded(object sender, DataGridViewRowEventArgs e)
+        {
+            DataGridView dgv = sender as DataGridView;
+            e.Row.Cells["Terminal"].Value = Environment.GetEnvironmentVariable("computername");
+        }
     }
 }
 

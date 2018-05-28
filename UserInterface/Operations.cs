@@ -231,63 +231,118 @@ namespace ALSTools
             Close();
         }
 
-
-        protected void DataGridViewAutoCompleteText(object sender, DataGridViewEditingControlShowingEventArgs e)
+        protected void CreateComboColumn(DataGridView dgv, string colName, DataTable dt)
         {
-            DataGridView dgv = sender as DataGridView;
-            string header = dgv.CurrentCell.OwningColumn.HeaderText;
-            TextBox txtCell = e.Control as TextBox;
-            List<string> obj = new List<string>();
-            if (dgv.Parent.ToString().Contains("Event"))
+            string comboColName = string.Format("combo{0}", colName);
+            //ADD COMBOBOX
+            if (!dgv.Columns.Contains(comboColName))
             {
-                switch (header)
-                {
-                    case "LogName":
-                        obj = BusinessLayer.Events.EventLogic.GetLogIDList();
-                        break;
-                    case "ProductionName":
-                        obj = BusinessLayer.BaseLogLogic.GetProductionList();
-                        break;
-                    case "User":
-                        obj.Add(Auth.AuthEntity.Username);
-                        obj.Add(Environment.UserName);
-                        break;
-                    case "Terminal":
-                        obj.Add(Environment.GetEnvironmentVariable("ComputerName"));
-                        break;
-                    default:
-                        break;
-                }
-            }
-            else if (dgv.Parent.ToString().Contains("Production"))
-            {
-                switch (header)
-                {
-                    case "EqpName":
-                        obj = BusinessLayer.BaseLogLogic.GetLogIDList();
-                        break;
-                    case "Method":
-                        obj = BusinessLayer.BaseLogLogic.GetMethodList();
-                        break;
-                    default:
-                        break;
-                }
-            }
+                DataGridViewComboBoxColumn combocol = new DataGridViewComboBoxColumn();
 
-            SetAutoComplete(txtCell, obj);
+                //Set combo-column to original col name so it can replace
+                combocol.HeaderText = colName;
+                //set name to appropriate column name but not replace original
+                combocol.Name = comboColName;
+                //set datasource
+                combocol.DataSource = dt;
+                //set value member to appropriate column name
+                combocol.ValueMember = colName;
+                //set display member to same column name
+                combocol.DisplayMember = combocol.ValueMember;
+                //Key property to set in order to display values, set to original column name
+                combocol.DataPropertyName = combocol.ValueMember;
+                //dEFINES value type
+                combocol.ValueType = dgv.Columns[colName].ValueType;
+
+                //Add combo column to current text column
+                dgv.Columns.Insert(dgv.Columns[colName].Index, combocol);
+                //Hide original field
+                dgv.Columns[dgv.Columns[colName].Index].Visible = false;
+
+
+                foreach (DataGridViewRow dr in dgv.Rows)
+                {
+                    {
+                        ////BUG: value invalid for datagridviewcombocell when not in items/datasource
+                        try
+                        {
+                            dr.Cells[comboColName].Value = dr.Cells[colName].Value;
+                        }
+                        catch (Exception ex) { Console.WriteLine(ex.Message); }
+                    }
+                }
+
+                dgv.EndEdit();
+                
+            }
         }
 
-        private static void SetAutoComplete(TextBox txtCell, List<string> list)
-        {
-            if (txtCell != null)
-            {
-                txtCell.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-                txtCell.AutoCompleteSource = AutoCompleteSource.CustomSource;
-                AutoCompleteStringCollection data = new AutoCompleteStringCollection();
 
-                data.AddRange(list.ToArray());
-                txtCell.AutoCompleteCustomSource = data;
-            }
+        protected void DataGridViewEditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+
+        {
+            //DataGridView dgv = sender as DataGridView;
+            ////string header = dgv.CurrentCell.OwningColumn.HeaderText;
+            //Type columnType = dgv.CurrentCell.OwningColumn.GetType();
+            //List<string> obj = new List<string>();
+            //if (columnType == typeof(DataGridViewComboBoxColumn))
+            //{
+            //    ComboBox txtCell = e.Control as ComboBox;
+            //    SetAutoComplete(txtCell, obj);
+            //}
+            //if (dgv.Parent.ToString().Contains("Event"))
+            //{
+                //switch (header)
+                //{
+                //    case "LogName":
+                //        obj = BusinessLayer.Events.EventLogic.GetLogIDList();
+                //        break;
+                //    case "ProductionName":
+                //        obj = BusinessLayer.BaseLogLogic.GetProductionList();
+                //        break;
+                //    case "User":
+                //        obj.Add(Auth.AuthEntity.Username);
+                //        obj.Add(Environment.UserName);
+                //        break;
+                //    case "Terminal":
+                //        obj.Add(Environment.GetEnvironmentVariable("ComputerName"));
+                //        break;
+                //    default:
+                //        break;
+                //}
+            //}
+            //else if (dgv.Parent.ToString().Contains("Production"))
+            //{
+                //switch (header)
+                //{
+                //    case "EqpName":
+                //        obj = BusinessLayer.BaseLogLogic.GetLogIDList();
+                //        break;
+                //    case "Method":
+                //        obj = BusinessLayer.BaseLogLogic.GetMethodList();
+                //        break;
+                //    default:
+                //        break;
+                //}
+            //}
+
+            
+        }
+
+        private static void SetAutoComplete(ComboBox txtCell, List<string> list)
+        {
+            txtCell.DropDownStyle = ComboBoxStyle.DropDown;
+
+            
+            //if (txtCell != null)
+            //{
+            //    txtCell.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            //    txtCell.AutoCompleteSource = AutoCompleteSource.CustomSource;
+            //    AutoCompleteStringCollection data = new AutoCompleteStringCollection();
+
+            //    data.AddRange(list.ToArray());
+            //    txtCell.AutoCompleteCustomSource = data;
+            //}
         }
     }
 }
