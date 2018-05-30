@@ -88,6 +88,8 @@
             this.dgv_Events.TabIndex = 7;
             this.dgv_Events.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Events_CellClick);
             this.dgv_Events.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Events_CellEndEdit);
+            this.dgv_Events.CellEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Events_CellEnter);
+            this.dgv_Events.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgv_Events_CellMouseDoubleClick);
             this.dgv_Events.CellValidating += new System.Windows.Forms.DataGridViewCellValidatingEventHandler(this.dgv_Events_CellValidating);
             this.dgv_Events.DefaultValuesNeeded += new System.Windows.Forms.DataGridViewRowEventHandler(this.dgv_Events_DefaultValuesNeeded);
             this.dgv_Events.SelectionChanged += new System.EventHandler(this.dgv_Events_SelectionChanged);
@@ -176,10 +178,14 @@
             this.DoubleClick += new System.EventHandler(this.frm_Event_DoubleClick);
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Events)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_AuditTrail)).EndInit();
+            this.MouseDown += base.FormMouseDown;
+            this.MouseMove += base.FormMouseMove;
+            this.MouseUp += base.FormMouseUp;
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
+
 
         #endregion
         private System.Windows.Forms.Label Label_ProductionIDFilter;

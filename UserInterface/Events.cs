@@ -22,6 +22,9 @@ namespace ALSTools
         private DataTable dtLogs;
         private DataSet MasterDS = EventLogic.MasterDS;
         private const string ID = EventLogic.ID;
+        private DateTimePicker dtp = new DateTimePicker();
+        private DataGridViewCell oldDGC;
+
 
         public frm_Event()
         {
@@ -31,17 +34,8 @@ namespace ALSTools
 
         private void GetData()
         {
-
-
-            //dtLogs = EventLogic.GetLogIDs();
-            if (daEvents == null)
-            {
-                daEvents = EventLogic.GetAdapter();
-            }
-            if (daAuditTrail == null)
-            {
-                daAuditTrail = EventLogic.GetBackupAdapter();
-            }
+            if (daEvents == null) { daEvents = EventLogic.GetAdapter(); }
+            if (daAuditTrail == null) { daAuditTrail = EventLogic.GetBackupAdapter(); }
 
             das.Clear();
             das.Add(daEvents);
@@ -61,12 +55,12 @@ namespace ALSTools
                 EventBS.DataMember = tblname;
                 dgv.DataSource = EventBS;
                 dgv.Columns[ID].ReadOnly = true;
-                
-                
 
-                CreateComboColumn(dgv,"LogName", EventLogic.GetLogs());
-                CreateComboColumn(dgv,"ProductionName", BusinessLayer.BaseLogLogic.GetProductionNames());
-                CreateComboColumn(dgv,"User", EventLogic.GetUsers());
+
+
+                CreateComboColumn(dgv, "LogName", EventLogic.GetLogs());
+                CreateComboColumn(dgv, "ProductionName", BusinessLayer.BaseLogLogic.GetProductionNames());
+                CreateComboColumn(dgv, "User", EventLogic.GetUsers());
 
                 MasterDS.AcceptChanges();
             }
@@ -137,8 +131,6 @@ namespace ALSTools
             finally
             {
                 EventLogic.TryCommitDB(MasterDS);
-
-                //TryCommitDB();
             }
             GetData();
 
@@ -147,6 +139,7 @@ namespace ALSTools
 
         private void DisplayAuditTrail(object sender)
         {
+
             DataGridView obj = sender as DataGridView;
             DataGridViewCell e = obj.CurrentCell;
             if (obj.SelectedCells.Count == 1)
@@ -156,7 +149,6 @@ namespace ALSTools
         }
         private void DisplayAuditTrail(object sender, DataGridViewCell e)
         {
-
             if (e.RowIndex != -1)
             {
                 DataGridView dgv = sender as DataGridView;
@@ -190,8 +182,11 @@ namespace ALSTools
             DisplayAuditTrail(sender, e);
         }
 
-
         private void UpdateDataSet(DataGridView dgv, DataGridViewCellEventArgs e)
+        {
+            UpdateDataSet(dgv);
+        }
+        private void UpdateDataSet(DataGridView dgv)
         {
             das.Clear();
             das.Add(daEvents);
@@ -334,52 +329,6 @@ namespace ALSTools
             }
         }
 
-        //private void CreateComboColumn(DataGridView dgv, string colName, DataTable dt)
-        //{
-        //    string comboColName = string.Format("combo{0}", colName);
-        //    //ADD COMBOBOX
-        //    if (!dgv.Columns.Contains(comboColName))
-        //    {
-        //        DataGridViewComboBoxColumn combocol = new DataGridViewComboBoxColumn();
-
-        //        //Set combo-column to original col name so it can replace
-        //        combocol.HeaderText = colName;
-        //        //set name to appropriate column name but not replace original
-        //        combocol.Name = comboColName;
-        //        //set datasource
-        //        combocol.DataSource = dt;
-        //        //set value member to appropriate column name
-        //        combocol.ValueMember = colName;
-        //        //set display member to same column name
-        //        combocol.DisplayMember = combocol.ValueMember;
-        //        //Key property to set in order to display values, set to original column name
-        //        combocol.DataPropertyName = combocol.ValueMember;
-        //        //dEFINES value type
-        //        combocol.ValueType = dgv.Columns[colName].ValueType;
-
-        //        //Add combo column to current text column
-        //        dgv.Columns.Insert(dgv.Columns[colName].Index, combocol);
-        //        //Hide original field
-        //        dgv.Columns[dgv.Columns[colName].Index].Visible = false;
-                
-
-        //        foreach (DataGridViewRow dr in dgv.Rows)
-        //        {
-        //            {
-        //                ////BUG: value invalid for datagridviewcombocell when not in items/datasource
-        //                try
-        //                {
-        //                    dr.Cells[comboColName].Value = dr.Cells[colName].Value;
-        //                }
-        //                catch (Exception ex) { Console.WriteLine(ex.Message); }
-        //            }
-        //        }
-
-        //        dgv.EndEdit();
-        //        MasterDS.AcceptChanges();
-        //    }
-        //}
-
         private void txt_ProductionID_TextChanged(object sender, EventArgs e)
         {
             TextBox txtbox = sender as TextBox;
@@ -460,6 +409,68 @@ namespace ALSTools
             DataGridView dgv = sender as DataGridView;
             e.Row.Cells["Terminal"].Value = Environment.GetEnvironmentVariable("computername");
         }
+
+        private void dgv_Events_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            DataGridView dgv = sender as DataGridView;
+            if (e.Button == MouseButtons.Left)
+            {
+                if (dgv[e.ColumnIndex, e.RowIndex].OwningColumn.HeaderText.Contains("Time"))
+                {
+                    DateTime datetime;
+                    dtp = new DateTimePicker();
+                    dgv.Controls.Add(dtp);
+                    System.Drawing.Rectangle rect = dgv.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, true);
+
+                    dtp.MaxDate = DateTime.Now;
+                    dtp.MinDate = DateTime.MinValue;
+
+                    dtp.CustomFormat = "yyyy-MM-dd hh:mm:ss tt";
+                    dtp.Format = DateTimePickerFormat.Custom;
+                    dtp.Location = new System.Drawing.Point(rect.X, rect.Y);
+                    dtp.Size = new System.Drawing.Size(rect.Width, rect.Height);
+                    bool success = DateTime.TryParse(dgv.CurrentCell.Value.ToString(), out datetime);
+                    if (success)
+                    {
+                        dtp.Value = datetime;
+                    }
+
+                    dtp.ShowUpDown = false;
+                    dtp.Visible = true;
+                    dtp.Show();
+                    dtp.ValueChanged += Dtp_ValueChanged;
+                    dtp.VisibleChanged += Dtp_VisibleChanged;
+                }
+            }
+        }
+
+        private void Dtp_VisibleChanged(object sender, EventArgs e)
+        {
+            DateTimePicker dtp = sender as DateTimePicker;
+            if (!dtp.Visible)
+            {
+                UpdateDataSet(this.dgv_Events);
+            }
+        }
+
+        private void Dtp_ValueChanged(object sender, EventArgs e)
+        {
+            oldDGC.Value = dtp.Value.ToString();
+        }
+
+
+        private void dgv_Events_CellEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            DataGridView dgv = sender as DataGridView;
+
+            if (dgv.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, true).Location != dtp.Location)
+            {
+                dtp.Visible = false;
+            }
+
+            oldDGC = dgv.CurrentCell;
+        }
+
     }
 }
 

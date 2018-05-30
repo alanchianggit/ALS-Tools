@@ -253,7 +253,6 @@ namespace ALSTools
                 combocol.DataPropertyName = combocol.ValueMember;
                 //dEFINES value type
                 combocol.ValueType = dgv.Columns[colName].ValueType;
-
                 //Add combo column to current text column
                 dgv.Columns.Insert(dgv.Columns[colName].Index, combocol);
                 //Hide original field
@@ -263,17 +262,17 @@ namespace ALSTools
                 foreach (DataGridViewRow dr in dgv.Rows)
                 {
                     {
-                        ////BUG: value invalid for datagridviewcombocell when not in items/datasource
                         try
                         {
-                            dr.Cells[comboColName].Value = dr.Cells[colName].Value;
+                            if (dr.Cells[colName].Value.ToString() != string.Empty && dr.Cells[colName].Value != null)
+                            { dr.Cells[comboColName].Value = dr.Cells[colName].Value; }
                         }
                         catch (Exception ex) { Console.WriteLine(ex.Message); }
                     }
                 }
 
                 dgv.EndEdit();
-                
+
             }
         }
 
@@ -292,48 +291,48 @@ namespace ALSTools
             //}
             //if (dgv.Parent.ToString().Contains("Event"))
             //{
-                //switch (header)
-                //{
-                //    case "LogName":
-                //        obj = BusinessLayer.Events.EventLogic.GetLogIDList();
-                //        break;
-                //    case "ProductionName":
-                //        obj = BusinessLayer.BaseLogLogic.GetProductionList();
-                //        break;
-                //    case "User":
-                //        obj.Add(Auth.AuthEntity.Username);
-                //        obj.Add(Environment.UserName);
-                //        break;
-                //    case "Terminal":
-                //        obj.Add(Environment.GetEnvironmentVariable("ComputerName"));
-                //        break;
-                //    default:
-                //        break;
-                //}
+            //switch (header)
+            //{
+            //    case "LogName":
+            //        obj = BusinessLayer.Events.EventLogic.GetLogIDList();
+            //        break;
+            //    case "ProductionName":
+            //        obj = BusinessLayer.BaseLogLogic.GetProductionList();
+            //        break;
+            //    case "User":
+            //        obj.Add(Auth.AuthEntity.Username);
+            //        obj.Add(Environment.UserName);
+            //        break;
+            //    case "Terminal":
+            //        obj.Add(Environment.GetEnvironmentVariable("ComputerName"));
+            //        break;
+            //    default:
+            //        break;
+            //}
             //}
             //else if (dgv.Parent.ToString().Contains("Production"))
             //{
-                //switch (header)
-                //{
-                //    case "EqpName":
-                //        obj = BusinessLayer.BaseLogLogic.GetLogIDList();
-                //        break;
-                //    case "Method":
-                //        obj = BusinessLayer.BaseLogLogic.GetMethodList();
-                //        break;
-                //    default:
-                //        break;
-                //}
+            //switch (header)
+            //{
+            //    case "EqpName":
+            //        obj = BusinessLayer.BaseLogLogic.GetLogIDList();
+            //        break;
+            //    case "Method":
+            //        obj = BusinessLayer.BaseLogLogic.GetMethodList();
+            //        break;
+            //    default:
+            //        break;
+            //}
             //}
 
-            
+
         }
 
         private static void SetAutoComplete(ComboBox txtCell, List<string> list)
         {
             txtCell.DropDownStyle = ComboBoxStyle.DropDown;
 
-            
+
             //if (txtCell != null)
             //{
             //    txtCell.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
