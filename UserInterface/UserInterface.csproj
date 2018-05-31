@@ -119,6 +119,9 @@
     <EmbeddedResource Include="Analysis Management.resx">
       <DependentUpon>Analysis Management.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Archiver.resx">
+      <DependentUpon>Archiver.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Auth.resx">
       <DependentUpon>Auth.cs</DependentUpon>
     </EmbeddedResource>

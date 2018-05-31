@@ -34,31 +34,37 @@
             this.btn_SelectOutPutPath = new System.Windows.Forms.Button();
             this.Label_OutPut = new System.Windows.Forms.Label();
             this.txt_OutPutPath = new System.Windows.Forms.TextBox();
-            this.treeview_Directories = new System.Windows.Forms.TreeView();
             this.btn_SelectDirectory = new System.Windows.Forms.Button();
             this.btn_Compress = new System.Windows.Forms.Button();
             this.chkbox_DeleteWhenComplete = new System.Windows.Forms.CheckBox();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.label_Progress = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
+            this.dgv_folders = new System.Windows.Forms.DataGridView();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_folders)).BeginInit();
             this.SuspendLayout();
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(12, 480);
+            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar1.Location = new System.Drawing.Point(12, 506);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(739, 23);
+            this.progressBar1.Size = new System.Drawing.Size(711, 23);
             this.progressBar1.Step = 1;
             this.progressBar1.TabIndex = 5;
             // 
             // txt_status
             // 
+            this.txt_status.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txt_status.Location = new System.Drawing.Point(12, 280);
             this.txt_status.Multiline = true;
             this.txt_status.Name = "txt_status";
             this.txt_status.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txt_status.Size = new System.Drawing.Size(739, 180);
+            this.txt_status.Size = new System.Drawing.Size(711, 203);
             this.txt_status.TabIndex = 6;
             // 
             // Label_Exclusion
@@ -94,23 +100,14 @@
             this.txt_OutPutPath.Enabled = false;
             this.txt_OutPutPath.Location = new System.Drawing.Point(172, 250);
             this.txt_OutPutPath.Name = "txt_OutPutPath";
-            this.txt_OutPutPath.Size = new System.Drawing.Size(398, 20);
+            this.txt_OutPutPath.Size = new System.Drawing.Size(414, 20);
             this.txt_OutPutPath.TabIndex = 2;
-            // 
-            // treeview_Directories
-            // 
-            this.treeview_Directories.CheckBoxes = true;
-            this.treeview_Directories.Location = new System.Drawing.Point(12, 25);
-            this.treeview_Directories.Name = "treeview_Directories";
-            this.treeview_Directories.Size = new System.Drawing.Size(558, 203);
-            this.treeview_Directories.TabIndex = 10;
-            this.treeview_Directories.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.node_AfterCheck);
             // 
             // btn_SelectDirectory
             // 
-            this.btn_SelectDirectory.Location = new System.Drawing.Point(577, 25);
+            this.btn_SelectDirectory.Location = new System.Drawing.Point(12, 198);
             this.btn_SelectDirectory.Name = "btn_SelectDirectory";
-            this.btn_SelectDirectory.Size = new System.Drawing.Size(126, 30);
+            this.btn_SelectDirectory.Size = new System.Drawing.Size(154, 30);
             this.btn_SelectDirectory.TabIndex = 0;
             this.btn_SelectDirectory.Text = "Add Directories";
             this.btn_SelectDirectory.UseVisualStyleBackColor = true;
@@ -118,9 +115,11 @@
             // 
             // btn_Compress
             // 
-            this.btn_Compress.Location = new System.Drawing.Point(576, 175);
+            this.btn_Compress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn_Compress.Location = new System.Drawing.Point(592, 198);
             this.btn_Compress.Name = "btn_Compress";
-            this.btn_Compress.Size = new System.Drawing.Size(159, 53);
+            this.btn_Compress.Size = new System.Drawing.Size(131, 72);
             this.btn_Compress.TabIndex = 0;
             this.btn_Compress.Text = "Compress All folders in Selected Path";
             this.btn_Compress.UseVisualStyleBackColor = true;
@@ -129,7 +128,7 @@
             // chkbox_DeleteWhenComplete
             // 
             this.chkbox_DeleteWhenComplete.AutoSize = true;
-            this.chkbox_DeleteWhenComplete.Location = new System.Drawing.Point(577, 64);
+            this.chkbox_DeleteWhenComplete.Location = new System.Drawing.Point(175, 206);
             this.chkbox_DeleteWhenComplete.Name = "chkbox_DeleteWhenComplete";
             this.chkbox_DeleteWhenComplete.Size = new System.Drawing.Size(159, 17);
             this.chkbox_DeleteWhenComplete.TabIndex = 3;
@@ -144,25 +143,27 @@
             0,
             0,
             0});
-            this.numericUpDown1.Location = new System.Drawing.Point(604, 111);
+            this.numericUpDown1.Location = new System.Drawing.Point(510, 204);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             100000,
             0,
             0,
             0});
             this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(120, 20);
+            this.numericUpDown1.Size = new System.Drawing.Size(76, 20);
             this.numericUpDown1.TabIndex = 4;
             this.numericUpDown1.Value = new decimal(new int[] {
             100,
             0,
             0,
             0});
+            this.numericUpDown1.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
             // 
             // label_Progress
             // 
+            this.label_Progress.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label_Progress.AutoSize = true;
-            this.label_Progress.Location = new System.Drawing.Point(369, 464);
+            this.label_Progress.Location = new System.Drawing.Point(695, 486);
             this.label_Progress.Name = "label_Progress";
             this.label_Progress.Size = new System.Drawing.Size(24, 13);
             this.label_Progress.TabIndex = 7;
@@ -171,18 +172,29 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(576, 95);
+            this.label1.Location = new System.Drawing.Point(371, 206);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(148, 13);
+            this.label1.Size = new System.Drawing.Size(133, 13);
             this.label1.TabIndex = 1;
-            this.label1.Text = "Skip folders greater than (KB):";
+            this.label1.Text = "Skip folders less than (KB):";
             // 
-            // frm_dm
+            // dgv_folders
+            // 
+            this.dgv_folders.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dgv_folders.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.dgv_folders.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv_folders.Location = new System.Drawing.Point(12, 25);
+            this.dgv_folders.Name = "dgv_folders";
+            this.dgv_folders.Size = new System.Drawing.Size(711, 167);
+            this.dgv_folders.TabIndex = 11;
+            // 
+            // ArchiverForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(759, 509);
-            this.Controls.Add(this.treeview_Directories);
+            this.ClientSize = new System.Drawing.Size(731, 535);
+            this.Controls.Add(this.dgv_folders);
             this.Controls.Add(this.label_Progress);
             this.Controls.Add(this.txt_status);
             this.Controls.Add(this.progressBar1);
@@ -196,9 +208,10 @@
             this.Controls.Add(this.btn_SelectOutPutPath);
             this.Controls.Add(this.btn_SelectDirectory);
             this.MaximizeBox = false;
-            this.Name = "frm_dm";
+            this.Name = "ArchiverForm";
             this.Text = "Archiver";
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_folders)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -211,13 +224,13 @@
         private System.Windows.Forms.Button btn_SelectOutPutPath;
         private System.Windows.Forms.Label Label_OutPut;
         private System.Windows.Forms.TextBox txt_OutPutPath;
-        private System.Windows.Forms.TreeView treeview_Directories;
         private System.Windows.Forms.Button btn_SelectDirectory;
         private System.Windows.Forms.Button btn_Compress;
         private System.Windows.Forms.CheckBox chkbox_DeleteWhenComplete;
         private System.Windows.Forms.NumericUpDown numericUpDown1;
         private System.Windows.Forms.Label label_Progress;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.DataGridView dgv_folders;
     }
 }
 

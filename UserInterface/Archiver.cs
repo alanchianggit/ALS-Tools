@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -13,6 +14,8 @@ namespace Archiver
 {
     public partial class ArchiverForm : Form
     {
+        private DataTable dt = new DataTable();
+
         private static ArchiverForm inst;
         public static ArchiverForm GetForm
         {
@@ -65,12 +68,28 @@ namespace Archiver
         public ArchiverForm()
         {
             InitializeComponent();
-            //this.progressBar1.Step = 1;
+
+            InitializeDataTable();
+            dgv_folders.DataSource = dt;
+
+
+        }
+
+        private void InitializeDataTable()
+        {
+            DataColumn dc;
+            dc = dt.Columns.Add("Folder Name", typeof(String));
+            dc = dt.Columns.Add("Folder Size (KB)", typeof(long));
+            dc = dt.Columns.Add("Modified DateTime", typeof(DateTime));
+            dc = dt.Columns.Add("Zip?", typeof(Boolean));
+
+            dt.Clear();
+
         }
 
         private string SelectFolder()
         {
-            
+
             if (CommonFileDialog.IsPlatformSupported)
             {
                 //Instantiate new common file dialog
@@ -105,18 +124,31 @@ namespace Archiver
 
         private void ListDirectory(TreeView treeView, string path)
         {
-            if (string.IsNullOrEmpty(path) == false)
+            DirectoryInfo rootDirectoryInfo = new DirectoryInfo(path);
+            //Treenode approach
+            treeView.Nodes.Add(CreateDirectoryNode(rootDirectoryInfo));
+        }
+
+        private void ListDirectory(string path)
+        {
+            DirectoryInfo rootDirectoryInfo = new DirectoryInfo(path);
+            //Datatable approach
+            foreach (DirectoryInfo directory in rootDirectoryInfo.GetDirectories())
             {
-                DirectoryInfo rootDirectoryInfo = new DirectoryInfo(path);
-                treeView.Nodes.Add(CreateDirectoryNode(rootDirectoryInfo));
+                //Datatable approach
+                List<DataRow> query = dt.AsEnumerable().Where(q => q.Field<string>("Folder Name") == directory.FullName).ToList();
+                if (query.Count > 0)
+                {
+                    foreach (DataRow d in query) { dt.Rows.Remove(d); }
+                }
+
+                DataRow dr = dt.NewRow();
+                dr["Folder Name"] = directory.FullName;
+                dr["Folder Size (KB)"] = DirSize(directory) / 1024f;
+                if (DirSize(directory) / 1024f > (long)this.numericUpDown1.Value) { dr["Zip?"] = true; }
+                dr["Modified DateTime"] = directory.LastWriteTime;
+                dt.Rows.Add(dr);
             }
-            else
-            {
-                UpdateStatusConsole(string.Format("No Folder selected"));
-
-            }
-
-
         }
 
         private TreeNode CreateDirectoryNode(DirectoryInfo directoryInfo)
@@ -125,6 +157,8 @@ namespace Archiver
             directoryNode.Checked = true;
             foreach (DirectoryInfo directory in directoryInfo.GetDirectories())
             {
+
+                //Treenode approach
                 directoryNode.Nodes.Add(directory.FullName, directory.FullName);
                 directoryNode.Nodes[directory.FullName].Checked = true;
                 CheckedNodes.Add(directoryNode.Nodes[directory.FullName].Text.ToString());
@@ -198,9 +232,21 @@ namespace Archiver
 
         private void btn_SelectDirectory_Click(object sender, EventArgs e)
         {
+            string path = SelectFolder();
 
-            //TreeView Approach 
-            ListDirectory(this.treeview_Directories, SelectFolder());
+            if (!string.IsNullOrEmpty(path))
+            {
+                UpdateStatusConsole(string.Format("Added Input:  {0}", path));
+                //Datatable Approach
+                ListDirectory(path);
+                
+                ////TreeView Approach 
+                //ListDirectory(this.treeview_Directories, path);
+            }
+            else
+            {
+                UpdateStatusConsole(string.Format("No Folder selected."));
+            }
         }
 
         private string ParseFolderNames(string folderName)
@@ -218,7 +264,12 @@ namespace Archiver
             List<Task> taskList = new List<Task>();
 
             //Select all folders from startpath except exclusion folder
-            string[] foldersindirectory = CheckedNodes.ToArray();
+            ////treeview approach
+            //string[] foldersindirectory = CheckedNodes.ToArray();
+
+            //datatable approach
+            string[] foldersindirectory = dt.AsEnumerable().Where(q => q.Field<bool>("Zip?") == true).Select(q => q.Field<string>("Folder Name")).ToArray();
+
             if (foldersindirectory.Length > 0 && this.txt_OutPutPath.ToString() != string.Empty)
             {
                 //set progress bar maximum to the number of directories
@@ -265,7 +316,6 @@ namespace Archiver
                     this.btn_SelectDirectory.Enabled = true;
                     this.chkbox_DeleteWhenComplete.Enabled = true;
                     this.btn_SelectOutPutPath.Enabled = true;
-                    this.treeview_Directories.Enabled = true;
                     //this.txt_OutPutPath.Enabled = true;
                     //updates status to "Complete"
                     UpdateStatusConsole("Completed Zipping.");
@@ -348,7 +398,9 @@ namespace Archiver
 
         private void btn_Compress_Click(object sender, EventArgs e)
         {
-            if (boolOutput == true && boolFoldersCount == true)
+            string[] foldersindirectory = dt.AsEnumerable().Where(q => q.Field<bool>("Zip?") == true).Select(q => q.Field<string>("Folder Name")).ToArray();
+
+            if (foldersindirectory.Length>0 || (boolOutput == true && boolFoldersCount == true))
             {
                 //disables all controls
                 this.btn_Compress.Enabled = false;
@@ -356,14 +408,14 @@ namespace Archiver
                 this.chkbox_DeleteWhenComplete.Enabled = false;
                 this.btn_SelectOutPutPath.Enabled = false;
                 //this.txt_OutPutPath.Enabled = false;
-                this.treeview_Directories.Enabled = false;
                 this.progressBar1.Value = 0;
                 PackFilesInFolder();
             }
             else
             {
-                UpdateStatusConsole("No folders selected or Output path is set incorrectly. Program will exit now.");
+                UpdateStatusConsole("No folders selected or Output path is set incorrectly. Compress cancelled.");
             }
+            
         }
 
         public static long DirSize(DirectoryInfo d)
@@ -390,12 +442,27 @@ namespace Archiver
             {
                 this.txt_OutPutPath.Text = string.Join(",", SelectFolder());
             }
-            catch (System.ArgumentNullException exc)
+            catch (ArgumentNullException exc)
             {
-
                 UpdateStatusConsole(string.Format("Error occurred in {1} module : {0}.", exc.Message, System.Reflection.MethodBase.GetCurrentMethod().Name));
             }
         }
 
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            NumericUpDown nud = sender as NumericUpDown;
+            foreach(DataRow dr in dt.Rows)
+            {
+                long size = (long)dr["Folder Size (KB)"];
+                if (size > nud.Value)
+                {
+                    dr["Zip?"] = true;
+                }
+                else
+                {
+                    dr["Zip?"] = false;
+                }
+            }
+        }
     }
 }
