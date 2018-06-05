@@ -541,7 +541,6 @@ namespace DAL.Factory
                 ActiveConn = null;
                 Instance.Reset();
             }
-            //((IDisposable)Instance).Dispose();
         }
     }
 }

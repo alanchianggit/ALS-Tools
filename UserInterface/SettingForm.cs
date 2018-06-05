@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
+
 namespace RunLoader
 {
     using BusinessLayer.SettingsLogic;
@@ -30,9 +31,10 @@ namespace RunLoader
         public SettingForm()
         {
             InitializeComponent();
-            //MessageBox.Show(SettingsLogic.GetFactorySettings("test"));
-            //SettingsLogic.ChangeFactorySettings("test", "testval" + DateTime.Now.ToString());
-            //MessageBox.Show(SettingsLogic.GetFactorySettings("test"));
+
+            MessageBox.Show(SettingsLogic.GetFactorySettings("test"));
+            SettingsLogic.ChangeFactorySettings("test", "testval" + DateTime.Now.ToString());
+            MessageBox.Show(SettingsLogic.GetFactorySettings("test"));
 
 
         }

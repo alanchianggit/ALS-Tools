@@ -10,7 +10,7 @@ namespace ALSTools
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        
+
         static void Main(string[] args)
         {
             Application.EnableVisualStyles();
@@ -34,13 +34,13 @@ namespace ALSTools
                     default:
                         break;
                 }
-                
+
             }
             else
             {
                 Application.Run(new frm_MainMenu());
             }
-            
+
         }
     }
 

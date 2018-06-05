@@ -40,7 +40,7 @@ namespace ALSTools
 
         private void GetData()
         {
-            
+
 
             daProductions = ProductionLogic.GetAdapter();
             daAuditTrail = ProductionLogic.GetBackupAdapter();
@@ -90,7 +90,7 @@ namespace ALSTools
 
             }
         }
-  
+
 
         private void ShowEvent(object sender, DataGridViewCellEventArgs e)
         {
@@ -170,7 +170,7 @@ namespace ALSTools
             if (CancelEdit) { GetData(); return; }
 
             DataGridView obj = sender as DataGridView;
-            ModifiedType mt = UpdateDataSet(obj, e);
+            ModifiedType mt = UpdateDataSet(obj);
             GetData();
 
 
@@ -190,42 +190,13 @@ namespace ALSTools
 
                 if (!string.IsNullOrEmpty(productionName.Value.ToString()))
                 {
-                    //frm.AddGeneralEvent(string.Format("New production: {0}", obj["ProductionID", e.RowIndex].Value), obj["ProductionName", e.RowIndex].Value.ToString());
-                    frm.AddGeneralEvent(string.Format("{1} production: {0}", obj[ID, e.RowIndex].Value,EventType), productionName.Value.ToString());
+                    frm.AddGeneralEvent(string.Format("{1} production: {0}", obj[ID, e.RowIndex].Value, EventType), productionName.Value.ToString());
                 }
                 else
                 {
-                    frm.AddGeneralEvent(string.Format("{1} production: {0}", obj[ID, e.RowIndex].Value,EventType));
+                    frm.AddGeneralEvent(string.Format("{1} production: {0}", obj[ID, e.RowIndex].Value, EventType));
                 }
 
-
-                //if (mt.Equals(ModifiedType.Insert))
-                //{
-                //    //Create events about production
-                //    if (!string.IsNullOrEmpty(productionName.Value.ToString()))
-                //    {
-                //        //frm.AddGeneralEvent(string.Format("New production: {0}", obj["ProductionID", e.RowIndex].Value), obj["ProductionName", e.RowIndex].Value.ToString());
-                //        frm.AddGeneralEvent(string.Format("New production: {0}", obj["ProductionID", e.RowIndex].Value), productionName.Value.ToString());
-                //    }
-                //    else
-                //    {
-                //        frm.AddGeneralEvent(string.Format("New production: {0}", obj["ProductionID", e.RowIndex].Value));
-                //    }
-
-                //}
-                //else if (mt.Equals(ModifiedType.Update))
-                //{
-                //    //Create events about updateed production
-                //    if (!string.IsNullOrEmpty(productionName.Value.ToString()))
-                //    {
-                //        //frm.AddGeneralEvent(string.Format("Modified production: {0}", obj["ProductionID", e.RowIndex].Value), obj["ProductionName", e.RowIndex].Value.ToString());
-                //        frm.AddGeneralEvent(string.Format("Modified production: {0}", obj["ProductionID", e.RowIndex].Value), productionName.Value.ToString());
-                //    }
-                //    else
-                //    {
-                //        frm.AddGeneralEvent(string.Format("Modified production: {0}", obj["ProductionID", e.RowIndex].Value));
-                //    }
-                //} 
             }
         }
         public enum ModifiedType
@@ -234,7 +205,8 @@ namespace ALSTools
             Update
         }
 
-        private ModifiedType UpdateDataSet(DataGridView dgv, DataGridViewCellEventArgs e)
+
+        private ModifiedType UpdateDataSet(DataGridView dgv)
         {
             das.Clear();
             das.Add(daProductions);
@@ -254,7 +226,7 @@ namespace ALSTools
                 if (obj.IsNew)
                 {
                     isNewRecord = true;
-                    
+
                     currDR.Table.Rows.Add(currDR);
                     currDR.EndEdit();
                     modType = ModifiedType.Insert;
@@ -291,7 +263,7 @@ namespace ALSTools
                     dt = currDR.Table.GetChanges(DataRowState.Modified);
                 }
 
-                if (dt!= null)
+                if (dt != null)
                 {
                     foreach (DataRow dr in dt.Rows)
                     {
@@ -303,7 +275,7 @@ namespace ALSTools
                                 //compare current and original versions
                                 if (!dr[i, DataRowVersion.Current].Equals(dr[i, DataRowVersion.Original]))
                                 {
-                                    
+
                                     DataTable dtbackup = MasterDS.Tables[backuptblName];
                                     DataRow drbackup = dtbackup.NewRow();
                                     //Import row values from old table to new
@@ -334,7 +306,7 @@ namespace ALSTools
 
         }
 
-       
+
 
         private void dgv_Production_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
         {
@@ -355,6 +327,73 @@ namespace ALSTools
         private void dgv_Production_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             ShowEvent(sender, e);
+        }
+
+        private void btn_StartRun_Click(object sender, EventArgs e)
+        {
+
+
+        }
+
+        private void buttonActions(object sender, EventArgs e)
+        {
+            try
+            {
+                Button btn = sender as Button;
+                
+
+                switch (btn.Name)
+                {
+                    case "btn_StartRun":
+                        //Input method for specific button actions
+                        break;
+                    default:
+                        break;
+                }
+
+                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                ProductionLogic.TryCommitDB(MasterDS);
+            }
+        }
+
+        public enum ButtonAction
+        {
+            StartRun,
+            EndRun,
+            RedoRun
+        }
+
+        private void buttonResults(ButtonAction btn)
+        {
+            try
+            {
+                DataRowView drv = this.dgv_Production.CurrentCell.OwningRow.DataBoundItem as DataRowView;
+                switch (drv.Row.Field<string>("Status"))
+                {
+                    case "Completed":
+                    case "Running":
+                    case "Moved":
+                        break;
+                    case null:
+                    case "":
+                    case "Created":
+                        drv.Row.SetField<string>("Status", "Running");
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
     }
 }

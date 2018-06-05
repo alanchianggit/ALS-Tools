@@ -668,7 +668,7 @@ namespace Entity
         protected int _quantity;
         protected string _method;
         protected string _eqpname;
-
+        protected string _status;
 
 
         
@@ -840,6 +840,19 @@ namespace Entity
             {
                 if (value == EqpName) return;
                 _eqpname = value;
+            }
+        }
+
+        public string Status
+        {
+            get
+            {
+                return _status;
+            }
+
+            set
+            {
+                _status = value;
             }
         }
 

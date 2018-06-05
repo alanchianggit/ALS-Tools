@@ -343,8 +343,8 @@ namespace Archiver
             DirectoryInfo di = new DirectoryInfo(folderPath);
 
 
-            if (DirSize(di) / 1024f > sizeThreshold)
-            {
+            //if (DirSize(di) / 1024f > sizeThreshold)
+            //{
                 try
                 {
 
@@ -370,12 +370,12 @@ namespace Archiver
                         UpdateProgress();
                     }
                 }
-            }
-            else
-            {
-                UpdateStatusConsole(string.Format("Folder '{0}' is below size limit, Folder is skipped.", di.Name));
-                UpdateProgress();
-            }
+            //}
+            //else
+            //{
+            //    UpdateStatusConsole(string.Format("Folder '{0}' is below size limit, Folder is skipped.", di.Name));
+            //    UpdateProgress();
+            //}
 
         }
         private void ProcessDelete(DirectoryInfo di)
