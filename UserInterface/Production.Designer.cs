@@ -97,6 +97,7 @@
             this.btn_EndRun.TabIndex = 2;
             this.btn_EndRun.Text = "End";
             this.btn_EndRun.UseVisualStyleBackColor = true;
+            this.btn_EndRun.Click += new System.EventHandler(this.buttonActions);
             // 
             // btn_RedoRun
             // 
@@ -106,6 +107,7 @@
             this.btn_RedoRun.TabIndex = 2;
             this.btn_RedoRun.Text = "Redo";
             this.btn_RedoRun.UseVisualStyleBackColor = true;
+            this.btn_RedoRun.Click += new System.EventHandler(this.buttonActions);
             // 
             // Production
             // 

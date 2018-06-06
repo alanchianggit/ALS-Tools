@@ -329,29 +329,27 @@ namespace ALSTools
             ShowEvent(sender, e);
         }
 
-        private void btn_StartRun_Click(object sender, EventArgs e)
-        {
-
-
-        }
-
         private void buttonActions(object sender, EventArgs e)
         {
+
+
+
+
             try
             {
+                DataRowView drv = this.dgv_Production.CurrentCell.OwningRow.DataBoundItem as DataRowView;
                 Button btn = sender as Button;
-                
+                string result = GetButtonDecisions(btn, drv.Row.Field<string>("Status"));
 
-                switch (btn.Name)
+                if (!string.IsNullOrEmpty(result))
                 {
-                    case "btn_StartRun":
-                        //Input method for specific button actions
-                        break;
-                    default:
-                        break;
+                    drv.Row.SetField<string>("Status", result);
+                }
+                else
+                {
+                    MessageBox.Show(string.Format("Cannot change status because the production is in '{0}' state.", drv.Row.Field<string>("Status")));
                 }
 
-                
             }
             catch (Exception ex)
             {
@@ -363,37 +361,30 @@ namespace ALSTools
             }
         }
 
-        public enum ButtonAction
-        {
-            StartRun,
-            EndRun,
-            RedoRun
-        }
 
-        private void buttonResults(ButtonAction btn)
+        private string GetButtonDecisions(Button btn, string status)
         {
-            try
-            {
-                DataRowView drv = this.dgv_Production.CurrentCell.OwningRow.DataBoundItem as DataRowView;
-                switch (drv.Row.Field<string>("Status"))
-                {
-                    case "Completed":
-                    case "Running":
-                    case "Moved":
-                        break;
-                    case null:
-                    case "":
-                    case "Created":
-                        drv.Row.SetField<string>("Status", "Running");
-                        break;
-                    default:
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+            string btnname = btn.Name;
+            string result;
+
+            //Initialize decision table
+            DataTable dt = new DataTable();
+
+            DataColumn dcstatus = dt.Columns.Add("Status", typeof(string));
+            DataColumn dcstart = dt.Columns.Add(this.btn_StartRun.Name, typeof(string));
+            DataColumn dcend = dt.Columns.Add(this.btn_EndRun.Name, typeof(string));
+            DataColumn dcredo = dt.Columns.Add(this.btn_RedoRun.Name, typeof(string));
+
+            dt.Rows.Add("Completed", null, null, "Redo");
+            dt.Rows.Add("Running", null, "Completed", "Redo");
+            dt.Rows.Add("Redo", "Running", null, null);
+            dt.Rows.Add(null, "Running", null, null);
+            dt.Rows.Add(string.Empty, "Running", null, null);
+            dt.Rows.Add("Created", "Running", null, null);
+
+            result = dt.AsEnumerable().Where(x => x.Field<string>("Status") == status).Select(q => q.Field<string>(btnname)).Single<string>();
+
+            return result;
         }
     }
 }
