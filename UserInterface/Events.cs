@@ -438,7 +438,11 @@ namespace ALSTools
                     dtp.ShowUpDown = false;
                     dtp.Visible = true;
                     dtp.Show();
+
+                    //cannot change value by typing in number of dtp
+                    
                     dtp.ValueChanged += Dtp_ValueChanged;
+                    
                     dtp.VisibleChanged += Dtp_VisibleChanged;
                 }
             }

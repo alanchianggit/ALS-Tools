@@ -41,7 +41,7 @@ namespace BusinessLayer
                 {
                     using (DataSet DS = new DataSet())
                     {
-                        
+
                         DS.Merge(dataset.Tables[i], true, MissingSchemaAction.Add);
                         DS.Tables[0].TableName = "Table";
                         listDA[i].Update(DS);
@@ -117,7 +117,7 @@ namespace BusinessLayer
             return dt;
         }
 
-      
+
     }
 
 
@@ -133,6 +133,8 @@ namespace BusinessLayer.Productions
     {
         private static string _tableName;
         public const string ID = "ProductionID";
+
+
 
         private static IDbDataAdapter _adapter;
 
@@ -166,6 +168,18 @@ namespace BusinessLayer.Productions
         public static new DataTable GetMethods()
         {
             DataTable dt = BaseLogLogic.GetMethods();
+
+            return dt;
+
+        }
+
+        public static DataTable GetTypes()
+        {
+            DataTable dt = new DataTable("ProductionTypes");
+
+            DataColumn dc = dt.Columns.Add("Type", typeof(string));
+            dt.Rows.Add("Online");
+            dt.Rows.Add("Offline");
 
             return dt;
 
@@ -269,7 +283,7 @@ namespace BusinessLayer.Events
             { da = obj.AdaptEventBackup(); }
             return da;
         }
-        
+
     }
 }
 

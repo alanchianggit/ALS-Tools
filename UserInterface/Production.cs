@@ -68,6 +68,7 @@ namespace ALSTools
                 CreateComboColumn(dgv, "Starter", ProductionLogic.GetStarter());
                 CreateComboColumn(dgv, "Ender", ProductionLogic.GetEnder());
                 CreateComboColumn(dgv, "Method", ProductionLogic.GetMethods());
+                CreateComboColumn(dgv, "Type", ProductionLogic.GetTypes());
 
                 MasterDS.AcceptChanges();
             }
@@ -169,40 +170,47 @@ namespace ALSTools
         {
             if (CancelEdit) { GetData(); return; }
 
+            int rowindex = e.RowIndex;
+
             DataGridView obj = sender as DataGridView;
             ModifiedType mt = UpdateDataSet(obj);
             GetData();
 
+            UpdateEvent(obj, mt, rowindex);
 
+        }
+        public enum ModifiedType
+        {
+            Insert,
+            Update
+        }
+
+        private void UpdateEvent(DataGridView obj, ModifiedType type, int rowIndex)
+        {
             frm_Event frm = GetEventForm();
-            DataGridViewCell productionName = obj["ProductionName", e.RowIndex];
+            DataGridViewCell productionName = obj["ProductionName", rowIndex];
             if (productionName.Value != null)
             {
                 string EventType = string.Empty;
-                if (mt.Equals(ModifiedType.Insert))
+                if (type.Equals(ModifiedType.Insert))
                 {
                     EventType = "New";
                 }
-                else if (mt.Equals(ModifiedType.Update))
+                else if (type.Equals(ModifiedType.Update))
                 {
                     EventType = "Modified";
                 }
 
                 if (!string.IsNullOrEmpty(productionName.Value.ToString()))
                 {
-                    frm.AddGeneralEvent(string.Format("{1} production: {0}", obj[ID, e.RowIndex].Value, EventType), productionName.Value.ToString());
+                    frm.AddGeneralEvent(string.Format("{1} production: {0}", obj[ID, rowIndex].Value, EventType), productionName.Value.ToString());
                 }
                 else
                 {
-                    frm.AddGeneralEvent(string.Format("{1} production: {0}", obj[ID, e.RowIndex].Value, EventType));
+                    frm.AddGeneralEvent(string.Format("{1} production: {0}", obj[ID, rowIndex].Value, EventType));
                 }
 
             }
-        }
-        public enum ModifiedType
-        {
-            Insert,
-            Update
         }
 
 
@@ -331,19 +339,20 @@ namespace ALSTools
 
         private void buttonActions(object sender, EventArgs e)
         {
-
-
-
-
             try
             {
                 DataRowView drv = this.dgv_Production.CurrentCell.OwningRow.DataBoundItem as DataRowView;
-                Button btn = sender as Button;
-                string result = GetButtonDecisions(btn, drv.Row.Field<string>("Status"));
+                int rowindex = this.dgv_Production.CurrentCell.OwningRow.Index;
 
-                if (!string.IsNullOrEmpty(result))
+                Button btn = sender as Button;
+                string newStatus = GetButtonDecisions(btn, drv.Row.Field<string>("Status"));
+
+                if (!string.IsNullOrEmpty(newStatus))
                 {
-                    drv.Row.SetField<string>("Status", result);
+                    drv.Row.SetField<string>("Status", newStatus);
+                    ModifiedType mt = UpdateDataSet(dgv_Production);
+                    GetData();
+                    UpdateEvent(dgv_Production, mt, rowindex); 
                 }
                 else
                 {
@@ -355,10 +364,7 @@ namespace ALSTools
             {
                 MessageBox.Show(ex.Message);
             }
-            finally
-            {
-                ProductionLogic.TryCommitDB(MasterDS);
-            }
+            
         }
 
 

@@ -113,17 +113,42 @@ namespace DAL.Factory
 
         public static void ChangeSettings(string arg, string val)
         {
-            Settings.Default.Properties[arg].DefaultValue = val;
-            //ConfigurationManager.AppSettings.Set(arg, val);
-            //var path = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
-            Settings.Default.Save();
+            //Settings.Default.Properties[arg].DefaultValue = val;
+            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            if (!config.AppSettings.Settings.AllKeys.Contains(arg))
+            {
+                config.AppSettings.Settings.Add(arg, val);
+            }
+            else
+            {
+                config.AppSettings.Settings[arg].Value = val;
+            }
+            config.Save(ConfigurationSaveMode.Modified);
         }
-        public static string GetSettings(string arg)
+        public static string GetSetting(string arg)
         {
             string result = string.Empty;
-            result = Settings.Default.Properties[arg].DefaultValue.ToString();
+            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            result = config.AppSettings.Settings[arg].Value.ToString();
             return result;
         }
+
+        public static DataTable GetSettings()
+        {
+            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
+
+            DataTable result = new DataTable("Configurations");
+            result.Columns.Add("Keys", typeof(string));
+            result.Columns.Add("Values", typeof(string));
+            
+            foreach (KeyValueConfigurationElement o in config.AppSettings.Settings)
+            {
+                result.Rows.Add(o.Key, o.Value);                
+            }
+            return result;
+        }
+
 
         public static string defaultDB
         {
@@ -998,7 +1023,7 @@ namespace DAL
             IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
             using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
             {
-                dt.Load(reader,LoadOption.PreserveChanges);
+                dt.Load(reader, LoadOption.PreserveChanges);
                 //Add empty value
                 DataRow drc = dt.NewRow();
                 dt.Rows.InsertAt(drc, 0);

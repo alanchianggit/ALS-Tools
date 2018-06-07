@@ -35,15 +35,12 @@ namespace DataAccessLayer.Properties {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string test {
             get {
                 return ((string)(this["test"]));
-            }
-            set {
-                this["test"] = value;
             }
         }
     }

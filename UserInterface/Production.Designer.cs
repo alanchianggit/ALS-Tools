@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgv_AuditTrail = new System.Windows.Forms.DataGridView();
             this.dgv_Production = new System.Windows.Forms.DataGridView();
             this.btn_StartRun = new System.Windows.Forms.Button();
@@ -59,14 +59,14 @@
             this.dgv_Production.BackgroundColor = System.Drawing.SystemColors.ControlDarkDark;
             this.dgv_Production.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             this.dgv_Production.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.LightGray;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.LightBlue;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.DarkBlue;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgv_Production.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.LightGray;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.LightBlue;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.Color.DarkBlue;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgv_Production.DefaultCellStyle = dataGridViewCellStyle1;
             this.dgv_Production.GridColor = System.Drawing.SystemColors.ButtonShadow;
             this.dgv_Production.Location = new System.Drawing.Point(12, 12);
             this.dgv_Production.Name = "dgv_Production";
@@ -80,20 +80,19 @@
             // 
             // btn_StartRun
             // 
-            this.btn_StartRun.Location = new System.Drawing.Point(12, 340);
+            this.btn_StartRun.Location = new System.Drawing.Point(747, 340);
             this.btn_StartRun.Name = "btn_StartRun";
-            this.btn_StartRun.Size = new System.Drawing.Size(190, 34);
+            this.btn_StartRun.Size = new System.Drawing.Size(81, 34);
             this.btn_StartRun.TabIndex = 2;
             this.btn_StartRun.Text = "Start";
             this.btn_StartRun.UseVisualStyleBackColor = true;
-            //this.btn_StartRun.Click += new System.EventHandler(this.btn_StartRun_Click);
             this.btn_StartRun.Click += new System.EventHandler(this.buttonActions);
             // 
             // btn_EndRun
             // 
-            this.btn_EndRun.Location = new System.Drawing.Point(208, 340);
+            this.btn_EndRun.Location = new System.Drawing.Point(834, 340);
             this.btn_EndRun.Name = "btn_EndRun";
-            this.btn_EndRun.Size = new System.Drawing.Size(190, 34);
+            this.btn_EndRun.Size = new System.Drawing.Size(81, 34);
             this.btn_EndRun.TabIndex = 2;
             this.btn_EndRun.Text = "End";
             this.btn_EndRun.UseVisualStyleBackColor = true;
@@ -101,9 +100,9 @@
             // 
             // btn_RedoRun
             // 
-            this.btn_RedoRun.Location = new System.Drawing.Point(404, 340);
+            this.btn_RedoRun.Location = new System.Drawing.Point(921, 340);
             this.btn_RedoRun.Name = "btn_RedoRun";
-            this.btn_RedoRun.Size = new System.Drawing.Size(190, 34);
+            this.btn_RedoRun.Size = new System.Drawing.Size(81, 34);
             this.btn_RedoRun.TabIndex = 2;
             this.btn_RedoRun.Text = "Redo";
             this.btn_RedoRun.UseVisualStyleBackColor = true;
@@ -125,6 +124,9 @@
             this.Text = "Production";
             ((System.ComponentModel.ISupportInitialize)(this.dgv_AuditTrail)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Production)).EndInit();
+            this.MouseDown += base.FormMouseDown;
+            this.MouseUp += base.FormMouseUp;
+            this.MouseMove += base.FormMouseMove;
             this.ResumeLayout(false);
 
         }

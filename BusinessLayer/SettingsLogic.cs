@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace BusinessLayer.SettingsLogic
 {
+    using System.Data;
     using DAL.Factory;
 
     public static class SettingsLogic
@@ -17,10 +18,19 @@ namespace BusinessLayer.SettingsLogic
 
         }
 
-        public static string GetFactorySettings(string arg)
+        public static string GetFactorySetting(string arg)
         {
-            string result = DataLayer.GetSettings(arg);
+            string result = DataLayer.GetSetting(arg);
             return result;
+        }
+
+        public static DataTable GetFactorySettings()
+        {
+            DataTable dt = new DataTable("Configurations");
+            dt = DataLayer.GetSettings();
+
+            return dt;
+
         }
     }
 }
