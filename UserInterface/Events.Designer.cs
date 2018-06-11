@@ -40,6 +40,7 @@
             this.Label_SearchPhrase = new System.Windows.Forms.Label();
             this.cmb_InstrumentFilter = new System.Windows.Forms.ComboBox();
             this.Label_InstFilter = new System.Windows.Forms.Label();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Events)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_AuditTrail)).BeginInit();
             this.SuspendLayout();
@@ -178,9 +179,6 @@
             this.DoubleClick += new System.EventHandler(this.frm_Event_DoubleClick);
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Events)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_AuditTrail)).EndInit();
-            this.MouseDown += base.FormMouseDown;
-            this.MouseMove += base.FormMouseMove;
-            this.MouseUp += base.FormMouseUp;
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -196,5 +194,6 @@
         private System.Windows.Forms.Label Label_SearchPhrase;
         private System.Windows.Forms.ComboBox cmb_InstrumentFilter;
         private System.Windows.Forms.Label Label_InstFilter;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }

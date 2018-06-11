@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-
-namespace BusinessLayer.SettingsLogic
+﻿namespace BusinessLayer.SettingsLogic
 {
     using System.Data;
     using DAL.Factory;
 
     public static class SettingsLogic
     {
-        public static void ChangeFactorySettings(string argName, string val)
+        public static void SetFactorySettings(string argName, string val)
         {
             DataLayer.ChangeSettings(argName, val);
 

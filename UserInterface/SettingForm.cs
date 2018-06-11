@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
@@ -16,7 +10,7 @@ namespace RunLoader
 
     public partial class SettingForm : Form
     {
-
+        private static BindingSource settingsBS = new BindingSource();
         private static SettingForm inst;
         public static SettingForm GetForm
         {
@@ -31,39 +25,35 @@ namespace RunLoader
         public SettingForm()
         {
             InitializeComponent();
-            
-            //SettingsLogic.ChangeFactorySettings("test", "testval" + DateTime.Now.ToString());
 
-            DataTable configurations = SettingsLogic.GetFactorySettings();
-            this.dataGridView1.DataSource = configurations;
+            DataSet ds = new DataSet();
+            ds.Tables.Add(SettingsLogic.GetFactorySettings());
+            settingsBS.DataSource = ds;
+            settingsBS.DataMember = "Configurations";
+            this.dataGridView1.DataSource = settingsBS;
+
         }
 
         private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-
+            DataGridView dgv = sender as DataGridView;
             try
             {
+                BindingSource bs = (BindingSource)dgv.DataSource;
+                string targetTblName = bs.DataMember.ToString();
 
-                //cannot get datagridview datasource
-                DataTable moddt = (DataTable)this.dataGridView1.DataSource;
-                DataTable dt = moddt.GetChanges(DataRowState.Modified);
-                if(dt.Rows.Count > 0 )
-                {
-                    foreach(DataRow dr in dt.Rows)
-                    {
-                        SettingsLogic.ChangeFactorySettings(dr["Key"].ToString(), dr["Value"].ToString());
-                    }
-                }
+                DataRowView obj = (DataRowView)bs.Current;
+                DataRow currDR = obj.Row;
 
-                
+                SettingsLogic.SetFactorySettings(currDR["Keys"].ToString(), currDR["Values"].ToString());
+
             }
-            catch (Exception)
+            catch (NullReferenceException nullEX)
             {
-
-                throw;
+                MessageBox.Show(nullEX.Message);
             }
 
-            
+
         }
     }
 }

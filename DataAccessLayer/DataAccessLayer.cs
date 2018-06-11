@@ -1,17 +1,17 @@
-﻿using System.Data;
-using System.Data.OleDb;
-using Oracle.ManagedDataAccess.Client;
-using System.Data.Common;
-using System.Data.SqlClient;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System;
-using System.Net;
-using System.Data.SQLite;
-using Entity;
-using System.Reflection;
-using System.Linq;
+using System.Data;
+using System.Data.Common;
 using System.Data.Odbc;
+using System.Data.OleDb;
+using System.Data.SqlClient;
+using System.Data.SQLite;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Reflection;
+using Entity;
+using Oracle.ManagedDataAccess.Client;
 
 
 
@@ -70,9 +70,8 @@ namespace AuthDAL
 
 namespace DAL.Factory
 {
-    using DataAccessLayer.Properties;
-
     using System.Configuration;
+    using DataAccessLayer.Properties;
     public enum DatabaseType
     {
         AccessACCDB,
@@ -108,7 +107,7 @@ namespace DAL.Factory
         //create exception fields list
         public static List<string> ExceptionFields = new List<string>();
 
-        //private const string defaultDB = @"C:\Users\Alan\Documents\BackEnd1.accdb";
+        private const string defaultDBPath = @"C:\Users\Alan\Documents\BackEnd1.accdb";
         private static string _defaultDB;
 
         public static void ChangeSettings(string arg, string val)
@@ -129,7 +128,11 @@ namespace DAL.Factory
         {
             string result = string.Empty;
             var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            result = config.AppSettings.Settings[arg].Value.ToString();
+            string [] list = config.AppSettings.Settings.AllKeys;
+            if (list.Contains(arg))
+            {
+                result = config.AppSettings.Settings[arg].Value.ToString();
+            }
             return result;
         }
 
@@ -172,12 +175,16 @@ namespace DAL.Factory
         public void Reset()
         {
             Instance = new DataLayer();
+            if (string.IsNullOrEmpty(GetSetting("DbPath")))
+            {
+                ChangeSettings("DbPath", defaultDBPath);
+            }
         }
 
 
         public DataLayer()
         {
-
+            
 
         }
 
@@ -793,8 +800,8 @@ namespace DAL.Files
 
 namespace DAL.Productions
 {
-    using DAL.Factory;
     using DAL.Backup;
+    using DAL.Factory;
 
     public class ProductionDAL : BaseDAL, IDisposable
     {

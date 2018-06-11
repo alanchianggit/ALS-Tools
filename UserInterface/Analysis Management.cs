@@ -40,7 +40,6 @@ namespace ALSTools
             
             InitializeComponent();
             this.txt_FileLocation.Text = SettingsLogic.GetFactorySetting("DbPath");
-            //this.txt_FileLocation.Text = @"C:\Users\Alan\Documents\BackEnd1.accdb";
             //this.txt_Output.Text = @"\\alvncws008\groups\minerals\spectroscopy\userfiles\alan\data\";
             this.cmb_Method.Text = "ME-MS41i";
         }

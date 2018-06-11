@@ -5,7 +5,6 @@ using System.Data;
 
 namespace BusinessLayer
 {
-    using System.Linq;
     using DAL;
     using DAL.Factory;
     public class BaseLogLogic
@@ -221,7 +220,6 @@ namespace BusinessLayer.Productions
 
 namespace BusinessLayer.Events
 {
-    using System.Linq;
     using DAL.Events;
     public class EventLogic : BaseLogLogic
     {
@@ -290,7 +288,6 @@ namespace BusinessLayer.Events
 namespace BusinessLayer.Backup
 {
     using DAL.Backup;
-    using LogicExtensions;
 
     public class BackupLogic : BaseLogLogic
     {

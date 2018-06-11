@@ -1,11 +1,9 @@
 ﻿using System;
+using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using DAL.Factory;
 using Auth;
-using System.Data;
-using System.Collections.Generic;
-using System.Linq;
+using DAL.Factory;
 
 namespace ALSTools
 {
@@ -28,6 +26,7 @@ namespace ALSTools
             DataLayer.Instance.Reset();
             AuthEntity.Instance.Reset();
             newSigninToolStripMenuItem.PerformClick();
+            settingsToolStripMenuItem.PerformClick();
             Size newsize = new Size(1800, 1000);
             this.Size = newsize;
         }
@@ -181,7 +180,6 @@ namespace ALSTools
             string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
             if (!strType.Contains("SettingForm") || (frm == null || frm.IsDisposed))
             {
-                //frm = new RunLoader.SettingForm();
                 frm = RunLoader.SettingForm.GetForm;
             }
             else
@@ -276,72 +274,5 @@ namespace ALSTools
             }
         }
 
-
-        protected void DataGridViewEditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
-
-        {
-            //DataGridView dgv = sender as DataGridView;
-            ////string header = dgv.CurrentCell.OwningColumn.HeaderText;
-            //Type columnType = dgv.CurrentCell.OwningColumn.GetType();
-            //List<string> obj = new List<string>();
-            //if (columnType == typeof(DataGridViewComboBoxColumn))
-            //{
-            //    ComboBox txtCell = e.Control as ComboBox;
-            //    SetAutoComplete(txtCell, obj);
-            //}
-            //if (dgv.Parent.ToString().Contains("Event"))
-            //{
-            //switch (header)
-            //{
-            //    case "LogName":
-            //        obj = BusinessLayer.Events.EventLogic.GetLogIDList();
-            //        break;
-            //    case "ProductionName":
-            //        obj = BusinessLayer.BaseLogLogic.GetProductionList();
-            //        break;
-            //    case "User":
-            //        obj.Add(Auth.AuthEntity.Username);
-            //        obj.Add(Environment.UserName);
-            //        break;
-            //    case "Terminal":
-            //        obj.Add(Environment.GetEnvironmentVariable("ComputerName"));
-            //        break;
-            //    default:
-            //        break;
-            //}
-            //}
-            //else if (dgv.Parent.ToString().Contains("Production"))
-            //{
-            //switch (header)
-            //{
-            //    case "EqpName":
-            //        obj = BusinessLayer.BaseLogLogic.GetLogIDList();
-            //        break;
-            //    case "Method":
-            //        obj = BusinessLayer.BaseLogLogic.GetMethodList();
-            //        break;
-            //    default:
-            //        break;
-            //}
-            //}
-
-
-        }
-
-        private static void SetAutoComplete(ComboBox txtCell, List<string> list)
-        {
-            txtCell.DropDownStyle = ComboBoxStyle.DropDown;
-
-
-            //if (txtCell != null)
-            //{
-            //    txtCell.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            //    txtCell.AutoCompleteSource = AutoCompleteSource.CustomSource;
-            //    AutoCompleteStringCollection data = new AutoCompleteStringCollection();
-
-            //    data.AddRange(list.ToArray());
-            //    txtCell.AutoCompleteCustomSource = data;
-            //}
-        }
     }
 }
