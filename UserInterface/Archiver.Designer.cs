@@ -48,7 +48,7 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar1.ForeColor = System.Drawing.SystemColors.GradientActiveCaption;
             this.progressBar1.Location = new System.Drawing.Point(12, 506);
@@ -59,8 +59,8 @@
             // 
             // txt_status
             // 
-            this.txt_status.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.txt_status.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txt_status.Location = new System.Drawing.Point(12, 280);
             this.txt_status.Multiline = true;
@@ -80,7 +80,7 @@
             // 
             // btn_SelectOutPutPath
             // 
-            this.btn_SelectOutPutPath.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.btn_SelectOutPutPath.BackColor = System.Drawing.SystemColors.ButtonFace;
             this.btn_SelectOutPutPath.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_SelectOutPutPath.ForeColor = System.Drawing.SystemColors.ControlText;
             this.btn_SelectOutPutPath.Location = new System.Drawing.Point(12, 234);
@@ -110,7 +110,7 @@
             // 
             // btn_SelectDirectory
             // 
-            this.btn_SelectDirectory.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.btn_SelectDirectory.BackColor = System.Drawing.SystemColors.ButtonFace;
             this.btn_SelectDirectory.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_SelectDirectory.ForeColor = System.Drawing.SystemColors.ControlText;
             this.btn_SelectDirectory.Location = new System.Drawing.Point(12, 198);
@@ -123,9 +123,9 @@
             // 
             // btn_Compress
             // 
-            this.btn_Compress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.btn_Compress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btn_Compress.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.btn_Compress.BackColor = System.Drawing.SystemColors.ButtonFace;
             this.btn_Compress.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btn_Compress.ForeColor = System.Drawing.SystemColors.ControlText;
             this.btn_Compress.Location = new System.Drawing.Point(592, 198);
@@ -194,25 +194,24 @@
             this.dgv_folders.AllowUserToAddRows = false;
             this.dgv_folders.AllowUserToDeleteRows = false;
             this.dgv_folders.AllowUserToResizeRows = false;
-            this.dgv_folders.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.dgv_folders.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.dgv_folders.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
-            this.dgv_folders.Location = new System.Drawing.Point(12, 25);
-            this.dgv_folders.Name = "dgv_folders";
-            this.dgv_folders.Size = new System.Drawing.Size(711, 167);
-            this.dgv_folders.TabIndex = 11;
             this.dgv_folders.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dgv_folders.BackgroundColor = System.Drawing.SystemColors.ControlDarkDark;
             this.dgv_folders.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             this.dgv_folders.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv_folders.DefaultCellStyle = dataGridViewCellStyle1;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.Color.LightGray;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.LightBlue;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.Color.DarkBlue;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgv_folders.DefaultCellStyle = dataGridViewCellStyle1;
+            this.dgv_folders.Location = new System.Drawing.Point(12, 25);
+            this.dgv_folders.Name = "dgv_folders";
+            this.dgv_folders.Size = new System.Drawing.Size(711, 167);
+            this.dgv_folders.TabIndex = 11;
             // 
             // ArchiverForm
             // 

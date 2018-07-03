@@ -179,6 +179,9 @@
             this.DoubleClick += new System.EventHandler(this.frm_Event_DoubleClick);
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Events)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_AuditTrail)).EndInit();
+            this.MouseDown += base.FormMouseDown;
+            this.MouseUp += base.FormMouseUp;
+            this.MouseMove += base.FormMouseMove;
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -128,7 +128,7 @@ namespace DAL.Factory
         {
             string result = string.Empty;
             var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            string [] list = config.AppSettings.Settings.AllKeys;
+            string[] list = config.AppSettings.Settings.AllKeys;
             if (list.Contains(arg))
             {
                 result = config.AppSettings.Settings[arg].Value.ToString();
@@ -144,10 +144,10 @@ namespace DAL.Factory
             DataTable result = new DataTable("Configurations");
             result.Columns.Add("Keys", typeof(string));
             result.Columns.Add("Values", typeof(string));
-            
+
             foreach (KeyValueConfigurationElement o in config.AppSettings.Settings)
             {
-                result.Rows.Add(o.Key, o.Value);                
+                result.Rows.Add(o.Key, o.Value);
             }
             return result;
         }
@@ -157,7 +157,7 @@ namespace DAL.Factory
         {
             get
             {
-                return _defaultDB = Settings.Default.DbPath;
+                return _defaultDB = GetSetting("DbPath");
             }
             set
             {
@@ -184,7 +184,7 @@ namespace DAL.Factory
 
         public DataLayer()
         {
-            
+
 
         }
 
@@ -1135,12 +1135,13 @@ namespace DAL
 
 namespace DAL.Events
 {
-
+    using System.Text;
     using DAL.Backup;
     using DAL.Factory;
 
     public class EventDAL : BaseDAL, IDisposable
     {
+        EventEntity obj = new EventEntity();
         public const string TableName = "[tbl_Events]";
         public static new EventDAL Instance = new EventDAL();
         public new void Reset()
@@ -1151,6 +1152,63 @@ namespace DAL.Events
         public EventDAL()
         {
             Initialize();
+            if (!IsDBSetup())
+            {
+                SetupDB();
+            }
+        }
+
+        private void SetupDB()
+        {
+            string strSQL = string.Empty;
+            StringBuilder sb = new StringBuilder();
+            Dictionary<string, string> dictfield = new Dictionary<string, string>();
+            sb.Append(string.Format("CREATE TABLE {0} (", TableName));
+            List<string> fields = new List<string>();
+            foreach (PropertyInfo pi in obj.GetType().GetProperties())
+            {
+
+                string dbtype = string.Empty;
+
+                switch (pi.PropertyType.ToString())
+                {
+                    case "System.String":
+
+                        dbtype = "TEXT(255)";
+                        break;
+                    case "System.Int32":
+                        
+                        dbtype = "INTEGER";
+                        if (pi.Name.Contains("ID"))
+                        {
+                            dbtype = string.Format("{0}", "COUNTER PRIMARY KEY");
+                        }
+                        break;
+                    case "System.DateTime":
+                        dbtype = "DateTime";
+                        break;
+                    default:
+                        break;
+                }
+
+                    fields.Add(string.Format("[{0}] {1}", pi.Name, dbtype)); 
+                //dictfield.Add(pi.Name, dbtype);
+            }
+
+
+            sb.Append(string.Join(",", fields));
+            sb.Append(")");
+            IDbCommand cmd = DataLayer.CreateCommand(sb.ToString());
+            try
+            {
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+
         }
 
         private string UpdateClause
@@ -1171,9 +1229,31 @@ namespace DAL.Events
             }
         }
 
+        private bool IsDBSetup()
+        {
+            bool setup;
+
+            try
+            {
+                DataLayer.ExceptionFields.Clear();
+                IDbCommand cmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
+                cmd.CommandText = string.Format("SELECT TOP 1 {0} FROM {1}", string.Join(",", DataLayer.FieldNames.ToArray()), TableName);
+                cmd.CommandType = CommandType.Text;
+
+                cmd.ExecuteScalar();
+                setup = true;
+            }
+            catch (Exception)
+            {
+                setup = false;
+
+            }
+            return setup;
+
+        }
+
         public IDbDataAdapter GetAdapter()
         {
-            EventEntity obj = new EventEntity();
             IDbDataAdapter da = DataLayer.CreateAdapter();
 
 
