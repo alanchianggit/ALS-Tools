@@ -20,7 +20,13 @@ namespace ALSTools
         private static List<IDbDataAdapter> das = ProductionLogic.listDA;
         private DataSet MasterDS = ProductionLogic.MasterDS;
         private const string ID = ProductionLogic.ID;
-
+        private enum StatusEnum
+        {
+            Created,
+            Running,
+            Completed,
+            Redo,
+        }
         public Production()
         {
             InitializeComponent();
@@ -58,6 +64,8 @@ namespace ALSTools
                 daProductions.Fill(ProductionDS);
                 MasterDS.Merge(ProductionDS.Tables["Table"], true, MissingSchemaAction.Add);
                 MasterDS.Tables["Table"].TableName = tblname;
+                MasterDS.Tables[tblname].Columns["EqpName"].DefaultValue = DAL.Factory.DataLayer.GetSetting("DefaultLogID");
+
                 ProductionBS.DataSource = MasterDS;
                 ProductionBS.DataMember = tblname;
                 dgv.DataSource = ProductionBS;
@@ -337,26 +345,61 @@ namespace ALSTools
             ShowEvent(sender, e);
         }
 
-        private void buttonActions(object sender, EventArgs e)
+        private void ProductionButtonActions(object sender, EventArgs e)
         {
+            Button btn = sender as Button;
+            
+            DateTime newdatetime = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
+            DataRowView drv = this.dgv_Production.CurrentCell.OwningRow.DataBoundItem as DataRowView;
+            int rowindex = this.dgv_Production.CurrentCell.OwningRow.Index;
             try
             {
-                DataRowView drv = this.dgv_Production.CurrentCell.OwningRow.DataBoundItem as DataRowView;
-                int rowindex = this.dgv_Production.CurrentCell.OwningRow.Index;
-
-                Button btn = sender as Button;
-                string newStatus = GetButtonDecisions(btn, drv.Row.Field<string>("Status"));
-
-                if (!string.IsNullOrEmpty(newStatus))
+                switch (btn.Name)
                 {
-                    drv.Row.SetField<string>("Status", newStatus);
-                    ModifiedType mt = UpdateDataSet(dgv_Production);
-                    GetData();
-                    UpdateEvent(dgv_Production, mt, rowindex); 
-                }
-                else
-                {
-                    MessageBox.Show(string.Format("Cannot change status because the production is in '{0}' state.", drv.Row.Field<string>("Status")));
+                    case "btn_AddComment":
+
+                        break;
+                    case "btn_EndRun":
+                    case "btn_StartRun":
+                    case "btn_RedoRun":
+
+                        string newStatus = GetStatus(btn, drv.Row.Field<string>("Status"));
+                        StatusEnum Status;
+                        Enum.TryParse(newStatus, out Status);
+
+                        if (!string.IsNullOrEmpty(newStatus))
+                        {
+                            //Change Time stamps
+                            switch (Status)
+                            {
+                                case StatusEnum.Completed:
+                                    drv.Row.SetField<DateTime>("EndTime", newdatetime);
+
+                                    break;
+                                case StatusEnum.Created:
+                                case StatusEnum.Redo:
+                                    drv.Row.SetField<string>("StartTime", null);
+                                    drv.Row.SetField<string>("EndTime", null);
+                                    break;
+                                case StatusEnum.Running:
+                                    drv.Row.SetField<DateTime>("StartTime", newdatetime);
+
+                                    break;
+                                default:
+                                    break;
+                            }
+                            //Change Status
+                            drv.Row.SetField<string>("Status", newStatus);
+
+                        }
+                        else
+                        {
+                            MessageBox.Show(string.Format("Cannot change status because the production is in '{0}' state.", drv.Row.Field<string>("Status")));
+                        }
+
+                        break;
+                    default:
+                        break;
                 }
 
             }
@@ -364,14 +407,20 @@ namespace ALSTools
             {
                 MessageBox.Show(ex.Message);
             }
-            
+            finally
+            {
+                ModifiedType mt = UpdateDataSet(dgv_Production);
+                GetData();
+                UpdateEvent(dgv_Production, mt, rowindex);
+            }
+
         }
 
 
-        private string GetButtonDecisions(Button btn, string status)
+        private string GetStatus(Button btn, string status)
         {
             string btnname = btn.Name;
-            string result;
+
 
             //Initialize decision table
             DataTable dt = new DataTable();
@@ -388,7 +437,7 @@ namespace ALSTools
             dt.Rows.Add(string.Empty, "Running", null, null);
             dt.Rows.Add("Created", "Running", null, null);
 
-            result = dt.AsEnumerable().Where(x => x.Field<string>("Status") == status).Select(q => q.Field<string>(btnname)).Single<string>();
+            string result = dt.AsEnumerable().Where(x => x.Field<string>("Status") == status).Select(q => q.Field<string>(btnname)).Single<string>();
 
             return result;
         }

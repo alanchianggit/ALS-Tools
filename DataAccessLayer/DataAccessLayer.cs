@@ -88,14 +88,6 @@ namespace DAL.Factory
         DB = DatabaseType.SQLite
     }
 
-    public enum ParameterType
-    {
-        Integer,
-        Char,
-        VarChar
-        // define a common parameter type set
-    }
-
     public class DataLayer : IDisposable
     {
 
@@ -800,11 +792,13 @@ namespace DAL.Files
 
 namespace DAL.Productions
 {
+    using System.Text;
     using DAL.Backup;
     using DAL.Factory;
 
     public class ProductionDAL : BaseDAL, IDisposable
     {
+        ProductionEntity obj = new ProductionEntity();
         private const string _tableName = "[tbl_Production]";
         public static new ProductionDAL Instance = new ProductionDAL();
         public new void Reset()
@@ -815,6 +809,117 @@ namespace DAL.Productions
         public ProductionDAL()
         {
             Initialize();
+            if (!IsDBSetup())
+            {
+                SetupDB();
+                RelateDB();
+            }
+        }
+
+        public override void SetupDB()
+        {
+            try
+            {
+                
+                string strSQL = string.Empty;
+                StringBuilder sb = new StringBuilder();
+                Dictionary<string, string> dictfield = new Dictionary<string, string>();
+                sb.Append(string.Format("CREATE TABLE {0} (", TableName));
+                List<string> fields = new List<string>();
+                foreach (PropertyInfo pi in obj.GetType().GetProperties())
+                {
+
+                    string dbtype = string.Empty;
+
+                    switch (pi.PropertyType.ToString())
+                    {
+                        case "System.String":
+
+                            dbtype = "TEXT(255)";
+                            break;
+                        case "System.Int32":
+
+                            dbtype = "INTEGER";
+                            if (pi.Name.Contains("ID"))
+                            {
+                                dbtype = string.Format("{0}", "COUNTER PRIMARY KEY");
+                            }
+                            break;
+                        case "System.DateTime":
+                            dbtype = "DateTime";
+                            break;
+                        default:
+                            break;
+                    }
+
+                    fields.Add(string.Format("[{0}] {1}", pi.Name, dbtype));
+                }
+
+
+                sb.Append(string.Join(",", fields));
+                sb.Append(")");
+                IDbCommand cmd = DataLayer.CreateCommand(sb.ToString());
+
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private void RelateDB()
+        {
+            try
+            {
+                string strSQL = string.Empty;
+                StringBuilder sb = new StringBuilder();
+
+                sb.Append(string.Format("ALTER TABLE {0} ADD CONSTRAINT FKEQPNAME FOREIGN KEY (EQPNAME) REFERENCES tbl_AvailableLogs(LogID) ON DELETE CASCADE ON UPDATE CASCADE", TableName));
+                IDbCommand cmd = DataLayer.CreateCommand(sb.ToString());
+                cmd.ExecuteNonQuery();
+
+                sb.Clear();
+                sb.Append(string.Format("ALTER TABLE {0} ADD CONSTRAINT FKMETHOD FOREIGN KEY (METHOD) REFERENCES tbl_Method(METHOD) ON DELETE CASCADE ON UPDATE CASCADE", TableName));
+                cmd = DataLayer.CreateCommand(sb.ToString());
+                cmd.ExecuteNonQuery();
+
+                sb.Clear();
+                sb.Append(string.Format("ALTER TABLE {0} ADD CONSTRAINT FKENDER FOREIGN KEY (ENDER) REFERENCES tbl_Employee(Initials) ON DELETE CASCADE ON UPDATE CASCADE", TableName));
+                cmd = DataLayer.CreateCommand(sb.ToString());
+                cmd.ExecuteNonQuery();
+
+                sb.Clear();
+                sb.Append(string.Format("ALTER TABLE {0} ADD CONSTRAINT FKSTARTER FOREIGN KEY (STARTER) REFERENCES tbl_Employee(Initials) ON DELETE CASCADE ON UPDATE CASCADE", TableName));
+                cmd = DataLayer.CreateCommand(sb.ToString());
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private bool IsDBSetup()
+        {
+            bool setup;
+
+            try
+            {
+                DataLayer.ExceptionFields.Clear();
+                IDbCommand cmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
+                cmd.CommandText = string.Format("SELECT TOP 1 {0} FROM {1}", string.Join(",", DataLayer.FieldNames.ToArray()), TableName);
+                cmd.CommandType = CommandType.Text;
+
+                cmd.ExecuteScalar();
+                setup = true;
+            }
+            catch (Exception)
+            {
+                setup = false;
+            }
+            return setup;
+
         }
 
         private string UpdateClause
@@ -986,6 +1091,11 @@ namespace DAL
             Instance = new BaseDAL();
         }
 
+        public virtual void SetupDB()
+        {
+
+        }
+
         public void Initialize()
         {
             if (DataLayer.ActiveConn == null)
@@ -1057,23 +1167,6 @@ namespace DAL
             return dt;
 
         }
-
-        public DataTable ReadLogs()
-        {
-            DataTable dt = new DataTable("AvailableLogs");
-
-            string strSQL = string.Format("SELECT [LogID],[Department] FROM {0} ORDER BY [LogID]", "[tbl_AvailableLogs]");
-            IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
-            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
-            {
-                dt.Load(reader, LoadOption.PreserveChanges);
-                //Add empty value
-                DataRow drc = dt.NewRow();
-                dt.Rows.InsertAt(drc, 0);
-            }
-            return dt;
-        }
-
 
         public DataTable ReadAvailableLogs()
         {
@@ -1158,49 +1251,49 @@ namespace DAL.Events
             }
         }
 
-        private void SetupDB()
+        public override void SetupDB()
         {
-            string strSQL = string.Empty;
-            StringBuilder sb = new StringBuilder();
-            Dictionary<string, string> dictfield = new Dictionary<string, string>();
-            sb.Append(string.Format("CREATE TABLE {0} (", TableName));
-            List<string> fields = new List<string>();
-            foreach (PropertyInfo pi in obj.GetType().GetProperties())
-            {
-
-                string dbtype = string.Empty;
-
-                switch (pi.PropertyType.ToString())
-                {
-                    case "System.String":
-
-                        dbtype = "TEXT(255)";
-                        break;
-                    case "System.Int32":
-                        
-                        dbtype = "INTEGER";
-                        if (pi.Name.Contains("ID"))
-                        {
-                            dbtype = string.Format("{0}", "COUNTER PRIMARY KEY");
-                        }
-                        break;
-                    case "System.DateTime":
-                        dbtype = "DateTime";
-                        break;
-                    default:
-                        break;
-                }
-
-                    fields.Add(string.Format("[{0}] {1}", pi.Name, dbtype)); 
-                //dictfield.Add(pi.Name, dbtype);
-            }
-
-
-            sb.Append(string.Join(",", fields));
-            sb.Append(")");
-            IDbCommand cmd = DataLayer.CreateCommand(sb.ToString());
             try
             {
+                string strSQL = string.Empty;
+                StringBuilder sb = new StringBuilder();
+                Dictionary<string, string> dictfield = new Dictionary<string, string>();
+                sb.Append(string.Format("CREATE TABLE {0} (", TableName));
+                List<string> fields = new List<string>();
+                foreach (PropertyInfo pi in obj.GetType().GetProperties())
+                {
+
+                    string dbtype = string.Empty;
+
+                    switch (pi.PropertyType.ToString())
+                    {
+                        case "System.String":
+
+                            dbtype = "TEXT(255)";
+                            break;
+                        case "System.Int32":
+
+                            dbtype = "INTEGER";
+                            if (pi.Name.Contains("ID"))
+                            {
+                                dbtype = string.Format("{0}", "COUNTER PRIMARY KEY");
+                            }
+                            break;
+                        case "System.DateTime":
+                            dbtype = "DateTime";
+                            break;
+                        default:
+                            break;
+                    }
+
+                    fields.Add(string.Format("[{0}] {1}", pi.Name, dbtype));
+                }
+
+
+                sb.Append(string.Join(",", fields));
+                sb.Append(")");
+                IDbCommand cmd = DataLayer.CreateCommand(sb.ToString());
+
                 cmd.ExecuteNonQuery();
             }
             catch (Exception ex)
@@ -1210,25 +1303,6 @@ namespace DAL.Events
 
 
         }
-
-        private string UpdateClause
-        {
-            get
-            {
-                string strSQL = string.Format("UPDATE {0} SET ", TableName);
-                for (int i = 0; i <= DataLayer.FieldNames.Count - 1; i++)
-                {
-                    if (i > 0)
-                    {
-                        strSQL += ",";
-                    }
-                    strSQL += string.Format("{0}={1}", DataLayer.FieldNames[i], DataLayer.FieldValues[i]);
-                }
-
-                return strSQL;
-            }
-        }
-
         private bool IsDBSetup()
         {
             bool setup;
@@ -1251,6 +1325,26 @@ namespace DAL.Events
             return setup;
 
         }
+
+        private string UpdateClause
+        {
+            get
+            {
+                string strSQL = string.Format("UPDATE {0} SET ", TableName);
+                for (int i = 0; i <= DataLayer.FieldNames.Count - 1; i++)
+                {
+                    if (i > 0)
+                    {
+                        strSQL += ",";
+                    }
+                    strSQL += string.Format("{0}={1}", DataLayer.FieldNames[i], DataLayer.FieldValues[i]);
+                }
+
+                return strSQL;
+            }
+        }
+
+
 
         public IDbDataAdapter GetAdapter()
         {

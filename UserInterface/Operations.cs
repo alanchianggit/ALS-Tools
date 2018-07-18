@@ -4,12 +4,14 @@ using System.Drawing;
 using System.Windows.Forms;
 using Auth;
 using DAL.Factory;
+using BusinessLayer;
 
 namespace ALSTools
 {
+    
     public partial class Operations : Form
     {
-
+        
         private static Operations inst;
         public static Operations Instance
         {
@@ -27,8 +29,27 @@ namespace ALSTools
             AuthEntity.Instance.Reset();
             newSigninToolStripMenuItem.PerformClick();
             settingsToolStripMenuItem.PerformClick();
-            Size newsize = new Size(1800, 1000);
-            this.Size = newsize;
+
+            this.Size = GetDisplaySize();
+            this.SetDesktopLocation(0, 0);
+
+            this.selectInstrumentToolStripMenuItem.ComboBox.DataSource = BaseLogLogic.GetLogs().DefaultView;
+            this.selectInstrumentToolStripMenuItem.ComboBox.DisplayMember = "LogID";
+            this.selectInstrumentToolStripMenuItem.ComboBox.BindingContext = this.BindingContext;
+            if (!string.IsNullOrEmpty(DataLayer.GetSetting("DefaultLogID")))
+            {
+                this.selectInstrumentToolStripMenuItem.ComboBox.Text = DataLayer.GetSetting("DefaultLogID");
+            }
+
+        }
+
+        private Size GetDisplaySize()
+        {
+            Size s = new Size();
+            s.Width = Screen.PrimaryScreen.WorkingArea.Width;
+            s.Height = Screen.PrimaryScreen.WorkingArea.Height;
+            
+            return s;
         }
 
         private void fileAccessFormToolStripMenuItem_Click(object sender, EventArgs e)
@@ -45,11 +66,8 @@ namespace ALSTools
         {
             string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
 
-            //ShowForm(strType);
-
             if (!strType.Contains("Analysis_Management") || frm == null || frm.IsDisposed)
             {
-                //frm = new Analysis_Management();
                 frm = Analysis_Management.GetForm;
             }
             else
@@ -73,7 +91,6 @@ namespace ALSTools
 
             if (!frmName.Contains("Analysis_Management") || frm == null || frm.IsDisposed)
             {
-                //frm = new Analysis_Management();
                 frm = Analysis_Management.GetForm;
             }
             else
@@ -103,7 +120,6 @@ namespace ALSTools
                 string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
                 if (!strType.Contains("Event") || (frm == null || frm.IsDisposed))
                 {
-                    //frm = new frm_Event();
                     frm = frm_Event.GetForm;
                 }
                 else
@@ -125,7 +141,6 @@ namespace ALSTools
                 string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
                 if (!strType.Contains("Production") || (frm == null || frm.IsDisposed))
                 {
-                    //frm = new Production();
                     frm = ALSTools.Production.GetForm;
                 }
                 else
@@ -145,7 +160,6 @@ namespace ALSTools
             string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
             if (!strType.Contains("Auth") || (frm == null || frm.IsDisposed))
             {
-                //frm = new frmAuth();
                 frm = frmAuth.GetForm;
             }
             else
@@ -165,7 +179,6 @@ namespace ALSTools
             string strType = frm != null ? strType = frm.GetType().ToString() : strType = string.Empty;
             if (!strType.Contains("XMLControl") || (frm == null || frm.IsDisposed))
             {
-                //frm = new XMLControl ();
                 frm = XMLControl.GetForm;
             }
             else
@@ -187,6 +200,13 @@ namespace ALSTools
                 frm.WindowState = FormWindowState.Normal;
             }
             ShowChildForm(frm);
+        }
+        
+
+        private void selectInstrumentToolStripMenuItem_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ToolStripComboBox combo = sender as ToolStripComboBox;
+            DataLayer.ChangeSettings("DefaultLogID", combo.Text);
         }
     }
 }
@@ -249,7 +269,7 @@ namespace ALSTools
                 combocol.DisplayMember = combocol.ValueMember;
                 //Key property to set in order to display values, set to original column name
                 combocol.DataPropertyName = combocol.ValueMember;
-                //dEFINES value type
+                //Defines value type
                 combocol.ValueType = dgv.Columns[colName].ValueType;
                 //Add combo column to current text column
                 dgv.Columns.Insert(dgv.Columns[colName].Index, combocol);

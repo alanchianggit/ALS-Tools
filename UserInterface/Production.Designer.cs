@@ -34,6 +34,7 @@
             this.btn_StartRun = new System.Windows.Forms.Button();
             this.btn_EndRun = new System.Windows.Forms.Button();
             this.btn_RedoRun = new System.Windows.Forms.Button();
+            this.btn_AddComment = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_AuditTrail)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Production)).BeginInit();
             this.SuspendLayout();
@@ -86,7 +87,7 @@
             this.btn_StartRun.TabIndex = 2;
             this.btn_StartRun.Text = "Start";
             this.btn_StartRun.UseVisualStyleBackColor = true;
-            this.btn_StartRun.Click += new System.EventHandler(this.buttonActions);
+            this.btn_StartRun.Click += new System.EventHandler(this.ProductionButtonActions);
             // 
             // btn_EndRun
             // 
@@ -96,7 +97,7 @@
             this.btn_EndRun.TabIndex = 2;
             this.btn_EndRun.Text = "End";
             this.btn_EndRun.UseVisualStyleBackColor = true;
-            this.btn_EndRun.Click += new System.EventHandler(this.buttonActions);
+            this.btn_EndRun.Click += new System.EventHandler(this.ProductionButtonActions);
             // 
             // btn_RedoRun
             // 
@@ -106,7 +107,17 @@
             this.btn_RedoRun.TabIndex = 2;
             this.btn_RedoRun.Text = "Redo";
             this.btn_RedoRun.UseVisualStyleBackColor = true;
-            this.btn_RedoRun.Click += new System.EventHandler(this.buttonActions);
+            this.btn_RedoRun.Click += new System.EventHandler(this.ProductionButtonActions);
+            // 
+            // btn_AddComment
+            // 
+            this.btn_AddComment.Location = new System.Drawing.Point(13, 340);
+            this.btn_AddComment.Name = "btn_AddComment";
+            this.btn_AddComment.Size = new System.Drawing.Size(181, 34);
+            this.btn_AddComment.TabIndex = 3;
+            this.btn_AddComment.Text = "Add Comment";
+            this.btn_AddComment.UseVisualStyleBackColor = true;
+            this.btn_AddComment.Click += new System.EventHandler(this.ProductionButtonActions);
             // 
             // Production
             // 
@@ -114,6 +125,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(44)))), ((int)(((byte)(51)))));
             this.ClientSize = new System.Drawing.Size(1508, 386);
+            this.Controls.Add(this.btn_AddComment);
             this.Controls.Add(this.btn_RedoRun);
             this.Controls.Add(this.btn_EndRun);
             this.Controls.Add(this.btn_StartRun);
@@ -124,9 +136,6 @@
             this.Text = "Production";
             ((System.ComponentModel.ISupportInitialize)(this.dgv_AuditTrail)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Production)).EndInit();
-            this.MouseDown += base.FormMouseDown;
-            this.MouseUp += base.FormMouseUp;
-            this.MouseMove += base.FormMouseMove;
             this.ResumeLayout(false);
 
         }
@@ -137,5 +146,6 @@
         private System.Windows.Forms.Button btn_StartRun;
         private System.Windows.Forms.Button btn_EndRun;
         private System.Windows.Forms.Button btn_RedoRun;
+        private System.Windows.Forms.Button btn_AddComment;
     }
 }
