@@ -64,7 +64,9 @@ namespace ALSTools
                 daProductions.Fill(ProductionDS);
                 MasterDS.Merge(ProductionDS.Tables["Table"], true, MissingSchemaAction.Add);
                 MasterDS.Tables["Table"].TableName = tblname;
-                MasterDS.Tables[tblname].Columns["EqpName"].DefaultValue = DAL.Factory.DataLayer.GetSetting("DefaultLogID");
+
+                //Default values
+                //MasterDS.Tables[tblname].Columns["EqpName"].DefaultValue = DAL.Factory.DataLayer.GetSetting("DefaultLogID");
 
                 ProductionBS.DataSource = MasterDS;
                 ProductionBS.DataMember = tblname;
@@ -168,7 +170,7 @@ namespace ALSTools
             }
             frm_Event otherForm;
             otherForm = this.MdiParent.MdiChildren.OfType<frm_Event>().Single();
-            otherForm.Show();
+            //otherForm.Show();
 
             return otherForm;
         }
@@ -181,55 +183,77 @@ namespace ALSTools
             int rowindex = e.RowIndex;
 
             DataGridView obj = sender as DataGridView;
-            ModifiedType mt = UpdateDataSet(obj);
+            EventChangeType mt = UpdateDataSet(obj);
             GetData();
 
             UpdateEvent(obj, mt, rowindex);
 
         }
-        public enum ModifiedType
+        public enum EventChangeType
         {
             Insert,
-            Update
+            Update,
+            None
         }
 
-        private void UpdateEvent(DataGridView obj, ModifiedType type, int rowIndex)
+        private void UpdateEvent(string comment, string productionName)
+        {
+            frm_Event frm = GetEventForm();
+            frm.AddGeneralEvent(comment, productionName);
+        }
+
+
+        private void UpdateEvent(DataGridView obj, EventChangeType type, int rowIndex)
         {
             frm_Event frm = GetEventForm();
             DataGridViewCell productionName = obj["ProductionName", rowIndex];
             if (productionName.Value != null)
             {
-                string EventType = string.Empty;
-                if (type.Equals(ModifiedType.Insert))
+                //string EventType = string.Empty;
+                //if (type.Equals(Production.EventChangeType.Insert))
+                //{
+                //    EventType = "New";
+
+                //}
+                //else if (type.Equals(Production.EventChangeType.Update))
+                //{
+                //    EventType = "Modified";
+                //}
+
+                string EventType = type.ToString();
+                switch (type)
                 {
-                    EventType = "New";
-                }
-                else if (type.Equals(ModifiedType.Update))
-                {
-                    EventType = "Modified";
+                    case EventChangeType.Insert:
+                    case EventChangeType.Update:
+                        if (!string.IsNullOrEmpty(productionName.Value.ToString()))
+                        {
+
+                            frm.AddGeneralEvent(string.Format("{1} production ID: {0}", obj[ID, rowIndex].Value, EventType), productionName.Value.ToString());
+                        }
+                        else
+                        {
+                            frm.AddGeneralEvent(string.Format("{1} productionID: {0}", obj[ID, rowIndex].Value, EventType));
+                        }
+                        break;
+                    case EventChangeType.None:
+                        break;
+                    default:
+                        break;
                 }
 
-                if (!string.IsNullOrEmpty(productionName.Value.ToString()))
-                {
-                    frm.AddGeneralEvent(string.Format("{1} production: {0}", obj[ID, rowIndex].Value, EventType), productionName.Value.ToString());
-                }
-                else
-                {
-                    frm.AddGeneralEvent(string.Format("{1} production: {0}", obj[ID, rowIndex].Value, EventType));
-                }
 
             }
         }
 
 
-        private ModifiedType UpdateDataSet(DataGridView dgv)
+        private EventChangeType UpdateDataSet(DataGridView dgv)
         {
             das.Clear();
             das.Add(daProductions);
             das.Add(daAuditTrail);
 
             bool isNewRecord = false;
-            ModifiedType modType;
+            EventChangeType modType = EventChangeType.None;
             try
             {
                 BindingSource bs = (BindingSource)dgv.DataSource;
@@ -245,7 +269,7 @@ namespace ALSTools
 
                     currDR.Table.Rows.Add(currDR);
                     currDR.EndEdit();
-                    modType = ModifiedType.Insert;
+                    modType = EventChangeType.Insert;
                 }
                 else
                 {
@@ -266,7 +290,7 @@ namespace ALSTools
                         currDR.Table.Rows.Remove(dr);
                     }
 
-                    modType = ModifiedType.Update;
+
                 }
 
                 DataTable dt = new DataTable();
@@ -302,6 +326,7 @@ namespace ALSTools
                                     drbackup["NewValue"] = dr[i, DataRowVersion.Current].ToString();
                                     drbackup["AffectedID"] = dr[ID].ToString();
                                     dtbackup.Rows.Add(drbackup);
+                                    modType = EventChangeType.Update;
                                 }
                             }
                         }
@@ -312,7 +337,7 @@ namespace ALSTools
             catch (Exception excep)
             {
                 MessageBox.Show(excep.Message.ToString());
-                return ModifiedType.Update;
+                return EventChangeType.None;
             }
             finally
             {
@@ -348,7 +373,7 @@ namespace ALSTools
         private void ProductionButtonActions(object sender, EventArgs e)
         {
             Button btn = sender as Button;
-            
+
             DateTime newdatetime = DateTimeExtension.GetDateWithoutMilliseconds(DateTime.Now);
             DataRowView drv = this.dgv_Production.CurrentCell.OwningRow.DataBoundItem as DataRowView;
             int rowindex = this.dgv_Production.CurrentCell.OwningRow.Index;
@@ -409,7 +434,7 @@ namespace ALSTools
             }
             finally
             {
-                ModifiedType mt = UpdateDataSet(dgv_Production);
+                EventChangeType mt = UpdateDataSet(dgv_Production);
                 GetData();
                 UpdateEvent(dgv_Production, mt, rowindex);
             }

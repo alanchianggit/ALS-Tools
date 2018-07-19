@@ -149,7 +149,18 @@ namespace DAL.Factory
         {
             get
             {
-                return _defaultDB = GetSetting("DbPath");
+                try
+                {
+                    _defaultDB = GetSetting("DbPath");
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    _defaultDB = defaultDBPath;
+                }
+                
+                return _defaultDB;
+
             }
             set
             {
@@ -820,7 +831,7 @@ namespace DAL.Productions
         {
             try
             {
-                
+
                 string strSQL = string.Empty;
                 StringBuilder sb = new StringBuilder();
                 Dictionary<string, string> dictfield = new Dictionary<string, string>();
@@ -1091,10 +1102,7 @@ namespace DAL
             Instance = new BaseDAL();
         }
 
-        public virtual void SetupDB()
-        {
-
-        }
+        public virtual void SetupDB() { }
 
         public void Initialize()
         {
