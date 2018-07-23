@@ -325,7 +325,7 @@ namespace ALSTools
             {
                 dtLogs = BusinessLayer.BaseLogLogic.GetLogs();
                 this.cmb_InstrumentFilter.DataSource = dtLogs;
-                this.cmb_InstrumentFilter.ValueMember = "LogID";
+                this.cmb_InstrumentFilter.ValueMember = "LogName";
                 this.cmb_InstrumentFilter.SelectedIndex = -1;
             }
         }

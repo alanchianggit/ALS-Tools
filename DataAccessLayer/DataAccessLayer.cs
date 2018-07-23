@@ -11,6 +11,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using Entity;
+using System.Text;
 using Oracle.ManagedDataAccess.Client;
 
 
@@ -800,6 +801,177 @@ namespace DAL.Files
     }
 }
 
+namespace DAL
+{
+    using DAL.Factory;
+
+    interface ISetupDB
+    {
+        void SetupDB();
+        void RelateDB();
+        bool IsDBSetup(object obj, string TableName);
+        //string UpdateClause();
+        
+    }
+
+    public class BaseDAL : IDisposable, ISetupDB
+    {
+        public static BaseDAL Instance = new BaseDAL();
+        public void Reset()
+        {
+            Instance = new BaseDAL();
+        }
+        
+
+        public virtual void SetupDB() { }
+        public virtual void RelateDB() { }
+
+        public void Initialize()
+        {
+            if (DataLayer.ActiveConn == null)
+            {
+                DataLayer.CreateConnection();
+            }
+
+            DataLayer.ExceptionFields.Clear();
+            DataLayer.FieldValues.Clear();
+            DataLayer.FieldNames.Clear();
+        }
+        public BaseDAL()
+        {
+            Initialize();
+        }
+        public DataTable GetMethods()
+        {
+            DataTable dt = new DataTable("Methods");
+
+
+            string strSQL = string.Format("SELECT DISTINCT [Method] FROM {0} ORDER BY [Method]", "[tbl_Method]");
+            IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
+            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
+            {
+                reader.Read();
+                dt.Load(reader, LoadOption.PreserveChanges);
+                //Add empty value
+                DataRow drc = dt.NewRow();
+                dt.Rows.InsertAt(drc, 0);
+            }
+            return dt;
+
+        }
+
+        public DataTable GetUsers()
+        {
+            DataTable dt = new DataTable("Users");
+
+            //Returns all empty values, even select *
+            string strSQL = string.Format("SELECT DISTINCT [Initials] FROM {0} ORDER BY [Initials]", "[tbl_Employee]");
+
+            IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
+            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
+            {
+                dt.Load(reader, LoadOption.PreserveChanges);
+                //Add empty value
+                DataRow drc = dt.NewRow();
+                dt.Rows.InsertAt(drc, 0);
+            }
+            return dt;
+
+        }
+
+        public DataTable ReadAvailableProductionNames()
+        {
+
+            DataTable dt = new DataTable("AvailableProductionNames");
+            dt = Productions.ProductionDAL.Instance.GetProduction();
+
+            return dt;
+
+        }
+
+        public DataTable ReadAvailableLogs()
+        {
+            DataTable dt = new DataTable("AvailableLogs");
+
+            string strSQL = string.Format("SELECT [LogName],[Department] FROM {0} ORDER BY [LogName]", "[tbl_AvailableLogs]");
+            IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
+            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
+            {
+                dt.Load(reader, LoadOption.PreserveChanges);
+                //Add empty value
+                DataRow drc = dt.NewRow();
+                dt.Rows.InsertAt(drc, 0);
+            }
+            return dt;
+
+        }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~BaseDAL() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+
+        
+
+        public virtual bool IsDBSetup(object obj, string TableName)
+        {
+            bool setup;
+
+            try
+            {
+                DataLayer.ExceptionFields.Clear();
+                IDbCommand cmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
+                cmd.CommandText = string.Format("SELECT TOP 1 {0} FROM {1}", string.Join(",", DataLayer.FieldNames.ToArray()), TableName);
+                cmd.CommandType = CommandType.Text;
+
+                cmd.ExecuteScalar();
+                setup = true;
+            }
+            catch (Exception)
+            {
+                setup = false;
+
+            }
+            return setup;
+
+        }
+
+        #endregion
+
+
+    }
+
+}
+
 
 namespace DAL.Productions
 {
@@ -820,13 +992,13 @@ namespace DAL.Productions
         public ProductionDAL()
         {
             Initialize();
-            if (!IsDBSetup())
+            if (!IsDBSetup(obj,TableName))
             {
                 SetupDB();
                 RelateDB();
             }
         }
-
+        
         public override void SetupDB()
         {
             try
@@ -868,6 +1040,7 @@ namespace DAL.Productions
 
 
                 sb.Append(string.Join(",", fields));
+                sb.Append(string.Format(", CONSTRAINT UC_Production UNIQUE (ProductionName)"));
                 sb.Append(")");
                 IDbCommand cmd = DataLayer.CreateCommand(sb.ToString());
 
@@ -879,14 +1052,16 @@ namespace DAL.Productions
             }
         }
 
-        private void RelateDB()
+        public override void RelateDB()
         {
+            //Setup appropriate secondary tables
+            DAL.Events.EventDAL.Instance.Reset();
             try
             {
                 string strSQL = string.Empty;
                 StringBuilder sb = new StringBuilder();
 
-                sb.Append(string.Format("ALTER TABLE {0} ADD CONSTRAINT FKEQPNAME FOREIGN KEY (EQPNAME) REFERENCES tbl_AvailableLogs(LogID) ON DELETE CASCADE ON UPDATE CASCADE", TableName));
+                sb.Append(string.Format("ALTER TABLE {0} ADD CONSTRAINT FKEQPNAME FOREIGN KEY (EQPNAME) REFERENCES tbl_AvailableLogs(LogName) ON DELETE CASCADE ON UPDATE CASCADE", TableName));
                 IDbCommand cmd = DataLayer.CreateCommand(sb.ToString());
                 cmd.ExecuteNonQuery();
 
@@ -911,34 +1086,12 @@ namespace DAL.Productions
             }
         }
 
-        private bool IsDBSetup()
-        {
-            bool setup;
-
-            try
-            {
-                DataLayer.ExceptionFields.Clear();
-                IDbCommand cmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
-                cmd.CommandText = string.Format("SELECT TOP 1 {0} FROM {1}", string.Join(",", DataLayer.FieldNames.ToArray()), TableName);
-                cmd.CommandType = CommandType.Text;
-
-                cmd.ExecuteScalar();
-                setup = true;
-            }
-            catch (Exception)
-            {
-                setup = false;
-            }
-            return setup;
-
-        }
-
         private string UpdateClause
         {
             get
             {
                 //need to build update statement
-                string strSQL = string.Format("UPDATE {0} SET ", "[tbl_Production]");
+                string strSQL = string.Format("UPDATE {0} SET ", TableName);
                 for (int i = 0; i <= DataLayer.FieldNames.Count - 1; i++)
                 {
                     if (i > 0)
@@ -959,6 +1112,27 @@ namespace DAL.Productions
                 return _tableName;
             }
         }
+
+        public DataTable GetProduction()
+        {
+
+            DataTable dt = new DataTable("AvailableProductionNames");
+
+            string strSQL = string.Format("SELECT DISTINCT [ProductionName] FROM {0} ORDER BY [ProductionName]", "[tbl_Production]");
+            IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
+            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
+            {
+                dt.Load(reader, LoadOption.PreserveChanges);
+                //Add empty value
+                DataRow drc = dt.NewRow();
+                dt.Rows.InsertAt(drc, 0);
+            }
+
+
+            return dt;
+
+        }
+
 
         public IDbDataAdapter GetAdapter()
         {
@@ -1019,13 +1193,7 @@ namespace DAL.Productions
             da.InsertCommand = insertcmd;
             return da;
         }
-        public IDbDataAdapter AdaptEventBackup()
-        {
-            IDbDataAdapter da = BackupDAL.Instance.GetAdapter();
-            return da;
-        }
-
-
+        
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
@@ -1090,153 +1258,12 @@ namespace DAL.Productions
     }
 
 }
-namespace DAL
-{
-    using DAL.Factory;
 
-    public class BaseDAL : IDisposable
-    {
-        public static BaseDAL Instance = new BaseDAL();
-        public void Reset()
-        {
-            Instance = new BaseDAL();
-        }
-
-        public virtual void SetupDB() { }
-
-        public void Initialize()
-        {
-            if (DataLayer.ActiveConn == null)
-            {
-                DataLayer.CreateConnection();
-            }
-
-            DataLayer.ExceptionFields.Clear();
-            DataLayer.FieldValues.Clear();
-            DataLayer.FieldNames.Clear();
-        }
-        public BaseDAL()
-        {
-            Initialize();
-        }
-        public DataTable GetMethods()
-        {
-            DataTable dt = new DataTable("Methods");
-
-
-            string strSQL = string.Format("SELECT DISTINCT [Method] FROM {0} ORDER BY [Method]", "[tbl_Method]");
-            IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
-            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
-            {
-                reader.Read();
-                dt.Load(reader, LoadOption.PreserveChanges);
-                //Add empty value
-                DataRow drc = dt.NewRow();
-                dt.Rows.InsertAt(drc, 0);
-            }
-            return dt;
-
-        }
-
-        public DataTable GetUsers()
-        {
-            DataTable dt = new DataTable("Users");
-
-            //Returns all empty values, even select *
-            string strSQL = string.Format("SELECT DISTINCT [Initials] FROM {0} ORDER BY [Initials]", "[tbl_Employee]");
-
-            IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
-            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
-            {
-                dt.Load(reader, LoadOption.PreserveChanges);
-                //Add empty value
-                DataRow drc = dt.NewRow();
-                dt.Rows.InsertAt(drc, 0);
-            }
-            return dt;
-
-        }
-
-        public DataTable ReadAvailableProductionNames()
-        {
-            DataTable dt = new DataTable("AvailableProductionNames");
-
-            string strSQL = string.Format("SELECT DISTINCT [ProductionName] FROM {0} ORDER BY [ProductionName]", "[tbl_Production]");
-            IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
-            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
-            {
-                dt.Load(reader, LoadOption.PreserveChanges);
-                //Add empty value
-                DataRow drc = dt.NewRow();
-                dt.Rows.InsertAt(drc, 0);
-            }
-
-
-            return dt;
-
-        }
-
-        public DataTable ReadAvailableLogs()
-        {
-            DataTable dt = new DataTable("AvailableLogs");
-
-            string strSQL = string.Format("SELECT [LogID],[Department] FROM {0} ORDER BY [LogID]", "[tbl_AvailableLogs]");
-            IDbCommand dbcmd = DataLayer.CreateCommand(strSQL);
-            using (IDataReader reader = dbcmd.ExecuteReader(CommandBehavior.Default))
-            {
-                dt.Load(reader, LoadOption.PreserveChanges);
-                //Add empty value
-                DataRow drc = dt.NewRow();
-                dt.Rows.InsertAt(drc, 0);
-            }
-            return dt;
-
-        }
-
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects).
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-
-                disposedValue = true;
-            }
-        }
-
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~BaseDAL() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
-        }
-        #endregion
-
-
-    }
-
-}
 
 
 namespace DAL.Events
 {
-    using System.Text;
+    
     using DAL.Backup;
     using DAL.Factory;
 
@@ -1253,9 +1280,10 @@ namespace DAL.Events
         public EventDAL()
         {
             Initialize();
-            if (!IsDBSetup())
+            if (!IsDBSetup(obj,TableName))
             {
                 SetupDB();
+                RelateDB();
             }
         }
 
@@ -1311,27 +1339,35 @@ namespace DAL.Events
 
 
         }
-        private bool IsDBSetup()
-        {
-            bool setup;
 
+        public override void RelateDB()
+        {
+            DAL.Productions.ProductionDAL.Instance.Reset();
             try
             {
-                DataLayer.ExceptionFields.Clear();
-                IDbCommand cmd = DataLayer.ExtractParameters(obj, DataLayer.ExceptionFields, true, "@");
-                cmd.CommandText = string.Format("SELECT TOP 1 {0} FROM {1}", string.Join(",", DataLayer.FieldNames.ToArray()), TableName);
-                cmd.CommandType = CommandType.Text;
+                string strSQL = string.Empty;
+                StringBuilder sb = new StringBuilder();
 
-                cmd.ExecuteScalar();
-                setup = true;
+                sb.Append(string.Format("ALTER TABLE {0} ADD CONSTRAINT FKLOGNAME FOREIGN KEY (LogName) REFERENCES tbl_AvailableLogs(LogName) ON DELETE CASCADE ON UPDATE CASCADE", TableName));
+                IDbCommand cmd = DataLayer.CreateCommand(sb.ToString());
+                cmd.ExecuteNonQuery();
+
+                sb.Clear();
+                sb.Append(string.Format("ALTER TABLE {0} ADD CONSTRAINT FKUSER FOREIGN KEY ([USER]) REFERENCES tbl_Employee(Initials) ON DELETE CASCADE ON UPDATE CASCADE", TableName));
+                cmd = DataLayer.CreateCommand(sb.ToString());
+                cmd.ExecuteNonQuery();
+
+                sb.Clear();
+                sb.Append(string.Format("ALTER TABLE {0} ADD CONSTRAINT FKPRODUCTION FOREIGN KEY (ProductionName) REFERENCES tbl_Production(ProductionName) ", TableName));
+                //sb.Append(string.Format("ALTER TABLE {0} ADD CONSTRAINT FKPRODUCTION FOREIGN KEY (ProductionName) REFERENCES tbl_Production(ProductionName) ON DELETE CASCADE ON UPDATE CASCADE", TableName));
+                cmd = DataLayer.CreateCommand(sb.ToString());
+                cmd.ExecuteNonQuery();
+                
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                setup = false;
-
+                Console.WriteLine(ex.Message);
             }
-            return setup;
-
         }
 
         private string UpdateClause
@@ -1465,28 +1501,107 @@ namespace DAL.Backup
 {
     using DAL.Factory;
 
-    public class BackupDAL : IDisposable
+    public class BackupDAL : BaseDAL, IDisposable
     {
+        BackupEntity obj = new BackupEntity();
         public const string TableName = "[tbl_Backup]";
-        public static BackupDAL Instance = new BackupDAL();
-        public void Reset()
+        public new static BackupDAL Instance = new BackupDAL();
+        public new void Reset()
         {
             Instance = new BackupDAL();
         }
 
         public BackupDAL()
         {
-            if (DataLayer.ActiveConn == null)
-            {
-                DataLayer.CreateConnection();
-            }
-
-            DataLayer.ExceptionFields.Clear();
-            DataLayer.FieldValues.Clear();
-            DataLayer.FieldNames.Clear();
+            Initialize();
 
         }
 
+        public override void SetupDB()
+        {
+            try
+            {
+
+                string strSQL = string.Empty;
+                StringBuilder sb = new StringBuilder();
+                Dictionary<string, string> dictfield = new Dictionary<string, string>();
+                sb.Append(string.Format("CREATE TABLE {0} (", TableName));
+                List<string> fields = new List<string>();
+                foreach (PropertyInfo pi in obj.GetType().GetProperties())
+                {
+
+                    string dbtype = string.Empty;
+
+                    switch (pi.PropertyType.ToString())
+                    {
+                        case "System.String":
+
+                            dbtype = "TEXT(255)";
+                            break;
+                        case "System.Int32":
+
+                            dbtype = "INTEGER";
+                            if (pi.Name.Contains("ID"))
+                            {
+                                dbtype = string.Format("{0}", "COUNTER PRIMARY KEY");
+                            }
+                            break;
+                        case "System.DateTime":
+                            dbtype = "DateTime";
+                            break;
+                        default:
+                            break;
+                    }
+
+                    fields.Add(string.Format("[{0}] {1}", pi.Name, dbtype));
+                }
+
+
+                sb.Append(string.Join(",", fields));
+                sb.Append(")");
+                IDbCommand cmd = DataLayer.CreateCommand(sb.ToString());
+
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public override void RelateDB()
+        {
+            try
+            {
+                string strSQL = string.Empty;
+                StringBuilder sb = new StringBuilder();
+
+                sb.Append(string.Format("ALTER TABLE {0} ADD CONSTRAINT FKEQPNAME FOREIGN KEY (EQPNAME) REFERENCES tbl_AvailableLogs(LogName) ON DELETE CASCADE ON UPDATE CASCADE", TableName));
+                IDbCommand cmd = DataLayer.CreateCommand(sb.ToString());
+                cmd.ExecuteNonQuery();
+
+                sb.Clear();
+                sb.Append(string.Format("ALTER TABLE {0} ADD CONSTRAINT FKMETHOD FOREIGN KEY (METHOD) REFERENCES tbl_Method(METHOD) ON DELETE CASCADE ON UPDATE CASCADE", TableName));
+                cmd = DataLayer.CreateCommand(sb.ToString());
+                cmd.ExecuteNonQuery();
+
+                sb.Clear();
+                sb.Append(string.Format("ALTER TABLE {0} ADD CONSTRAINT FKENDER FOREIGN KEY (ENDER) REFERENCES tbl_Employee(Initials) ON DELETE CASCADE ON UPDATE CASCADE", TableName));
+                cmd = DataLayer.CreateCommand(sb.ToString());
+                cmd.ExecuteNonQuery();
+
+                sb.Clear();
+                sb.Append(string.Format("ALTER TABLE {0} ADD CONSTRAINT FKSTARTER FOREIGN KEY (STARTER) REFERENCES tbl_Employee(Initials) ON DELETE CASCADE ON UPDATE CASCADE", TableName));
+                cmd = DataLayer.CreateCommand(sb.ToString());
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+     
         private string UpdateClause
         {
             get
@@ -1599,7 +1714,7 @@ namespace DAL.Backup
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing)
+        protected new virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {

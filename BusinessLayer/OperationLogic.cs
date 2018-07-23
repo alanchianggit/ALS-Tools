@@ -147,7 +147,7 @@ namespace BusinessLayer.Productions
         public static new DataTable GetLogs()
         {
             DataTable dt = BaseLogLogic.GetLogs();
-            dt.Columns["LogID"].ColumnName = "EqpName";
+            dt.Columns["LogName"].ColumnName = "EqpName";
             return dt;
         }
 
@@ -241,7 +241,7 @@ namespace BusinessLayer.Events
         public static new DataTable GetLogs()
         {
             DataTable dt = BaseLogLogic.GetLogs();
-            dt.Columns["LogID"].ColumnName = "LogName";
+            dt.Columns["LogName"].ColumnName = "LogName";
             return dt;
         }
 

@@ -366,6 +366,116 @@ namespace Entity
             }
         }
     }
+    public class MethodsEntity:IDisposable
+    {
+        private string method;
+        private string digVol;
+        private string maxSTD;
+        private string maxDup;
+        private string fileName;
+
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        public string Method
+        {
+            get
+            {
+                return method;
+            }
+
+            set
+            {
+                method = value;
+            }
+        }
+
+        public string DigVol
+        {
+            get
+            {
+                return digVol;
+            }
+
+            set
+            {
+                digVol = value;
+            }
+        }
+
+        public string MaxSTD
+        {
+            get
+            {
+                return maxSTD;
+            }
+
+            set
+            {
+                maxSTD = value;
+            }
+        }
+
+        public string MaxDup
+        {
+            get
+            {
+                return maxDup;
+            }
+
+            set
+            {
+                maxDup = value;
+            }
+        }
+
+        public string FileName
+        {
+            get
+            {
+                return fileName;
+            }
+
+            set
+            {
+                fileName = value;
+            }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Methods() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        void IDisposable.Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
+    }
+
 
     public class EventEntity : IDisposable
     {

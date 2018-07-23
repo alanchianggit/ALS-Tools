@@ -34,7 +34,7 @@ namespace ALSTools
             this.SetDesktopLocation(0, 0);
 
             this.selectInstrumentToolStripMenuItem.ComboBox.DataSource = BaseLogLogic.GetLogs().DefaultView;
-            this.selectInstrumentToolStripMenuItem.ComboBox.DisplayMember = "LogID";
+            this.selectInstrumentToolStripMenuItem.ComboBox.DisplayMember = "LogName";
             this.selectInstrumentToolStripMenuItem.ComboBox.BindingContext = this.BindingContext;
             if (!string.IsNullOrEmpty(DataLayer.GetSetting("DefaultLogID")))
             {
